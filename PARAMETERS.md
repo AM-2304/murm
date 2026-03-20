@@ -3,32 +3,32 @@
 
 ## TIER 1: .env FILE: Global defaults, no code change needed
 
-DEFAULT_AGENTS=50
+### DEFAULT_AGENTS=50
  File: config.py -> Settings.default_agents
  What: Pre-fills the agent count in the UI and CLI default.
  Effect: More agents = more diverse opinions, more LLM calls, higher cost.
          Recommendation: Use 20 for testing, 50-100 for real runs.
          Rule of thumb: double agents = double cost, diminishing returns above 100.
 
-DEFAULT_ROUNDS=30
+### DEFAULT_ROUNDS=30
  File: config.py -> Settings.default_rounds
  What: Pre-fills the rounds slider in the UI.
  Effect: More rounds = more interaction cycles, slower convergence detection.
          Recommendation: Use 15 for testing, 30-50 for real runs.
 
-DEFAULT_SEED=42
+### DEFAULT_SEED=42
  File: config.py -> Settings.default_seed
  What: The starting number for all randomness in the simulation.
  Effect: Same seed + same inputs = identical output every time.
          Change this to get a different-but-reproducible run.
 
-TOKEN_BUDGET=0
+### TOKEN_BUDGET=0
  File: config.py -> Settings.token_budget
  What: Hard cap on total tokens across the entire process.
  Effect: 0 = no limit. Any positive integer stops the run if exceeded.
          200000 tokens ≈ $0.02 on Groq, $0.06 on gpt-4o-mini.
 
-LOG_LEVEL=INFO
+### LOG_LEVEL=INFO
  File: config.py -> Settings.log_level
  What: How much detail appears in your terminal.
  Values: DEBUG (every LLM call), INFO (normal), WARNING (errors only)

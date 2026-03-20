@@ -40,14 +40,14 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 ## Requirements
 
 - Python 3.11 or 3.12
-- An API key from any of: [Groq](https://console.groq.com) (free tier available), [OpenAI](https://platform.openai.com), [Anthropic](https://console.anthropic.com), or a local [Ollama](https://ollama.ai) installation
-- Node.js 18+ (only if you want the web UI - the CLI works without it)
+- An API key from any of: [Groq](https://console.groq.com) , [OpenAI](https://platform.openai.com), [Anthropic](https://console.anthropic.com), or a local [Ollama](https://ollama.ai) installation
+- Node.js 18+ (only if you want the web UI; the CLI works without it)
 
 ---
 
 ## Quickstart: three paths to your first run
 
-### Path 1: Command line only (fastest, no Node.js needed)
+### Path 1: Command line only (fastest)
 
 ```bash
 git clone https://github.com/AM-2304/murm
@@ -93,7 +93,7 @@ npm run dev
 
 Open `http://localhost:3000` in your browser.
 
-### Path 3: Docker (one command, everything included)
+### Path 3: Docker 
 
 ```bash
 git clone https://github.com/AM-2304/murm

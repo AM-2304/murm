@@ -4,6 +4,7 @@ Predict how public opinion shifts. Feed in any document, ask a plain-English que
 
 Built as a research-grade, local-first, English-language replacement for [MiroFish](https://github.com/666ghj/MiroFish).
 
+**The Live Demo will be shortly available** 
 ---
 
 ## What it does

@@ -52,7 +52,7 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 ```bash
 git clone https://github.com/AM-2304/murm
 cd murm
-python3 -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+python3 -m venv murm && source murm/bin/activate   # Windows: murm\Scripts\activate
 pip install -e .
 cp .env.example .env
 ```
@@ -82,7 +82,7 @@ murm estimate --agents 20 --rounds 15
 
 ```bash
 # Terminal 1 - start the backend API
-source .venv/bin/activate
+source murm/bin/activate
 murm serve
 
 # Terminal 2 - start the frontend
@@ -440,7 +440,7 @@ print(report)
 
 **`ModuleNotFoundError: No module named 'murm'`**
 
-You are not inside the virtual environment. Run `source .venv/bin/activate` (Mac/Linux) or `.venv\Scripts\activate` (Windows) first.
+You are not inside the virtual environment. Run `source murm/bin/activate` (Mac/Linux) or `murm\Scripts\activate` (Windows) first.
 
 **`LLM_API_KEY not set` or similar error**
 
@@ -467,7 +467,7 @@ You installed the package but are not in the virtual environment. Run `source .v
 ## Running the tests
 
 ```bash
-source .venv/bin/activate
+source murm/bin/activate
 python -m pytest tests/ -v
 ```
 

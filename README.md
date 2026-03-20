@@ -1,4 +1,4 @@
-# MURM
+# 🗣️ MURM (pronounced as murmur)- Listen to what people have to say
 
 Predict how public opinion shifts. Feed in any document, ask a plain-English question, simulate a crowd of autonomous agents reacting to it, and receive a structured report with a confidence score and uncertainty bounds.
 

@@ -109,9 +109,9 @@ Open `http://localhost:3000`.
 
 ## Setting up your API key: step by step
 
-You only need one key. Here are the three cheapest options.
+You only need one key. Here are the three cheapest options to explore.
 
-**Groq (recommended for first-time testing — has a free tier)**
+**Groq (recommended for first-time testing because it has a free tier)**
 
 1. Go to [console.groq.com](https://console.groq.com) and sign up
 2. Click "API Keys" in the left sidebar, then "Create API Key"
@@ -123,7 +123,7 @@ You only need one key. Here are the three cheapest options.
    AGENT_MODEL=groq/llama-3.1-8b-instant
    AGENT_API_KEY=gsk_your_key_here
    ```
-5. A 20-agent 15-round test costs roughly $0.002 (less than a penny)
+5. A 20-agent 15-round test costs roughly $0.002
 
 **OpenAI**
 

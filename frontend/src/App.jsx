@@ -106,14 +106,16 @@ export default function App() {
   const [simTab, setSimTab] = useState("metrics");
   const [reportTab, setReportTab] = useState("report");
   const [runConfig, setRunConfig] = useState(null);
+  const [autoAdvanced, setAutoAdvanced] = useState(false);
 
   const sim = useSimulation();
 
   useEffect(() => {
-    if (sim.status === "completed" && step === 2 && sim.report) {
+    if (sim.status === "completed" && step === 2 && sim.report && !autoAdvanced) {
+      setAutoAdvanced(true);
       setTimeout(() => setStep(3), 500);
     }
-  }, [sim.status, sim.report, step]);
+  }, [sim.status, sim.report, step, autoAdvanced]);
 
   // Poll for updated graph data while a run is active (catches new entities added during build)
   useEffect(() => {
@@ -143,6 +145,7 @@ export default function App() {
 
   async function handleRunSubmit(config) {
     setRunConfig(config);
+    setAutoAdvanced(false);
     setStep(2);
     setSimTab("metrics");
     await sim.startRun({

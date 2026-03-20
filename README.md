@@ -10,6 +10,26 @@ Built as a research-grade, local-first, English-language replacement for [MiroFi
 
 You give MURM a seed document (a news article, a policy draft, a financial report, a story) and a prediction question. It extracts a knowledge graph from that document, generates a population of diverse simulated people with different opinions and communication styles, runs them through repeated rounds of discussion in a simulated environment, and produces a written report answering your question. The report includes a direct prediction, a 0-100 confidence score, evidence from the simulation, and an uncertainty statement that tells you whether the result was consistent across multiple independent runs or highly sensitive to initial conditions.
 
+### Visual Walkthrough
+
+*(Demo run focused on a Central Bank Rate Decision seed document)*
+
+**1. Setup & Context Grounding**
+![Setup](demo/assets/setup.png)
+
+**2. High-Density Knowledge Graph Extraction (Real-Time Physics & JSON Export)**
+![Graph Panel](demo/assets/graph.png)
+
+**3. Multi-Agent Simulation (Live Stream, Metrics, & Roster)**
+![Metrics](demo/assets/metrics.png)
+![Live Action Feed](demo/assets/livestream.png)
+
+**4. Post-Simulation Counterfactual Analysis (God Mode/Branching)**
+![God Mode](demo/assets/god_mode.png)
+
+**5. Final Prediction Report & Analyst Calibration Chat**
+![Report](demo/assets/report.png)
+
 ---
 
 ## Why this exists: the problems with MiroFish
@@ -33,6 +53,11 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 | No deletion: can't remove unwanted runs or projects | DELETE endpoints for projects and runs |
 | 500 errors on graph build with Groq and non-JSON-mode providers | 3-retry backoff + JSON fallback for every provider |
 | Cannot inject events mid-simulation | Counterfactual event injection at any specified round |
+| No post-simulation A/B scenario testing | 1-click Branch & Compare Counterfactual Simulation generator |
+| No physical graph growth during simulation | Real-time Dynamic GraphRAG visualization that structurally evolves as agents interact, plus pure D3 JSON extraction for external analysis |
+| Low-density or completely missing relations | "Extreme Density" ontology instruction overriding forcing 15-30 nodes and 25-45 edges per document parsing |
+| Homogeneous agent populations | Deeply-seeded demographic archetypes for rigorous population diversity |
+| Static simulation contexts without grounding | Real-world Context Grounding via live Wikipedia injection at Round 0 |
 | No emergence metrics | Shannon entropy, Gini coefficient, polarization index, opinion velocity per round |
 
 ---

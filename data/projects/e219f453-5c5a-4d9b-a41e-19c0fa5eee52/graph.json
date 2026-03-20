@@ -1,0 +1,93 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "name": "United States",
+      "entity_type": "Country",
+      "summary": "A country in North America, where the Federal Reserve is located.",
+      "id": "united_states"
+    },
+    {
+      "name": "Federal Reserve",
+      "entity_type": "Financial Institution",
+      "summary": "The central bank of the United States, responsible for setting interest rates.",
+      "id": "federal_reserve"
+    },
+    {
+      "name": "Jerome Powell",
+      "entity_type": "Person",
+      "summary": "The Chair of the Federal Reserve, who makes statements about interest rates and the economy.",
+      "id": "jerome_powell"
+    },
+    {
+      "name": "Google",
+      "entity_type": "Company",
+      "summary": "A technology company that announced layoffs.",
+      "id": "google"
+    },
+    {
+      "name": "Meta",
+      "entity_type": "Company",
+      "summary": "A technology company that confirmed layoffs.",
+      "id": "meta"
+    },
+    {
+      "name": "Twitter",
+      "entity_type": "Company",
+      "summary": "A social media company acquired by Elon Musk.",
+      "id": "twitter"
+    },
+    {
+      "name": "Elon Musk",
+      "entity_type": "Person",
+      "summary": "A businessman who acquired Twitter.",
+      "id": "elon_musk"
+    },
+    {
+      "name": "S&P 500",
+      "entity_type": "Market Index",
+      "summary": "A stock market index that tracks the performance of 500 large companies.",
+      "id": "s&p_500"
+    },
+    {
+      "name": "Russia",
+      "entity_type": "Country",
+      "summary": "A country that is disrupting gas supplies to Europe.",
+      "id": "russia"
+    },
+    {
+      "name": "Europe",
+      "entity_type": "Country",
+      "summary": "A continent that is being affected by Russia's gas supply disruptions.",
+      "id": "europe"
+    },
+    {
+      "name": "Consumer confidence",
+      "entity_type": "Economic Indicator",
+      "summary": "A measure of how confident consumers are in the economy.",
+      "id": "consumer_confidence"
+    },
+    {
+      "name": "Venture capital",
+      "entity_type": "Industry",
+      "summary": "An industry that invests in startups and early-stage companies.",
+      "id": "venture_capital"
+    },
+    {
+      "name": "Housing market",
+      "entity_type": "Industry",
+      "summary": "An industry that is being affected by high mortgage rates.",
+      "id": "housing_market"
+    }
+  ],
+  "edges": [
+    {
+      "relation": "acquired",
+      "weight": 1.0,
+      "source": "elon_musk",
+      "target": "twitter"
+    }
+  ]
+}

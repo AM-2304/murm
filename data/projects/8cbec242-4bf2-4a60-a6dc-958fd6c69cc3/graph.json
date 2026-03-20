@@ -1,0 +1,51 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "name": "OpenAI",
+      "entity_type": "Organization",
+      "summary": "An artificial intelligence research laboratory",
+      "id": "openai"
+    },
+    {
+      "name": "GPT-5",
+      "entity_type": "Model",
+      "summary": "A multimodal model developed by OpenAI",
+      "id": "gpt-5"
+    },
+    {
+      "name": "multimodal capabilities",
+      "entity_type": "Capability",
+      "summary": "The ability to process multiple forms of data",
+      "id": "multimodal_capabilities"
+    },
+    {
+      "name": "benchmarks",
+      "entity_type": "Benchmark",
+      "summary": "Standard measures of performance",
+      "id": "benchmarks"
+    }
+  ],
+  "edges": [
+    {
+      "relation": "released",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "gpt-5"
+    },
+    {
+      "relation": "has",
+      "weight": 1.0,
+      "source": "gpt-5",
+      "target": "multimodal_capabilities"
+    },
+    {
+      "relation": "surpasses",
+      "weight": 1.0,
+      "source": "gpt-5",
+      "target": "benchmarks"
+    }
+  ]
+}

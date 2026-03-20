@@ -1,0 +1,279 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "name": "Federal Reserve",
+      "entity_type": "Central Bank",
+      "summary": "The central bank of the United States, responsible for setting monetary policy. It held interest rates steady at its latest meeting.",
+      "id": "federal_reserve"
+    },
+    {
+      "name": "4.25-4.50%",
+      "entity_type": "Interest Rate",
+      "summary": "The current interest rate set by the Federal Reserve, ranging from 4.25% to 4.50%. It was held steady at the latest meeting.",
+      "id": "4.25-4.50%"
+    },
+    {
+      "name": "Latest Meeting",
+      "entity_type": "Meeting",
+      "summary": "The most recent meeting of the Federal Reserve, where interest rates were held steady and the labor market was discussed.",
+      "id": "latest_meeting"
+    },
+    {
+      "name": "Services Inflation",
+      "entity_type": "Inflation",
+      "summary": "A type of inflation that affects the services sector, which has been persistent according to the Federal Reserve.",
+      "id": "services_inflation"
+    },
+    {
+      "name": "Labor Market",
+      "entity_type": "Labor Market",
+      "summary": "The market for labor, which remains unexpectedly resilient according to the Federal Reserve.",
+      "id": "labor_market"
+    },
+    {
+      "name": "Chair Commentary",
+      "entity_type": "Commentary",
+      "summary": "The comments made by the Chair of the Federal Reserve, which signaled a higher-for-longer stance on interest rates.",
+      "id": "chair_commentary"
+    },
+    {
+      "name": "Market Projections",
+      "entity_type": "Market Projection",
+      "summary": "The projections made by markets, which had expected more cuts in interest rates than the Federal Reserve plans to make.",
+      "id": "market_projections"
+    },
+    {
+      "name": "Bond Market",
+      "entity_type": "Bond Market",
+      "summary": "The market for bonds, which reacted to the Federal Reserve's decision with a yield spike in the 2-year tenor.",
+      "id": "bond_market"
+    },
+    {
+      "name": "2-year Tenor",
+      "entity_type": "Tenor",
+      "summary": "A type of bond with a 2-year maturity, which saw a yield spike after the Federal Reserve's decision.",
+      "id": "2-year_tenor"
+    },
+    {
+      "name": "Yield Spike",
+      "entity_type": "Yield",
+      "summary": "A sudden increase in the yield of bonds, which occurred in the 2-year tenor after the Federal Reserve's decision.",
+      "id": "yield_spike"
+    },
+    {
+      "name": "Consumer Confidence Surveys",
+      "entity_type": "Consumer Confidence Survey",
+      "summary": "Surveys that measure consumer confidence, which had been recovering but may be affected by the Federal Reserve's decision.",
+      "id": "consumer_confidence_surveys"
+    },
+    {
+      "name": "Housing Market",
+      "entity_type": "Housing Market",
+      "summary": "The market for housing, which is expected to be weighed on by the Federal Reserve's decision.",
+      "id": "housing_market"
+    },
+    {
+      "name": "Regional Fed Presidents",
+      "entity_type": "Regional Fed President",
+      "summary": "The presidents of the regional Federal Reserve banks, some of whom have dissented publicly from the Federal Reserve's decision.",
+      "id": "regional_fed_presidents"
+    },
+    {
+      "name": "Cumulative Tightening Effects",
+      "entity_type": "Tightening Effect",
+      "summary": "The effects of the Federal Reserve's tightening of monetary policy, which some regional Fed presidents believe are not yet fully reflected in data.",
+      "id": "cumulative_tightening_effects"
+    },
+    {
+      "name": "Data",
+      "entity_type": "Data",
+      "summary": "The information used to inform the Federal Reserve's decisions, which some regional Fed presidents believe does not yet fully reflect the cumulative tightening effects.",
+      "id": "data"
+    },
+    {
+      "name": "Monetary Policy",
+      "entity_type": "Monetary Policy",
+      "summary": "The policy set by the Federal Reserve to control the money supply and interest rates, which has been tightened in recent times.",
+      "id": "monetary_policy"
+    },
+    {
+      "name": "Financial Market",
+      "entity_type": "Financial Market",
+      "summary": "The market for financial assets, which is affected by the Federal Reserve's decisions on monetary policy.",
+      "id": "financial_market"
+    },
+    {
+      "name": "Economic Sector",
+      "entity_type": "Economic Sector",
+      "summary": "A sector of the economy, such as the housing market or labor market, which is affected by the Federal Reserve's decisions.",
+      "id": "economic_sector"
+    },
+    {
+      "name": "Decision",
+      "entity_type": "Decision",
+      "summary": "The decision made by the Federal Reserve to hold interest rates steady, which is expected to have various effects on the economy.",
+      "id": "decision"
+    },
+    {
+      "name": "Projection",
+      "entity_type": "Projection",
+      "summary": "A forecast or prediction, such as the market projections for interest rates or the Federal Reserve's projections for the economy.",
+      "id": "projection"
+    },
+    {
+      "name": "Market Reaction",
+      "entity_type": "Market Reaction",
+      "summary": "The reaction of financial markets to the Federal Reserve's decision, which included a yield spike in the 2-year tenor.",
+      "id": "market_reaction"
+    },
+    {
+      "name": "Economic Indicator",
+      "entity_type": "Economic Indicator",
+      "summary": "A statistic or metric that indicates the state of the economy, such as inflation or labor market data.",
+      "id": "economic_indicator"
+    },
+    {
+      "name": "Interest Rate Cuts",
+      "entity_type": "Decision",
+      "summary": "The decision to cut interest rates, which the Federal Reserve plans to do fewer times than markets had expected.",
+      "id": "interest_rate_cuts"
+    }
+  ],
+  "edges": [
+    {
+      "relation": "held_at",
+      "weight": 1.0,
+      "source": "federal_reserve",
+      "target": "latest_meeting"
+    },
+    {
+      "relation": "held_at",
+      "weight": 1.0,
+      "source": "federal_reserve",
+      "target": "4.25-4.50%"
+    },
+    {
+      "relation": "citing",
+      "weight": 1.0,
+      "source": "federal_reserve",
+      "target": "services_inflation"
+    },
+    {
+      "relation": "citing",
+      "weight": 1.0,
+      "source": "federal_reserve",
+      "target": "labor_market"
+    },
+    {
+      "relation": "contrasting_with",
+      "weight": 1.0,
+      "source": "federal_reserve",
+      "target": "market_projections"
+    },
+    {
+      "relation": "weigh_on",
+      "weight": 1.0,
+      "source": "federal_reserve",
+      "target": "housing_market"
+    },
+    {
+      "relation": "following",
+      "weight": 1.0,
+      "source": "federal_reserve",
+      "target": "monetary_policy"
+    },
+    {
+      "relation": "reacted_with",
+      "weight": 1.0,
+      "source": "bond_market",
+      "target": "yield_spike"
+    },
+    {
+      "relation": "associated_with",
+      "weight": 1.0,
+      "source": "2-year_tenor",
+      "target": "yield_spike"
+    },
+    {
+      "relation": "influencing",
+      "weight": 1.0,
+      "source": "consumer_confidence_surveys",
+      "target": "housing_market"
+    },
+    {
+      "relation": "dissented_against",
+      "weight": 1.0,
+      "source": "regional_fed_presidents",
+      "target": "federal_reserve"
+    },
+    {
+      "relation": "arguing",
+      "weight": 1.0,
+      "source": "regional_fed_presidents",
+      "target": "cumulative_tightening_effects"
+    },
+    {
+      "relation": "not yet fully reflected_in",
+      "weight": 1.0,
+      "source": "cumulative_tightening_effects",
+      "target": "data"
+    },
+    {
+      "relation": "causing",
+      "weight": 1.0,
+      "source": "monetary_policy",
+      "target": "financial_market"
+    },
+    {
+      "relation": "triggering",
+      "weight": 1.0,
+      "source": "financial_market",
+      "target": "economic_sector"
+    },
+    {
+      "relation": "influencing",
+      "weight": 1.0,
+      "source": "economic_sector",
+      "target": "economic_indicator"
+    },
+    {
+      "relation": "resulting_in",
+      "weight": 1.0,
+      "source": "decision",
+      "target": "projection"
+    },
+    {
+      "relation": "resulting_in",
+      "weight": 1.0,
+      "source": "decision",
+      "target": "market_reaction"
+    },
+    {
+      "relation": "indicating",
+      "weight": 1.0,
+      "source": "market_reaction",
+      "target": "economic_indicator"
+    },
+    {
+      "relation": "impacting",
+      "weight": 1.0,
+      "source": "market_reaction",
+      "target": "financial_market"
+    },
+    {
+      "relation": "informing",
+      "weight": 1.0,
+      "source": "economic_indicator",
+      "target": "decision"
+    },
+    {
+      "relation": "projected",
+      "weight": 1.0,
+      "source": "interest_rate_cuts",
+      "target": "market_projections"
+    }
+  ]
+}

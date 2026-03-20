@@ -10,23 +10,28 @@ const TYPE_PALETTE = {
   governmentagency: { fill: "#1A7F4B", stroke: "#145C36" },
   policymaker: { fill: "#1A7F4B", stroke: "#145C36" },
   media: { fill: "#D4600A", stroke: "#A04508" },
-  mediaoutlet: { fill: "#D4600A", stroke: "#A04508" },
   investor: { fill: "#0097A7", stroke: "#006978" },
-  investorinstitution: { fill: "#0097A7", stroke: "#006978" },
   event: { fill: "#E91E8C", stroke: "#B01568" },
   concept: { fill: "#7B7B7B", stroke: "#555555" },
   location: { fill: "#558B2F", stroke: "#38601F" },
   policy: { fill: "#F57F17", stroke: "#B85A10" },
   technology: { fill: "#1565C0", stroke: "#0D3F7A" },
-  product: { fill: "#6A1B9A", stroke: "#4A1270" },
-  entity: { fill: "#546E7A", stroke: "#37474F" },
-  default: { fill: "#8D6E63", stroke: "#5D4037" },
 };
 
+const d3Colors = d3.schemeSet2.concat(d3.schemeDark2).concat(d3.schemeCategory10);
+let colorIndex = 0;
+const dynamicColors = {};
+
 function getTypeColor(type) {
-  if (!type) return TYPE_PALETTE.default;
+  if (!type) return { fill: "#8D6E63", stroke: "#5D4037" };
   const key = type.toLowerCase().replace(/[^a-z]/g, "");
-  return TYPE_PALETTE[key] || TYPE_PALETTE.default;
+  if (TYPE_PALETTE[key]) return TYPE_PALETTE[key];
+  if (!dynamicColors[key]) {
+      const c = d3.color(d3Colors[colorIndex % d3Colors.length]);
+      dynamicColors[key] = { fill: c.formatHex(), stroke: c.darker(0.8).formatHex() };
+      colorIndex++;
+  }
+  return dynamicColors[key];
 }
 
 function getTypeLabel(type) {
@@ -39,8 +44,12 @@ function getEntityTypes(nodes) {
   const seen = new Set();
   const types = [];
   for (const n of nodes) {
-    const t = (n.entity_type || n.type || "entity").toLowerCase().replace(/[^a-z]/g, "");
-    if (!seen.has(t)) { seen.add(t); types.push({ key: t, label: getTypeLabel(n.entity_type || n.type || "entity"), color: getTypeColor(n.entity_type || n.type) }); }
+    const rawType = n.entity_type || n.type || "entity";
+    const key = rawType.toLowerCase().replace(/[^a-z]/g, "");
+    if (!seen.has(key)) { 
+      seen.add(key); 
+      types.push({ key, label: getTypeLabel(rawType), color: getTypeColor(rawType) }); 
+    }
   }
   return types;
 }
@@ -48,11 +57,23 @@ function getEntityTypes(nodes) {
 export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
   const svgRef = useRef(null);
   const simRef = useRef(null);
+  const timerRef = useRef(null);
   const [selected, setSelected] = useState(null);
   const [hoveredType, setHoveredType] = useState(null);
   const [zoom, setZoom] = useState(1);
   const [activeNodeIds, setActiveNodeIds] = useState(new Set());
   const [dynamicGraph, setDynamicGraph] = useState(null);
+  
+  const handleDownload = () => {
+    if (!graphData) return;
+    const blob = new Blob([JSON.stringify(graphData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `murm_graph_export_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // 1. Sync initial backend graph
   useEffect(() => {
@@ -124,40 +145,84 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
   }, [liveActions, dynamicGraph]);
 
   const draw = useCallback(() => {
-    if (!svgRef.current || !dynamicGraph) return;
+    console.log("draw() triggered!", { hasSvg: !!svgRef.current, hasDynamicGraph: !!dynamicGraph });
+    try {
+      if (!svgRef.current || !dynamicGraph) {
+         console.log("Bailing early: missing svgRef or dynamicGraph");
+         return;
+      }
+      
+      // Create a copy of the graph to run the physics simulation on
+      const nodes = (dynamicGraph.nodes || []).map(n => ({ ...n }));
+      const rawEdges = dynamicGraph.edges || dynamicGraph.links || [];
+      const nodeIndex = {};
+      nodes.forEach(n => { nodeIndex[n.id || n.name] = n; });
+      const edges = rawEdges
+        .filter(e => {
+          const s = typeof e.source === "object" ? e.source.id || e.source.name : e.source;
+          const t = typeof e.target === "object" ? e.target.id || e.target.name : e.target;
+          return nodeIndex[s] && nodeIndex[t];
+        })
+        .map(e => ({ ...e }));
+
+      console.log("Prepared nodes & edges:", { nodesLength: nodes.length, edgesLength: edges.length });
+
+      if (!nodes.length) {
+         console.warn("Bailing early: nodes.length is 0");
+         return;
+      }
+
+      const el = svgRef.current;
+      const W = el.clientWidth || 700;
+      const H = height;
+      console.log("Dimensions:", { W, H });
+      if (timerRef.current) timerRef.current.stop();
     
-    // Create a copy of the graph to run the physics simulation on
-    const nodes = (dynamicGraph.nodes || []).map(n => ({ ...n }));
-    const rawEdges = dynamicGraph.edges || dynamicGraph.links || [];
-    const nodeIndex = {};
-    nodes.forEach(n => { nodeIndex[n.id] = n; });
-    const edges = rawEdges
-      .filter(e => {
-        const s = typeof e.source === "object" ? e.source.id : e.source;
-        const t = typeof e.target === "object" ? e.target.id : e.target;
-        return nodeIndex[s] && nodeIndex[t];
-      })
-      .map(e => ({ ...e }));
-
-    if (!nodes.length) return;
-
-    const el = svgRef.current;
-    const W = el.clientWidth || 700;
-    const H = height;
-
     // Clear and redraw is acceptable here because React's fast DOM update
     // will just make the graph pop organically when an agent builds a new entity hook.
     d3.select(el).selectAll("*").remove();
 
     const svg = d3.select(el).attr("width", W).attr("height", H);
 
-    // Background
-    svg.append("rect").attr("width", W).attr("height", H).attr("fill", "#0D0D0D").attr("rx", 4);
+    // Definitions for markers and filters
+    const defs = svg.append("defs");
+    
+    // Arrow marker for links
+    defs.append("marker")
+      .attr("id", "arrow")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 22) // pushed out so it doesn't hide under node
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5")
+      .attr("fill", "rgba(255,255,255,0.4)");
+
+    // Glow filter
+    const filter = defs.append("filter").attr("id", "glow").attr("x", "-20%").attr("y", "-20%").attr("width", "140%").attr("height", "140%");
+    filter.append("feGaussianBlur")
+      .attr("in", "SourceGraphic")
+      .attr("stdDeviation", "2.5")
+      .attr("result", "coloredBlur");
+    const feMerge = filter.append("feMerge");
+    feMerge.append("feMergeNode").attr("in", "coloredBlur");
+    feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+
+    // Background gradient instead of flat black
+    const bgGrad = defs.append("radialGradient")
+      .attr("id", "bg-grad")
+      .attr("cx", "50%").attr("cy", "50%").attr("r", "70%");
+    bgGrad.append("stop").attr("offset", "0%").attr("stop-color", "#1A1A24");
+    bgGrad.append("stop").attr("offset", "100%").attr("stop-color", "#08080C");
+
+    svg.append("rect").attr("width", W).attr("height", H).attr("fill", "url(#bg-grad)").attr("rx", 4);
 
     // Subtle grid
-    const gridG = svg.append("g").attr("opacity", 0.08);
-    for (let x = 0; x < W; x += 40) gridG.append("line").attr("x1", x).attr("x2", x).attr("y1", 0).attr("y2", H).attr("stroke", "#FFFFFF").attr("stroke-width", 0.5);
-    for (let y = 0; y < H; y += 40) gridG.append("line").attr("x1", 0).attr("x2", W).attr("y1", y).attr("y2", y).attr("stroke", "#FFFFFF").attr("stroke-width", 0.5);
+    const gridG = svg.append("g").attr("opacity", 0.05);
+    for (let x = 0; x < W; x += 40) gridG.append("line").attr("x1", x).attr("x2", x).attr("y1", 0).attr("y2", H).attr("stroke", "#4A90E2").attr("stroke-width", 0.5);
+    for (let y = 0; y < H; y += 40) gridG.append("line").attr("x1", 0).attr("x2", W).attr("y1", y).attr("y2", y).attr("stroke", "#4A90E2").attr("stroke-width", 0.5);
 
     const g = svg.append("g");
 
@@ -174,12 +239,21 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
 
     // Edge lines
     const linkG = g.append("g");
-    const link = linkG.selectAll("line")
+    const link = linkG.selectAll("path")
       .data(edges)
-      .join("line")
-      .attr("stroke", "#FFFFFF")
-      .attr("stroke-width", 0.5)
-      .attr("stroke-opacity", 0.15);
+      .join("path")
+      .attr("fill", "none")
+      .attr("stroke", d => d.relation === "DISCUSSES" ? "#50E3C2" : "rgba(255,255,255,0.25)")
+      .attr("stroke-width", d => d.relation === "DISCUSSES" ? 1.5 : 1)
+      .attr("stroke-dasharray", d => d.relation === "DISCUSSES" ? "4 4" : "none");
+
+    // Animate the 'DISCUSSES' links to look like data flow
+    if (edges.some(e => e.relation === "DISCUSSES")) {
+      timerRef.current = d3.timer((elapsed) => {
+        link.filter(d => d.relation === "DISCUSSES")
+            .attr("stroke-dashoffset", -elapsed / 15);
+      });
+    }
 
     // Edge labels (relation type)
     const linkLabel = g.append("g").selectAll("text")
@@ -201,12 +275,12 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
       .call(
         d3.drag()
           .on("start", (event, d) => {
-            if (!event.active) sim.alphaTarget(0.3).restart();
+            if (!event.active && simRef.current) simRef.current.alphaTarget(0.3).restart();
             d.fx = d.x; d.fy = d.y;
           })
           .on("drag", (event, d) => { d.fx = event.x; d.fy = event.y; })
           .on("end", (event, d) => {
-            if (!event.active) sim.alphaTarget(0);
+            if (!event.active && simRef.current) simRef.current.alphaTarget(0);
             d.fx = null; d.fy = null;
           })
       )
@@ -217,17 +291,18 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
 
     // Glow circle behind node
     node.append("circle")
-      .attr("r", d => nodeRadius(d) + 4)
+      .attr("r", d => nodeRadius(d) + 6)
       .attr("fill", d => getTypeColor(d.entity_type || d.type).fill)
-      .attr("fill-opacity", 0.15)
+      .attr("fill-opacity", 0.25)
       .attr("stroke", "none");
 
     // Main node circle
     node.append("circle")
       .attr("r", nodeRadius)
       .attr("fill", d => getTypeColor(d.entity_type || d.type).fill)
-      .attr("stroke", d => getTypeColor(d.entity_type || d.type).stroke)
-      .attr("stroke-width", 1.5);
+      .attr("stroke", "#FFFFFF")
+      .attr("stroke-width", 2)
+      .attr("stroke-opacity", 0.8);
 
     // Active pulse ring — shown when a live agent action matches this node
     node.append("circle")
@@ -251,19 +326,24 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
 
     // Simulation
     const sim = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(edges).id(d => d.id).distance(80).strength(0.4))
-      .force("charge", d3.forceManyBody().strength(-200))
+      .force("link", d3.forceLink(edges).id(d => d.id).distance(90).strength(0.5))
+      .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(W / 2, H / 2))
-      .force("collision", d3.forceCollide(d => nodeRadius(d) + 8));
+      .force("collide", d3.forceCollide().radius(30).iterations(3));
+      
     simRef.current = sim;
 
     sim.on("tick", () => {
-      link
-        .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+      link.attr("d", d => {
+        let sx = d.source.x || 0, sy = d.source.y || 0;
+        let tx = d.target.x || 0, ty = d.target.y || 0;
+        return `M${sx},${sy} L${tx},${ty}`;
+      });
+
       linkLabel
         .attr("x", d => (d.source.x + d.target.x) / 2)
-        .attr("y", d => (d.source.y + d.target.y) / 2);
+        .attr("y", d => (d.source.y + d.target.y) / 2 - 4);
+
       node.attr("transform", d => `translate(${d.x},${d.y})`);
     });
 
@@ -292,8 +372,17 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
         link.attr("stroke-opacity", 0.15).attr("stroke-width", 0.5);
       });
 
-    return () => sim.stop();
-  }, [graphData, height]);
+      console.log("D3 rendering complete! Starting simulation...");
+      console.log("SVG Check at end of draw:", {
+         children: el.childElementCount,
+         htmlCutoff: el.innerHTML.slice(0, 150)
+      });
+      
+    } catch (e) {
+      console.error("D3 rendering error:", e);
+    }
+    return () => simRef.current?.stop();
+  }, [dynamicGraph, height]);
 
   // Apply pulse animation whenever activeNodeIds changes — runs independently of full redraw
   useEffect(() => {
@@ -326,8 +415,11 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
       </div>
 
       {/* Controls hint */}
-      <div style={{ position: "absolute", bottom: 10, left: 12, fontSize: 9, color: "#FFFFFF", opacity: 0.35, letterSpacing: "0.08em" }}>
-        SCROLL TO ZOOM  ·  DRAG TO MOVE  ·  CLICK NODE FOR DETAILS
+      <div style={{ position: "absolute", bottom: 10, left: 12, fontSize: 9, color: "#FFFFFF", opacity: 0.35, letterSpacing: "0.08em", display: "flex", gap: 16 }}>
+        <span>SCROLL TO ZOOM · DRAG TO MOVE · CLICK NODE FOR DETAILS</span>
+        <button onClick={handleDownload} style={{ fontSize: 9, background: "none", border: "none", color: "#50E3C2", cursor: "pointer", letterSpacing: "0.08em" }}>
+          [ DOWNLOAD JSON ]
+        </button>
       </div>
 
       {/* Legend */}

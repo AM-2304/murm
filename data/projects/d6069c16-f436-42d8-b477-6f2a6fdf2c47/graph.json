@@ -1,0 +1,111 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "name": "San Francisco",
+      "entity_type": "City",
+      "summary": "A city in California that has implemented a universal basic income pilot program.",
+      "id": "san_francisco"
+    },
+    {
+      "name": "Universal Basic Income Pilot Program",
+      "entity_type": "Program",
+      "summary": "A program providing $1,000 per month to 1,000 randomly selected residents for two years.",
+      "id": "universal_basic_income_pilot_program"
+    },
+    {
+      "name": "Residents",
+      "entity_type": "Residents",
+      "summary": "1,000 randomly selected individuals receiving $1,000 per month for two years.",
+      "id": "residents"
+    },
+    {
+      "name": "Business Groups",
+      "entity_type": "Business Groups",
+      "summary": "Organizations planning to challenge the tax in court.",
+      "id": "business_groups"
+    },
+    {
+      "name": "Commercial Real Estate Transactions",
+      "entity_type": "Transactions",
+      "summary": "Transactions above $5 million subject to a 0.5% tax.",
+      "id": "commercial_real_estate_transactions"
+    },
+    {
+      "name": "Tax",
+      "entity_type": "Tax",
+      "summary": "A 0.5% tax on commercial real estate transactions above $5 million.",
+      "id": "tax"
+    },
+    {
+      "name": "Housing Affordability Crisis",
+      "entity_type": "Housing",
+      "summary": "A severe crisis in San Francisco where median rent exceeds $3,500 per month.",
+      "id": "housing_affordability_crisis"
+    },
+    {
+      "name": "Court",
+      "entity_type": "Court",
+      "summary": "The venue where business groups plan to challenge the tax.",
+      "id": "court"
+    }
+  ],
+  "edges": [
+    {
+      "relation": "announced",
+      "weight": 1.0,
+      "source": "san_francisco",
+      "target": "universal_basic_income_pilot_program"
+    },
+    {
+      "relation": "provides",
+      "weight": 1.0,
+      "source": "universal_basic_income_pilot_program",
+      "target": "residents"
+    },
+    {
+      "relation": "funded_by",
+      "weight": 1.0,
+      "source": "universal_basic_income_pilot_program",
+      "target": "tax"
+    },
+    {
+      "relation": "reviews",
+      "weight": 1.0,
+      "source": "universal_basic_income_pilot_program",
+      "target": "court"
+    },
+    {
+      "relation": "addresses",
+      "weight": 1.0,
+      "source": "universal_basic_income_pilot_program",
+      "target": "housing_affordability_crisis"
+    },
+    {
+      "relation": "challenges",
+      "weight": 1.0,
+      "source": "business_groups",
+      "target": "tax"
+    },
+    {
+      "relation": "exceeds",
+      "weight": 1.0,
+      "source": "commercial_real_estate_transactions",
+      "target": "tax"
+    },
+    {
+      "relation": "addresses",
+      "weight": 1.0,
+      "source": "tax",
+      "target": "commercial_real_estate_transactions"
+    },
+    {
+      "relation": "addresses",
+      "weight": 1.0,
+      "source": "housing_affordability_crisis",
+      "target": "san_francisco"
+    }
+  ]
+}

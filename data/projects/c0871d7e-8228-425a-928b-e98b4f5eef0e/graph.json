@@ -1,0 +1,171 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "name": "OpenAI",
+      "entity_type": "Organization",
+      "summary": "Artificial intelligence company",
+      "id": "openai"
+    },
+    {
+      "name": "GPT-5",
+      "entity_type": "Model",
+      "summary": "Artificial intelligence model",
+      "id": "gpt-5"
+    },
+    {
+      "name": "Meta",
+      "entity_type": "Organization",
+      "summary": "Technology company",
+      "id": "meta"
+    },
+    {
+      "name": "GPT-4",
+      "entity_type": "Model",
+      "summary": "Artificial intelligence model",
+      "id": "gpt-4"
+    },
+    {
+      "name": "Stanford",
+      "entity_type": "University",
+      "summary": "Private research university",
+      "id": "stanford"
+    },
+    {
+      "name": "API",
+      "entity_type": "Model",
+      "summary": "Application programming interface",
+      "id": "api"
+    },
+    {
+      "name": "Day",
+      "entity_type": "Day",
+      "summary": "Unit of time",
+      "id": "day"
+    },
+    {
+      "name": "Month",
+      "entity_type": "Month",
+      "summary": "Unit of time",
+      "id": "month"
+    },
+    {
+      "name": "Year",
+      "entity_type": "Year",
+      "summary": "Unit of time",
+      "id": "year"
+    },
+    {
+      "name": "Dollar",
+      "entity_type": "Dollar",
+      "summary": "Currency unit",
+      "id": "dollar"
+    },
+    {
+      "name": "60",
+      "entity_type": "Day",
+      "summary": "Number of days",
+      "id": "60"
+    },
+    {
+      "name": "8",
+      "entity_type": "Percent",
+      "summary": "Percentage value",
+      "id": "8"
+    },
+    {
+      "name": "200",
+      "entity_type": "Dollar",
+      "summary": "Currency value",
+      "id": "200"
+    },
+    {
+      "name": "Researchers",
+      "entity_type": "Researcher",
+      "summary": "Person conducting research",
+      "id": "researchers"
+    },
+    {
+      "name": "Startups",
+      "entity_type": "Startup",
+      "summary": "Young company",
+      "id": "startups"
+    },
+    {
+      "name": "Government agencies",
+      "entity_type": "Government",
+      "summary": "Government organization",
+      "id": "government_agencies"
+    },
+    {
+      "name": "Corporations",
+      "entity_type": "Corporation",
+      "summary": "Large business organization",
+      "id": "corporations"
+    }
+  ],
+  "edges": [
+    {
+      "relation": "requires_license",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "gpt-5"
+    },
+    {
+      "relation": "has_access",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "api"
+    },
+    {
+      "relation": "has_benchmarked",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "gpt-4"
+    },
+    {
+      "relation": "has_concentrated",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "corporations"
+    },
+    {
+      "relation": "has_concentrated",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "government_agencies"
+    },
+    {
+      "relation": "has_priced_out",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "startups"
+    },
+    {
+      "relation": "has_priced_out",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "researchers"
+    },
+    {
+      "relation": "has_benchmarked",
+      "weight": 1.0,
+      "source": "meta",
+      "target": "gpt-4"
+    },
+    {
+      "relation": "has_published",
+      "weight": 1.0,
+      "source": "stanford",
+      "target": "researchers"
+    },
+    {
+      "relation": "has_published",
+      "weight": 1.0,
+      "source": "researchers",
+      "target": "stanford"
+    }
+  ]
+}

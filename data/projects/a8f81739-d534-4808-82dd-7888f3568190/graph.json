@@ -1,0 +1,123 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "name": "City",
+      "entity_type": "City",
+      "summary": "The city where the lead levels are exceeding federal action thresholds in residential taps.",
+      "id": "city"
+    },
+    {
+      "name": "City Council",
+      "entity_type": "Council",
+      "summary": "The council that has issued a boil-water advisory and announced an emergency infrastructure replacement program.",
+      "id": "city_council"
+    },
+    {
+      "name": "Residential Taps",
+      "entity_type": "Infrastructure",
+      "summary": "The taps in the city's older neighborhoods where lead levels are exceeding federal action thresholds.",
+      "id": "residential_taps"
+    },
+    {
+      "name": "Low-income Residents",
+      "entity_type": "Resident",
+      "summary": "The residents who are disproportionately affected by the lead levels in the city's older neighborhoods.",
+      "id": "low-income_residents"
+    },
+    {
+      "name": "Older Neighborhoods",
+      "entity_type": "Neighborhood",
+      "summary": "The neighborhoods where the lead levels are exceeding federal action thresholds in residential taps.",
+      "id": "older_neighborhoods"
+    },
+    {
+      "name": "Emergency Infrastructure Replacement Program",
+      "entity_type": "Program",
+      "summary": "The program announced by the city council to replace the infrastructure in the affected zones.",
+      "id": "emergency_infrastructure_replacement_program"
+    },
+    {
+      "name": "Community Groups",
+      "entity_type": "Community Group",
+      "summary": "The groups that are organizing legal action against the city.",
+      "id": "community_groups"
+    },
+    {
+      "name": "Mayor",
+      "entity_type": "Mayor",
+      "summary": "The mayor who has acknowledged the failure of routine testing procedures and announced the resignation of the public works director.",
+      "id": "mayor"
+    },
+    {
+      "name": "Public Works Director",
+      "entity_type": "Director",
+      "summary": "The director who has resigned due to the failure of routine testing procedures.",
+      "id": "public_works_director"
+    },
+    {
+      "name": "Older Housing Stock",
+      "entity_type": "Housing",
+      "summary": "The housing stock in the city's older neighborhoods that correlates with income levels in the city.",
+      "id": "older_housing_stock"
+    }
+  ],
+  "edges": [
+    {
+      "relation": "organizes",
+      "weight": 1.0,
+      "source": "city_council",
+      "target": "emergency_infrastructure_replacement_program"
+    },
+    {
+      "relation": "issues",
+      "weight": 1.0,
+      "source": "city_council",
+      "target": "residential_taps"
+    },
+    {
+      "relation": "correlates_with",
+      "weight": 1.0,
+      "source": "low-income_residents",
+      "target": "older_housing_stock"
+    },
+    {
+      "relation": "affects",
+      "weight": 1.0,
+      "source": "emergency_infrastructure_replacement_program",
+      "target": "residential_taps"
+    },
+    {
+      "relation": "organizes",
+      "weight": 1.0,
+      "source": "community_groups",
+      "target": "city"
+    },
+    {
+      "relation": "announces",
+      "weight": 1.0,
+      "source": "mayor",
+      "target": "public_works_director"
+    },
+    {
+      "relation": "acknowledges",
+      "weight": 1.0,
+      "source": "mayor",
+      "target": "city"
+    },
+    {
+      "relation": "resigns",
+      "weight": 1.0,
+      "source": "public_works_director",
+      "target": "city"
+    },
+    {
+      "relation": "disproportionately_affects",
+      "weight": 1.0,
+      "source": "older_housing_stock",
+      "target": "low-income_residents"
+    }
+  ]
+}

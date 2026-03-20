@@ -1,0 +1,165 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "name": "OpenAI",
+      "entity_type": "Company",
+      "summary": "A technology company that develops and offers AI models and tools.",
+      "id": "openai"
+    },
+    {
+      "name": "GPT-5",
+      "entity_type": "Model",
+      "summary": "A large language model developed by OpenAI.",
+      "id": "gpt-5"
+    },
+    {
+      "name": "Meta",
+      "entity_type": "Company",
+      "summary": "A technology company that develops and offers various products and services, including AI models.",
+      "id": "meta"
+    },
+    {
+      "name": "GPT-4",
+      "entity_type": "Model",
+      "summary": "A large language model developed by OpenAI.",
+      "id": "gpt-4"
+    },
+    {
+      "name": "API",
+      "entity_type": "API",
+      "summary": "A set of defined rules that enable different software systems to communicate with each other.",
+      "id": "api"
+    },
+    {
+      "name": "License",
+      "entity_type": "License",
+      "summary": "A legal document that grants permission to use, modify, or distribute software, hardware, or other intellectual property.",
+      "id": "license"
+    },
+    {
+      "name": "Model",
+      "entity_type": "Model",
+      "summary": "A software program that is trained on data to perform a specific task, such as language translation or image recognition.",
+      "id": "model"
+    },
+    {
+      "name": "Customer",
+      "entity_type": "Customer",
+      "summary": "An individual or organization that uses a product or service.",
+      "id": "customer"
+    },
+    {
+      "name": "Day",
+      "entity_type": "Day",
+      "summary": "A unit of time equal to 24 hours.",
+      "id": "day"
+    },
+    {
+      "name": "Month",
+      "entity_type": "Month",
+      "summary": "A unit of time equal to 30 or 31 days.",
+      "id": "month"
+    },
+    {
+      "name": "Year",
+      "entity_type": "Year",
+      "summary": "A unit of time equal to 365 or 366 days.",
+      "id": "year"
+    },
+    {
+      "name": "Model_Release",
+      "entity_type": "Model_Release",
+      "summary": "The process of making a new version of a software program available to the public.",
+      "id": "model_release"
+    },
+    {
+      "name": "Announcement",
+      "entity_type": "Announcement",
+      "summary": "A public statement or declaration of news or information.",
+      "id": "announcement"
+    }
+  ],
+  "edges": [
+    {
+      "relation": "has",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "gpt-5"
+    },
+    {
+      "relation": "is_accessed_through",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "api"
+    },
+    {
+      "relation": "has_license_cost",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "license"
+    },
+    {
+      "relation": "has",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "customer"
+    },
+    {
+      "relation": "coincides_with",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "day"
+    },
+    {
+      "relation": "coincides_with",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "month"
+    },
+    {
+      "relation": "coincides_with",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "year"
+    },
+    {
+      "relation": "releases",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "model_release"
+    },
+    {
+      "relation": "announces",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "announcement"
+    },
+    {
+      "relation": "is_benchmarked_against",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "gpt-4"
+    },
+    {
+      "relation": "discontinues",
+      "weight": 1.0,
+      "source": "openai",
+      "target": "model"
+    },
+    {
+      "relation": "has",
+      "weight": 1.0,
+      "source": "meta",
+      "target": "model"
+    },
+    {
+      "relation": "is_benchmarked_against",
+      "weight": 1.0,
+      "source": "meta",
+      "target": "gpt-4"
+    }
+  ]
+}

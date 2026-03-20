@@ -1,0 +1,41 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - AGENT_MODEL=${AGENT_MODEL:-}
+      - AGENT_API_KEY=${AGENT_API_KEY:-}
+      - TOKEN_BUDGET=${TOKEN_BUDGET:-0}
+      - DATA_DIR=/app/data
+      - CHROMA_PATH=/app/data/chroma
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  data:

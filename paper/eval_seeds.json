@@ -1,0 +1,23 @@
+[
+  {
+    "title": "AI Regulation Bill 2025",
+    "seed_text": "The proposed Artificial Intelligence Safety and Transparency Act would require mandatory audits for high-risk AI systems deployed in healthcare, criminal justice, and financial services. Companies with annual revenue exceeding $100 million would face penalties of up to 4% of global turnover for non-compliance. Civil liberties groups have raised concerns that audit requirements could entrench incumbents and limit open-source development. Industry groups argue the compliance timeline of 18 months is insufficient for systems already deployed. The European Parliament has expressed interest in harmonizing the legislation with existing EU AI Act provisions.",
+    "question": "How will public sentiment toward this AI regulation bill evolve over 30 days after announcement?",
+    "expected_direction": "polarization",
+    "domain": "policy"
+  },
+  {
+    "title": "Central Bank Rate Decision",
+    "seed_text": "The Federal Reserve held interest rates steady at 4.25-4.50% at its latest meeting, citing persistent services inflation and a labor market that remains unexpectedly resilient. Chair commentary signaled a higher-for-longer stance with fewer projected cuts in the coming year than markets had priced. Bond markets reacted with a yield spike in the 2-year tenor. Consumer confidence surveys had been recovering but this decision is expected to weigh on housing market activity. Several regional Fed presidents have dissented publicly, arguing that cumulative tightening effects are not yet fully reflected in data.",
+    "question": "What will be the dominant market and public sentiment narrative around this rate decision over the next 2 weeks?",
+    "expected_direction": "negative",
+    "domain": "finance"
+  },
+  {
+    "title": "Municipal Water Crisis",
+    "seed_text": "Testing has revealed lead levels exceeding federal action thresholds in 23% of sampled residential taps in the city's older neighborhoods. The city council has issued a boil-water advisory for affected zones and announced an emergency infrastructure replacement program estimated at $340 million over 5 years. Low-income residents are disproportionately affected, as older housing stock correlates with income levels in the city. Community groups are organizing legal action. The mayor has acknowledged the failure of routine testing procedures and announced the resignation of the public works director.",
+    "question": "How will community trust in local government evolve in the month following this announcement?",
+    "expected_direction": "decline",
+    "domain": "governance"
+  }
+]

@@ -489,7 +489,7 @@ Each agent makes one LLM call per round. With 50 agents and 10 concurrent calls 
 
 **ChromaDB error on startup**
 
-Delete the `data/chroma` directory and restart. This can happen if the database was created with a different version of ChromaDB. All other data is preserved — only the vector index is rebuilt.
+Delete the `data/chroma` directory and restart. This can happen if the database was created with a different version of ChromaDB. All other data is preserved - only the vector index is rebuilt.
 
 **`murm` command not found after install**
 

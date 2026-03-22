@@ -5,11 +5,11 @@ build-backend = "hatchling.build"
 [project]
 name = "murm"
 version = "0.2.0"
-description = "Multi-agent Uncertainty Resolution Machine: predict public opinion with local-first swarm intelligence"
+description = "Multi-agent Uncertainty Resolution Machine - predict public opinion with local-first swarm intelligence"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "Akhilesh M" }]
+authors = [{ name = "Akhilesh Magotra" }]
 keywords = ["multi-agent", "simulation", "swarm-intelligence", "prediction", "llm", "public-opinion"]
 classifiers = [
     "Programming Language :: Python :: 3.11",

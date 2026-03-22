@@ -1,10 +1,9 @@
-# 🗣️ MURM (pronounced as murmur)- Listen to what people have to say
+# ️ MURM (pronounced as murmur)- Listen to what people have to say
 
 Predict how public opinion shifts. Feed in any document, ask a plain-English question, simulate a crowd of autonomous agents reacting to it, and receive a structured report with a confidence score and uncertainty bounds.
 
 Built as a research-grade, local-first, English-language replacement for [MiroFish](https://github.com/666ghj/MiroFish).
 
-**The Live Demo will be shortly available** 
 ---
 
 ## What it does
@@ -71,21 +70,14 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 
 ---
 
-## Quickstart: Four paths to your first run
+## Quickstart: three paths to your first run
 
-### Path 1: PyPI Install (Recommended & Fastest)
-
-```bash
-python3 -m venv murm && source murm/bin/activate   # Windows: murm\Scripts\activate
-pip install murm
-```
-
-### Path 2: Build from source
+### Path 1: Command line only (fastest)
 
 ```bash
 git clone https://github.com/AM-2304/murm
 cd murm
-python3 -m venv murm && source murm/bin/activate
+python3 -m venv murm && source murm/bin/activate   # Windows: murm\Scripts\activate
 pip install -e .
 cp .env.example .env
 ```

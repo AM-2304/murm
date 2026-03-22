@@ -27,9 +27,7 @@ from murm.simulation.metrics import MetricsCollector, _shannon_entropy, _gini
 from murm.simulation.trace import TraceWriter
 
 
-# ------------------------------------------------------------------
 # Graph engine
-# ------------------------------------------------------------------
 
 class TestKnowledgeGraph:
     def test_add_and_retrieve_entity(self, tmp_path):
@@ -84,9 +82,7 @@ class TestKnowledgeGraph:
         assert _canonical_id("openai") == "openai"
 
 
-# ------------------------------------------------------------------
 # Agent model
-# ------------------------------------------------------------------
 
 class TestAgentProfile:
     def test_to_dict_roundtrip(self):
@@ -120,9 +116,7 @@ class TestAgentProfile:
         assert len(state.opinion_history) == 0
 
 
-# ------------------------------------------------------------------
 # Quota rounding
-# ------------------------------------------------------------------
 
 class TestQuotaRound:
     def test_sum_equals_total(self):
@@ -136,9 +130,7 @@ class TestQuotaRound:
         assert all(v == 2 for v in result)
 
 
-# ------------------------------------------------------------------
 # Metrics
-# ------------------------------------------------------------------
 
 class TestMetrics:
     def test_shannon_entropy_uniform(self):
@@ -173,9 +165,7 @@ class TestMetrics:
         assert "entropy_time_series" in summary
 
 
-# ------------------------------------------------------------------
 # Budget manager
-# ------------------------------------------------------------------
 
 class TestBudgetManager:
     def test_budget_not_exceeded_within_limit(self):
@@ -206,9 +196,7 @@ class TestBudgetManager:
         assert snap["budget_used_pct"] == pytest.approx(20.0, abs=0.1)
 
 
-# ------------------------------------------------------------------
 # Environment
-# ------------------------------------------------------------------
 
 class TestEnvironments:
     def test_forum_feed_includes_scenario(self):
@@ -251,9 +239,7 @@ class TestEnvironments:
         assert len(all_posts) == 1
 
 
-# ------------------------------------------------------------------
 # Trace writer
-# ------------------------------------------------------------------
 
 class TestTraceWriter:
     def test_write_and_read_back(self, tmp_path):
@@ -279,9 +265,7 @@ class TestTraceWriter:
         assert len(writer._buffer) == 0
 
 
-# ------------------------------------------------------------------
 # Calibration
-# ------------------------------------------------------------------
 
 class TestCalibration:
     def test_brier_score_perfect_prediction(self):
@@ -317,9 +301,7 @@ class TestCalibration:
         assert len(stmt) > 20
 
 
-# ------------------------------------------------------------------
 # ProjectStore delete methods
-# ------------------------------------------------------------------
 
 import asyncio as _asyncio
 import pytest
@@ -365,9 +347,7 @@ class TestProjectStore:
         _asyncio.run(store.delete_run("nonexistent-id-000"))
 
 
-# ------------------------------------------------------------------
 # RAG injection — engine accepts embedder kwarg and builds correct prompt
-# ------------------------------------------------------------------
 
 class TestRAGInjection:
     def test_build_action_prompt_with_graph_context(self):
@@ -459,9 +439,7 @@ class TestRAGInjection:
             assert engine._embedder is None
 
 
-# ------------------------------------------------------------------
 # skip_graph flag in CreateRunRequest model
-# ------------------------------------------------------------------
 
 class TestSkipGraphFlag:
     def test_skip_graph_defaults_false(self):

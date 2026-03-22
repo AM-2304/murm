@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: murm-backend
+    env: docker
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /docs
+    disk:
+      name: murm-data
+      mountPath: /app/data
+      sizeGB: 1
+    envVars:
+      - key: LLM_API_KEY
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: PORT
+        value: "8000"
+      - key: DATA_DIR
+        value: "/app/data"
+      - key: CHROMA_PATH
+        value: "/app/data/chroma"
+      - key: CORS_ORIGINS
+        value: "*"

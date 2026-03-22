@@ -70,14 +70,21 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 
 ---
 
-## Quickstart: three paths to your first run
+## Quickstart: four paths to your first run
 
-### Path 1: Command line only (fastest)
+### Path 1: PyPI Install (Recommended & Fastest)
+
+```bash
+python3 -m venv murm && source murm/bin/activate   # Windows: murm\Scripts\activate
+pip install murm
+```
+
+### Path 2: Build from source
 
 ```bash
 git clone https://github.com/AM-2304/murm
 cd murm
-python3 -m venv murm && source murm/bin/activate   # Windows: murm\Scripts\activate
+python3 -m venv murm && source murm/bin/activate
 pip install -e .
 cp .env.example .env
 ```
@@ -481,11 +488,11 @@ Each agent makes one LLM call per round. With 50 agents and 10 concurrent calls 
 
 **ChromaDB error on startup**
 
-Delete the `data/chroma` directory and restart. This can happen if the database was created with a different version of ChromaDB. All other data is preserved - only the vector index is rebuilt.
+Delete the `data/chroma` directory and restart. This can happen if the database was created with a different version of ChromaDB. All other data is preserved — only the vector index is rebuilt.
 
 **`murm` command not found after install**
 
-You installed the package but are not in the virtual environment. Run `source .venv/bin/activate` and try again.
+You installed the package but are not in the virtual environment. Run `source murm/bin/activate` and try again.
 
 ---
 

@@ -1,5 +1,5 @@
 """
-LiteLLM wrapper. Every component that needs an LLM calls this — never litellm directly.
+LiteLLM wrapper. Every component that needs an LLM calls this - never litellm directly.
 
 Key design decisions:
   - complete_json() NEVER sends response_format to Groq. Groq silently hangs on
@@ -63,7 +63,7 @@ class LLMProvider:
     ) -> str:
         """
         Chat completion with retry and hard timeout.
-        Does NOT accept response_format — callers that need JSON use complete_json().
+        Does NOT accept response_format - callers that need JSON use complete_json().
         """
         call_kwargs: dict[str, Any] = dict(
             model=self.model,
@@ -74,23 +74,6 @@ class LLMProvider:
         )
         if self.api_key:  call_kwargs["api_key"]  = self.api_key
         if self.base_url: call_kwargs["base_url"] = self.base_url
-
-        # --- DEMO MODE MOCK CACHING INTERCEPTOR ---
-        demo_mode = getattr(settings, "demo_mode", False)
-        cache_file = None
-        if demo_mode:
-            cache_dir = Path("demo/cache")
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            prompt_hash = hashlib.sha256(json.dumps([messages, self.model], sort_keys=True).encode()).hexdigest()
-            cache_file = cache_dir / f"{prompt_hash}.json"
-            
-            if cache_file.exists():
-                try:
-                    await asyncio.sleep(0.3)  # Add realistic async latency for the UI stream
-                    return json.loads(cache_file.read_text(encoding="utf-8"))["content"]
-                except Exception as e:
-                    logger.warning(f"Failed to read demo cache: {e}")
-        # ------------------------------------------
 
         for attempt in range(self.max_retries):
             try:
@@ -115,27 +98,27 @@ class LLMProvider:
             except asyncio.TimeoutError:
                 if attempt == self.max_retries - 1:
                     raise RuntimeError("LLM call timed out after 60s on final retry")
-                logger.warning("LLM timeout (attempt %d/%d) — retrying", attempt + 1, self.max_retries)
+                logger.warning("LLM timeout (attempt %d/%d) - retrying", attempt + 1, self.max_retries)
                 await asyncio.sleep(self.retry_delay)
 
             except litellm.RateLimitError:
                 if attempt == self.max_retries - 1:
                     raise RuntimeError(
                         "Rate limit persists after all retries. "
-                        "On Groq paid tier this should not happen — check your API key."
+                        "On Groq paid tier this should not happen - check your API key."
                     )
                 wait = min(
                     self.retry_delay * (2 ** attempt) + random.uniform(0, _JITTER),
                     _MAX_WAIT,
                 )
-                logger.warning("Rate limit (attempt %d/%d) — waiting %.0fs", attempt + 1, self.max_retries, wait)
+                logger.warning("Rate limit (attempt %d/%d) - waiting %.0fs", attempt + 1, self.max_retries, wait)
                 await asyncio.sleep(wait)
 
             except litellm.APIConnectionError as exc:
                 if attempt == self.max_retries - 1:
                     raise
                 wait = self.retry_delay + random.uniform(0, _JITTER)
-                logger.warning("Connection error attempt %d: %s — retry in %.0fs", attempt + 1, exc, wait)
+                logger.warning("Connection error attempt %d: %s - retry in %.0fs", attempt + 1, exc, wait)
                 await asyncio.sleep(wait)
 
         raise RuntimeError(f"LLM call failed after {self.max_retries} retries")
@@ -168,7 +151,7 @@ class AgentLLMProvider(LLMProvider):
     """
     Faster, lighter model for per-agent turns inside the simulation loop.
     Fails fast (3 retries, 1s base) because a failed agent turn just skips
-    that agent for the round — it does not break the simulation.
+    that agent for the round - it does not break the simulation.
     """
     def __init__(self, budget: BudgetManager | None = None) -> None:
         super().__init__(

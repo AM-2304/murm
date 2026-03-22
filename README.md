@@ -1,10 +1,9 @@
-# 🗣️ MURM (pronounced as murmur)- Listen to what people have to say
+# ️ MURM (pronounced as murmur)- Listen to what people have to say
 
 Predict how public opinion shifts. Feed in any document, ask a plain-English question, simulate a crowd of autonomous agents reacting to it, and receive a structured report with a confidence score and uncertainty bounds.
 
 Built as a research-grade, local-first, English-language replacement for [MiroFish](https://github.com/666ghj/MiroFish).
 
-**The Live Demo will be shortly available** 
 ---
 
 ## What it does
@@ -71,19 +70,26 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 
 ---
 
-## Quickstart: three paths to your first run
+## Quickstart: four paths to your first run
 
-### Path 1: Command line only (fastest)
+### Path 1: PyPI Install (Recommended & Fastest)
+
+```bash
+python3 -m venv murm_env && source murm_env/bin/activate   # Windows: murm_env\Scripts\activate
+pip install murm
+```
+
+### Path 2: Build from source
 
 ```bash
 git clone https://github.com/AM-2304/murm
 cd murm
-python3 -m venv murm && source murm/bin/activate   # Windows: murm\Scripts\activate
+python3 -m venv murm_env && source murm_env/bin/activate
 pip install -e .
 cp .env.example .env
 ```
 
-Open `.env` in any text editor. Change these two lines:
+For either Path 1 or Path 2, you need to configure your AI provider. Create (or open) a `.env` file in your directory and add these two lines:
 ```
 LLM_MODEL=groq/llama-3.3-70b-versatile
 LLM_API_KEY=your_actual_key_here
@@ -104,7 +110,7 @@ See the cost before you run:
 murm estimate --agents 20 --rounds 15
 ```
 
-### Path 2: Web UI
+### Path 3: Web UI
 
 ```bash
 # Terminal 1 - start the backend API
@@ -119,7 +125,7 @@ npm run dev
 
 Open `http://localhost:3000` in your browser.
 
-### Path 3: Docker 
+### Path 4: Docker 
 
 ```bash
 git clone https://github.com/AM-2304/murm

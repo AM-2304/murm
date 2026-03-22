@@ -62,6 +62,9 @@ class Settings(BaseSettings):
     # Log level
     log_level: LogLevel = Field(default=LogLevel.INFO, alias="LOG_LEVEL")
 
+    # Run without API keys by freezing and serving from demo/cache/
+    demo_mode: bool = Field(default=False, alias="DEMO_MODE")
+
     @field_validator("data_dir", "chroma_path", mode="before")
     @classmethod
     def coerce_path(cls, v: str | Path) -> Path:

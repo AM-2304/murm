@@ -5,6 +5,22 @@ const IS_STATIC_DEMO = import.meta.env.VITE_STATIC_DEMO === 'true';
 
 async function request(method, path, body) {
   if (IS_STATIC_DEMO) {
+    if (path === "/api/projects/") {
+      return [{
+        project_id: "demo-project-1",
+        title: "Federal Reserve Rate Decision",
+        status: "ready",
+        created_at: Math.floor(Date.now() / 1000) - 3600
+      }, {
+        project_id: "demo-project-2",
+        title: "Wuhan University Brand Reputation",
+        status: "ready",
+        created_at: Math.floor(Date.now() / 1000) - 86400
+      }];
+    }
+    if (path.includes("/api/projects/") && method === "GET") {
+      return { status: "ready", project_id: "demo-project-1" };
+    }
     if (path.includes("/api/projects/") && method === "POST") {
       await mock.MOCK_DELAY(800);
       return { id: "demo-project-1" };

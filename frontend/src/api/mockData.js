@@ -1,8 +1,7 @@
-// ============================================================
 // Static Demo Data — matches the exact event shapes that
 // useSimulation.js, AgentFeed.jsx, MetricsDashboard.jsx,
 // ReportView.jsx, and AgentRoster.jsx all consume.
-// ============================================================
+
 
 export const MOCK_GRAPH = {
   nodes: [

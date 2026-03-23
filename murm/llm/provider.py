@@ -13,9 +13,11 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import hashlib
 import json
 import logging
 import random
+from pathlib import Path
 from pathlib import Path
 from typing import Any
 
@@ -74,6 +76,23 @@ class LLMProvider:
         )
         if self.api_key:  call_kwargs["api_key"]  = self.api_key
         if self.base_url: call_kwargs["base_url"] = self.base_url
+
+        # --- DEMO MODE MOCK CACHING INTERCEPTOR ---
+        demo_mode = getattr(settings, "demo_mode", False)
+        cache_file = None
+        if demo_mode:
+            cache_dir = Path("demo/cache")
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            prompt_hash = hashlib.sha256(json.dumps([messages, self.model], sort_keys=True).encode()).hexdigest()
+            cache_file = cache_dir / f"{prompt_hash}.json"
+            
+            if cache_file.exists():
+                try:
+                    await asyncio.sleep(0.3)  # Add realistic async latency for the UI stream
+                    return json.loads(cache_file.read_text(encoding="utf-8"))["content"]
+                except Exception as e:
+                    logger.warning(f"Failed to read demo cache: {e}")
+        # ------------------------------------------
 
         # DEMO MODE MOCK CACHING INTERCEPTOR 
         demo_mode = getattr(settings, "demo_mode", False)

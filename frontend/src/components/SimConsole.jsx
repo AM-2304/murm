@@ -20,7 +20,7 @@ function formatLine(event) {
             text = p.message || "";
             break;
         case "agents_ready":
-            text = `${p.n_agents} agents generated`;
+            text = `${p.n_agents || (p.profiles ? p.profiles.length : "undefined")} agents generated`;
             break;
         case "round_completed":
             text = `Round ${p.round} — ${p.actions} actions — entropy ${p.metrics?.opinion_entropy?.toFixed(3) ?? "—"}`;

@@ -140,35 +140,35 @@ export const MOCK_SSE_EVENTS = [
 
 export const MOCK_REPORT = `## MURM Analytical Report: Federal Reserve Competence Perception
 
-*Prediction Target:* How will public sentiment shift towards the Fed's competence over the next 30 days?
+Prediction Target: How will public sentiment shift towards the Fed's competence over the next 30 days?
 
-*Simulation Parameters:* 5 agents · 5 rounds · Forum environment · Normal opinion distribution · Seed 42
+Simulation Parameters: 5 agents · 5 rounds · Forum environment · Normal opinion distribution · Seed 42
 
 ---
 
 ### 1. Direct Prediction
 
-*Public sentiment toward the Federal Reserve's competence will shift net-negative over the next 30 days, with an estimated 12-18 point decline in general public approval.* However, this decline will be sharply bifurcated along socioeconomic lines: institutional investors and financial professionals will maintain or slightly increase their confidence in the Fed, while consumers, small business owners, and retail investors will register significant drops in perceived competence.
+Public sentiment toward the Federal Reserve's competence will shift net-negative over the next 30 days, with an estimated 12-18 point decline in general public approval. However, this decline will be sharply bifurcated along socioeconomic lines: institutional investors and financial professionals will maintain or slightly increase their confidence in the Fed, while consumers, small business owners, and retail investors will register significant drops in perceived competence.
 
 ### 2. Evidence from Simulation
 
 The multi-agent simulation produced several key findings across 5 rounds of structured deliberation:
 
-- *Immediate Polarization:* Within the first round, agents split into two distinct camps that never reconverged. The polarization index rose from 0.62 to 0.85 across the simulation, indicating deepening — not moderating — divisions.
-- *The "Dot Plot Divide":* The single most contentious element was the Fed's dot plot showing 3 projected rate cuts. Investor-class agents interpreted this as competent forward guidance. Consumer-class agents interpreted it as an empty promise based on prior broken commitments.
-- *Communication Failure Consensus:* By Round 3, even the most pro-Fed agent (Marcus Chen, macro-economist) conceded that the Fed's communication strategy had failed, while maintaining that the underlying policy was sound. This nuanced position reflects expert consensus in real-world analysis.
-- *Class-Based Perception Split:* Agent Chloe Andersen's Round 4 synthesis crystallized the core finding: "The Fed's competence perception will split along class lines. Net negative for general public, net positive for institutional investors."
+- Immediate Polarization: Within the first round, agents split into two distinct camps that never reconverged. The polarization index rose from 0.62 to 0.85 across the simulation, indicating deepening — not moderating — divisions.
+- The "Dot Plot Divide": The single most contentious element was the Fed's dot plot showing 3 projected rate cuts. Investor-class agents interpreted this as competent forward guidance. Consumer-class agents interpreted it as an empty promise based on prior broken commitments.
+- Communication Failure Consensus: By Round 3, even the most pro-Fed agent (Marcus Chen, macro-economist) conceded that the Fed's communication strategy had failed, while maintaining that the underlying policy was sound. This nuanced position reflects expert consensus in real-world analysis.
+- Class-Based Perception Split: Agent Chloe Andersen's Round 4 synthesis crystallized the core finding: "The Fed's competence perception will split along class lines. Net negative for general public, net positive for institutional investors."
 
 ### 3. Emergence Analysis
 
-- *Opinion Entropy:* Rose from 1.54 to 1.91 bits across the simulation, indicating increasing diversity of opinion rather than convergence. This suggests the Fed's "wait and see" approach actively generates confusion rather than confidence.
-- *Polarization Index:* Climbed steadily from 0.62 to 0.85, confirming that discussion of Fed policy amplifies division rather than building consensus. This has direct implications for social media sentiment analysis.
-- *Gini Coefficient:* Dropped from 0.20 to 0.10, meaning participation became more equal over time — all agents were deeply engaged. This suggests the topic has high salience across demographics.
-- *Opinion Velocity:* Declined from 0.40 to 0.08, indicating agents locked into their positions quickly. Early impressions of Fed competence are "sticky" and resistant to counter-argument.
+- Opinion Entropy: Rose from 1.54 to 1.91 bits across the simulation, indicating increasing diversity of opinion rather than convergence. This suggests the Fed's "wait and see" approach actively generates confusion rather than confidence.
+- Polarization Index: Climbed steadily from 0.62 to 0.85, confirming that discussion of Fed policy amplifies division rather than building consensus. This has direct implications for social media sentiment analysis.
+- Gini Coefficient: Dropped from 0.20 to 0.10, meaning participation became more equal over time — all agents were deeply engaged. This suggests the topic has high salience across demographics.
+- Opinion Velocity: Declined from 0.40 to 0.08, indicating agents locked into their positions quickly. Early impressions of Fed competence are "sticky" and resistant to counter-argument.
 
 ### 4. Confidence Assessment
 
-*Confidence Score: 82/100*
+Confidence Score: 82/100
 
 The simulation exhibited high internal consistency: the mechanism of sentiment shift (class-based bifurcation driven by communication failure rather than policy substance) was independently identified by multiple agents with different priors. The velocity decline indicates strong agreement on the direction, even while disagreeing on magnitude. Confidence is reduced from 90 to 82 because: (a) the simulation used 5 agents, which limits emergent complexity, and (b) external shocks (geopolitical events, surprise economic data) could override the baseline trajectory.
 
@@ -176,9 +176,9 @@ The simulation exhibited high internal consistency: the mechanism of sentiment s
 
 The primary sources of uncertainty are:
 
-- *External Economic Shocks:* A sudden spike in core PCE or an unexpected jobs report within the 30-day window could either accelerate or reverse the predicted sentiment shift.
-- *Fed Communication Pivot:* If the Fed issues an unscheduled statement or the Chair gives an interview that directly addresses public frustration, the communication-failure driver could be partially neutralized.
-- *Political Amplification:* The proximity to election rhetoric could amplify negative sentiment beyond the simulation's baseline estimate.
+- External Economic Shocks: A sudden spike in core PCE or an unexpected jobs report within the 30-day window could either accelerate or reverse the predicted sentiment shift.
+- Fed Communication Pivot: If the Fed issues an unscheduled statement or the Chair gives an interview that directly addresses public frustration, the communication-failure driver could be partially neutralized.
+- Political Amplification: The proximity to election rhetoric could amplify negative sentiment beyond the simulation's baseline estimate.
 
 Multi-seed variance was low (σ = 0.04 on final entropy), indicating the prediction is robust to initialization differences.
 

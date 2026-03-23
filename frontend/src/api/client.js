@@ -5,53 +5,69 @@ const IS_STATIC_DEMO = import.meta.env.VITE_STATIC_DEMO === 'true';
 
 async function request(method, path, body) {
   if (IS_STATIC_DEMO) {
-    if (path === "/api/projects/") {
+    // ---- Project endpoints ----
+    if (path === "/api/projects/" && method === "GET") {
       return [{
         project_id: "demo-project-1",
         title: "Federal Reserve Rate Decision",
         status: "ready",
         created_at: Math.floor(Date.now() / 1000) - 3600
-      }, {
-        project_id: "demo-project-2",
-        title: "Wuhan University Brand Reputation",
-        status: "ready",
-        created_at: Math.floor(Date.now() / 1000) - 86400
       }];
     }
-    if (path.includes("/api/projects/") && method === "GET") {
-      return { status: "ready", project_id: "demo-project-1" };
-    }
     if (path.includes("/api/projects/") && method === "POST") {
-      await mock.MOCK_DELAY(800);
-      return { id: "demo-project-1" };
+      await mock.MOCK_DELAY(600);
+      return { project_id: "demo-project-1" };
     }
+    if (path.includes("/api/projects/") && method === "GET") {
+      return { project_id: "demo-project-1", title: "Federal Reserve Rate Decision", status: "ready" };
+    }
+    if (path.includes("/api/projects/") && method === "DELETE") {
+      return { ok: true };
+    }
+
+    // ---- Graph endpoints ----
     if (path.includes("/build") && method === "POST") {
-      await mock.MOCK_DELAY(2000); // Simulate graph extraction
+      await mock.MOCK_DELAY(2000);
       return { status: "building", project_id: "demo-project-1" };
     }
-    if (path.includes("/graph/stats") && method === "GET") {
-      return { entities: 7, relations: 7 };
+    if (path.includes("/graph/stats")) {
+      return { n_entities: 7, n_relations: 7 };
     }
-    if (path.includes("/graph") && method === "GET") {
+    if (path.includes("/graph")) {
       return mock.MOCK_GRAPH;
     }
-    if (path.includes("/api/runs/") && method === "POST") {
+
+    // ---- Run endpoints ----
+    if (path === "/api/runs/" && method === "POST") {
       await mock.MOCK_DELAY(500);
-      return { id: "demo-run-1" };
+      return { run_id: "demo-run-1" };
     }
-    if (path.includes("/metrics") && method === "GET") {
-      return mock.MOCK_METRICS;
+    if (path.includes("/estimate")) {
+      return mock.MOCK_COST_ESTIMATE;
     }
-    if (path.includes("/report") && method === "GET") {
-      await mock.MOCK_DELAY(1500);
-      return { report_text: mock.MOCK_REPORT };
+    if (path.includes("/metrics")) {
+      return mock.MOCK_SSE_EVENTS
+        .filter(e => e.type === "round_completed")
+        .map(e => ({ round: e.payload.round, ...e.payload.metrics }));
+    }
+    if (path.includes("/report")) {
+      return { report: mock.MOCK_REPORT };
+    }
+    if (path.includes("/cancel")) {
+      return { ok: true };
     }
     if (path.includes("/api/runs/") && method === "GET") {
-      return { status: "running", config: { agents: 5, rounds: 2 } };
+      return { status: "completed", run_id: "demo-run-1", config: { n_agents: 5, n_rounds: 5 } };
     }
+    if (path.includes("/api/runs/") && method === "DELETE") {
+      return { ok: true };
+    }
+
+    // Fallback
     return {};
   }
 
+  // ---- Real API mode ----
   const opts = {
     method,
     headers: body ? { "Content-Type": "application/json" } : {},
@@ -74,6 +90,7 @@ export const api = {
   listProjects: () => request("GET", "/api/projects/"),
   getProject: (id) => request("GET", `/api/projects/${id}`),
   uploadFile: async (projectId, file) => {
+    if (IS_STATIC_DEMO) { await mock.MOCK_DELAY(300); return { ok: true }; }
     const form = new FormData();
     form.append("file", file);
     const res = await fetch(`${BASE}/api/projects/${projectId}/upload`, { method: "POST", body: form });
@@ -93,32 +110,35 @@ export const api = {
   getMetrics: (runId) => request("GET", `/api/runs/${runId}/metrics`),
   deleteProject: (id) => request("DELETE", `/api/projects/${id}`),
   deleteRun: (id) => request("DELETE", `/api/runs/${id}`),
+  getEstimate: (agents, rounds, seeds) =>
+    request("GET", `/api/runs/estimate?agents=${agents}&rounds=${rounds}&seeds=${seeds}`),
 };
 
 export function openStream(runId, onEvent, since = 0) {
   if (IS_STATIC_DEMO) {
-    let internalClock = 0;
     let isActive = true;
-    
+
     const playStream = async () => {
-      // Stream agent generation sequentially
-      for (let i = 0; i < 5; i++) {
+      for (const event of mock.MOCK_SSE_EVENTS) {
         if (!isActive) return;
-        onEvent(mock.MOCK_EVENTS[i]);
-        await mock.MOCK_DELAY(800);
-      }
-      
-      // Stream the action rounds
-      for (let i = 5; i < mock.MOCK_EVENTS.length; i++) {
+
+        // Delay between events to simulate real-time AI processing
+        if (event.type === "agents_ready") {
+          await mock.MOCK_DELAY(1500);
+        } else if (event.type === "round_completed") {
+          // Each round takes 3-5 seconds to simulate agent thinking
+          const roundDelay = 3000 + Math.random() * 2000;
+          await mock.MOCK_DELAY(roundDelay);
+        } else if (event.type === "simulation_ended") {
+          await mock.MOCK_DELAY(1000);
+        }
+
         if (!isActive) return;
-        onEvent(mock.MOCK_EVENTS[i]);
-        // Simulate realistic thinking delays between agent posts
-        await mock.MOCK_DELAY(1500 + Math.random() * 1500);
+        onEvent(event);
       }
     };
-    
+
     playStream();
-    
     return () => { isActive = false; };
   }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { api } from "../api/client";
 
 const inp = {
   width: "100%", padding: "10px 12px", fontSize: 13,
@@ -95,10 +96,8 @@ export function RunForm({ projectId, onSubmit, disabled }) {
   const fetchEstimate = useCallback(async (agents, rounds, seeds) => {
     setEstimating(true);
     try {
-      const res = await fetch(
-        `/api/runs/estimate?agents=${agents}&rounds=${rounds}&seeds=${seeds}`
-      );
-      if (res.ok) setEstimate(await res.json());
+      const data = await api.getEstimate(agents, rounds, seeds);
+      if (data) setEstimate(data);
     } catch { }
     finally { setEstimating(false); }
   }, []);

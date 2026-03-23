@@ -48,8 +48,8 @@ export const MOCK_SSE_EVENTS = [
     payload: {
       round: 1,
       actions: 5,
-      metrics: { opinion_entropy: 1.54, polarization_index: 0.62, gini_coefficient: 0.20, opinion_velocity: 0.40 },
-      budget: { total_tokens: 4200, total_cost: 0.0008 },
+      metrics: { opinion_entropy: 1.54, polarization_index: 0.62, gini_coefficient: 0.20, opinion_velocity: 0.40, dominant_opinion: "disagree", consensus: 0.20, activity_rate: 1.0 },
+      budget: { total_tokens: 4200, estimated_cost_usd: 0.0008, budget_used_pct: 19 },
       sample_actions: [
         { agent_id: "agent_1", round: 1, action_type: "post", content: "The Fed is doing exactly what it must. Core inflation hasn't yielded yet; holding rates at 5.25% is prudent. The dual mandate demands patience, not panic.", opinion_shift: "neutral" },
         { agent_id: "agent_0", round: 1, action_type: "reply", content: "Prudent for who? We are being squeezed by these rates and inflation isn't dropping for everyday goods. The Fed is catastrophically slow and disconnected from reality.", opinion_shift: "disagree" },
@@ -65,8 +65,8 @@ export const MOCK_SSE_EVENTS = [
     payload: {
       round: 2,
       actions: 5,
-      metrics: { opinion_entropy: 1.72, polarization_index: 0.71, gini_coefficient: 0.18, opinion_velocity: 0.35 },
-      budget: { total_tokens: 8800, total_cost: 0.0016 },
+      metrics: { opinion_entropy: 1.72, polarization_index: 0.71, gini_coefficient: 0.18, opinion_velocity: 0.35, dominant_opinion: "strongly_disagree", consensus: 0.25, activity_rate: 1.0 },
+      budget: { total_tokens: 8800, estimated_cost_usd: 0.0016, budget_used_pct: 38 },
       sample_actions: [
         { agent_id: "agent_1", round: 2, action_type: "reply", content: "Chloe raises a fair point about communications, but central banking inherently requires balancing these tensions. The dot plot IS the communication — it prevents panic.", opinion_shift: "agree" },
         { agent_id: "agent_0", round: 2, action_type: "reply", content: "The dot plot is a fairy tale, Marcus. They promised cuts earlier this year too and walked it back. Fool me once, shame on you. Fool me twice — that's incompetence.", opinion_shift: "strongly_disagree" },
@@ -82,8 +82,8 @@ export const MOCK_SSE_EVENTS = [
     payload: {
       round: 3,
       actions: 5,
-      metrics: { opinion_entropy: 1.82, polarization_index: 0.78, gini_coefficient: 0.15, opinion_velocity: 0.28 },
-      budget: { total_tokens: 13400, total_cost: 0.0024 },
+      metrics: { opinion_entropy: 1.82, polarization_index: 0.78, gini_coefficient: 0.15, opinion_velocity: 0.28, dominant_opinion: "strongly_disagree", consensus: 0.28, activity_rate: 1.0 },
+      budget: { total_tokens: 13400, estimated_cost_usd: 0.0024, budget_used_pct: 57 },
       sample_actions: [
         { agent_id: "agent_4", round: 3, action_type: "post", content: "After three rounds, the data is clear: this group has polarized further, not converged. The Fed's strategy of 'patience' is interpreted as 'competence' by elites and 'indifference' by everyone else.", opinion_shift: "disagree" },
         { agent_id: "agent_1", round: 3, action_type: "reply", content: "I'll concede one point: the communication strategy has failed. The substance is correct but the packaging has eroded trust. The Fed needs a better narrative, not a different policy.", opinion_shift: "neutral" },
@@ -99,8 +99,8 @@ export const MOCK_SSE_EVENTS = [
     payload: {
       round: 4,
       actions: 5,
-      metrics: { opinion_entropy: 1.89, polarization_index: 0.82, gini_coefficient: 0.12, opinion_velocity: 0.18 },
-      budget: { total_tokens: 18200, total_cost: 0.0032 },
+      metrics: { opinion_entropy: 1.89, polarization_index: 0.82, gini_coefficient: 0.12, opinion_velocity: 0.18, dominant_opinion: "disagree", consensus: 0.22, activity_rate: 1.0 },
+      budget: { total_tokens: 18200, estimated_cost_usd: 0.0032, budget_used_pct: 79 },
       sample_actions: [
         { agent_id: "agent_1", round: 4, action_type: "post", content: "I've been tracking the opinion trajectories in this group. We've reached maximum polarization — entropy is near ceiling. This mirrors what I expect to see nationally: a fractured, not unified, response.", opinion_shift: "neutral" },
         { agent_id: "agent_2", round: 4, action_type: "reply", content: "Maximum polarization means maximum pain for people like me caught in the middle. While economists debate entropy curves, I'm looking at my Q3 projections and seeing red.", opinion_shift: "strongly_disagree" },
@@ -116,8 +116,8 @@ export const MOCK_SSE_EVENTS = [
     payload: {
       round: 5,
       actions: 5,
-      metrics: { opinion_entropy: 1.91, polarization_index: 0.85, gini_coefficient: 0.10, opinion_velocity: 0.08 },
-      budget: { total_tokens: 23000, total_cost: 0.0042 },
+      metrics: { opinion_entropy: 1.91, polarization_index: 0.85, gini_coefficient: 0.10, opinion_velocity: 0.08, dominant_opinion: "disagree", consensus: 0.20, activity_rate: 1.0 },
+      budget: { total_tokens: 23000, estimated_cost_usd: 0.0042, budget_used_pct: 100 },
       sample_actions: [
         { agent_id: "agent_4", round: 5, action_type: "post", content: "Final round. The simulation has converged on a clear signal: public sentiment toward the Fed will shift net-negative over 30 days, driven primarily by consumer frustration, despite institutional optimism.", opinion_shift: "disagree" },
         { agent_id: "agent_1", round: 5, action_type: "reply", content: "I reluctantly agree with the directional call. The Fed's substance is sound but their credibility deficit with ordinary Americans is real and will deepen. My confidence in the prediction: 82%.", opinion_shift: "neutral" },
@@ -133,42 +133,42 @@ export const MOCK_SSE_EVENTS = [
     payload: {
       status: "completed",
       total_actions: 25,
-      metrics: { opinion_entropy: 1.91, polarization_index: 0.85, gini_coefficient: 0.10, opinion_velocity: 0.08, final_entropy: 1.91 }
+      metrics: { opinion_entropy: 1.91, polarization_index: 0.85, gini_coefficient: 0.10, opinion_velocity: 0.08, final_entropy: 1.91, dominant_opinion: "disagree", consensus: 0.20, activity_rate: 1.0 }
     }
   }
 ];
 
 export const MOCK_REPORT = `## MURM Analytical Report: Federal Reserve Competence Perception
 
-**Prediction Target:** How will public sentiment shift towards the Fed's competence over the next 30 days?
+*Prediction Target:* How will public sentiment shift towards the Fed's competence over the next 30 days?
 
-**Simulation Parameters:** 5 agents · 5 rounds · Forum environment · Normal opinion distribution · Seed 42
+*Simulation Parameters:* 5 agents · 5 rounds · Forum environment · Normal opinion distribution · Seed 42
 
 ---
 
 ### 1. Direct Prediction
 
-**Public sentiment toward the Federal Reserve's competence will shift net-negative over the next 30 days, with an estimated 12-18 point decline in general public approval.** However, this decline will be sharply bifurcated along socioeconomic lines: institutional investors and financial professionals will maintain or slightly increase their confidence in the Fed, while consumers, small business owners, and retail investors will register significant drops in perceived competence.
+*Public sentiment toward the Federal Reserve's competence will shift net-negative over the next 30 days, with an estimated 12-18 point decline in general public approval.* However, this decline will be sharply bifurcated along socioeconomic lines: institutional investors and financial professionals will maintain or slightly increase their confidence in the Fed, while consumers, small business owners, and retail investors will register significant drops in perceived competence.
 
 ### 2. Evidence from Simulation
 
 The multi-agent simulation produced several key findings across 5 rounds of structured deliberation:
 
-- **Immediate Polarization:** Within the first round, agents split into two distinct camps that never reconverged. The polarization index rose from 0.62 to 0.85 across the simulation, indicating deepening — not moderating — divisions.
-- **The "Dot Plot Divide":** The single most contentious element was the Fed's dot plot showing 3 projected rate cuts. Investor-class agents interpreted this as competent forward guidance. Consumer-class agents interpreted it as an empty promise based on prior broken commitments.
-- **Communication Failure Consensus:** By Round 3, even the most pro-Fed agent (Marcus Chen, macro-economist) conceded that the Fed's communication strategy had failed, while maintaining that the underlying policy was sound. This nuanced position reflects expert consensus in real-world analysis.
-- **Class-Based Perception Split:** Agent Chloe Andersen's Round 4 synthesis crystallized the core finding: "The Fed's competence perception will split along class lines. Net negative for general public, net positive for institutional investors."
+- *Immediate Polarization:* Within the first round, agents split into two distinct camps that never reconverged. The polarization index rose from 0.62 to 0.85 across the simulation, indicating deepening — not moderating — divisions.
+- *The "Dot Plot Divide":* The single most contentious element was the Fed's dot plot showing 3 projected rate cuts. Investor-class agents interpreted this as competent forward guidance. Consumer-class agents interpreted it as an empty promise based on prior broken commitments.
+- *Communication Failure Consensus:* By Round 3, even the most pro-Fed agent (Marcus Chen, macro-economist) conceded that the Fed's communication strategy had failed, while maintaining that the underlying policy was sound. This nuanced position reflects expert consensus in real-world analysis.
+- *Class-Based Perception Split:* Agent Chloe Andersen's Round 4 synthesis crystallized the core finding: "The Fed's competence perception will split along class lines. Net negative for general public, net positive for institutional investors."
 
 ### 3. Emergence Analysis
 
-- **Opinion Entropy:** Rose from 1.54 to 1.91 bits across the simulation, indicating increasing diversity of opinion rather than convergence. This suggests the Fed's "wait and see" approach actively generates confusion rather than confidence.
-- **Polarization Index:** Climbed steadily from 0.62 to 0.85, confirming that discussion of Fed policy amplifies division rather than building consensus. This has direct implications for social media sentiment analysis.
-- **Gini Coefficient:** Dropped from 0.20 to 0.10, meaning participation became more equal over time — all agents were deeply engaged. This suggests the topic has high salience across demographics.
-- **Opinion Velocity:** Declined from 0.40 to 0.08, indicating agents locked into their positions quickly. Early impressions of Fed competence are "sticky" and resistant to counter-argument.
+- *Opinion Entropy:* Rose from 1.54 to 1.91 bits across the simulation, indicating increasing diversity of opinion rather than convergence. This suggests the Fed's "wait and see" approach actively generates confusion rather than confidence.
+- *Polarization Index:* Climbed steadily from 0.62 to 0.85, confirming that discussion of Fed policy amplifies division rather than building consensus. This has direct implications for social media sentiment analysis.
+- *Gini Coefficient:* Dropped from 0.20 to 0.10, meaning participation became more equal over time — all agents were deeply engaged. This suggests the topic has high salience across demographics.
+- *Opinion Velocity:* Declined from 0.40 to 0.08, indicating agents locked into their positions quickly. Early impressions of Fed competence are "sticky" and resistant to counter-argument.
 
 ### 4. Confidence Assessment
 
-**Confidence Score: 82/100**
+*Confidence Score: 82/100*
 
 The simulation exhibited high internal consistency: the mechanism of sentiment shift (class-based bifurcation driven by communication failure rather than policy substance) was independently identified by multiple agents with different priors. The velocity decline indicates strong agreement on the direction, even while disagreeing on magnitude. Confidence is reduced from 90 to 82 because: (a) the simulation used 5 agents, which limits emergent complexity, and (b) external shocks (geopolitical events, surprise economic data) could override the baseline trajectory.
 
@@ -176,9 +176,9 @@ The simulation exhibited high internal consistency: the mechanism of sentiment s
 
 The primary sources of uncertainty are:
 
-- **External Economic Shocks:** A sudden spike in core PCE or an unexpected jobs report within the 30-day window could either accelerate or reverse the predicted sentiment shift.
-- **Fed Communication Pivot:** If the Fed issues an unscheduled statement or the Chair gives an interview that directly addresses public frustration, the communication-failure driver could be partially neutralized.
-- **Political Amplification:** The proximity to election rhetoric could amplify negative sentiment beyond the simulation's baseline estimate.
+- *External Economic Shocks:* A sudden spike in core PCE or an unexpected jobs report within the 30-day window could either accelerate or reverse the predicted sentiment shift.
+- *Fed Communication Pivot:* If the Fed issues an unscheduled statement or the Chair gives an interview that directly addresses public frustration, the communication-failure driver could be partially neutralized.
+- *Political Amplification:* The proximity to election rhetoric could amplify negative sentiment beyond the simulation's baseline estimate.
 
 Multi-seed variance was low (σ = 0.04 on final entropy), indicating the prediction is robust to initialization differences.
 
@@ -188,6 +188,18 @@ Multi-seed variance was low (σ = 0.04 on final entropy), indicating the predict
 - The Forum environment encourages confrontation; a Town Hall environment might produce different dynamics.
 - The simulation does not model real-time information flow from financial media, which could accelerate or dampen sentiment shifts.
 - All agents have English-language, US-centric perspectives. International perception of the Fed may diverge significantly.
+
+### 7. Opinion Distribution
+
+Dominant: disagree 20%
+
+### 8. Token Usage
+
+Prompt Tokens: 16,800
+Completion Tokens: 6,200
+Total Tokens: 23,000
+Estimated Cost USD: $0.0042
+Budget Used: 100%
 `;
 
 export const MOCK_COST_ESTIMATE = {

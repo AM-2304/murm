@@ -10,7 +10,7 @@ function Stat({ label, value, sub, compact }) {
   );
 }
 
-function OpinionBar({ metrics }) {
+export function OpinionBar({ metrics }) {
   const dominant = metrics?.dominant_opinion;
   const consensus = metrics?.consensus || 0;
   if (!dominant) return null;

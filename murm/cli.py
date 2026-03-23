@@ -325,10 +325,17 @@ async def _run_pipeline(
     else:
         budget_lines = str(budget_snapshot)
 
+    # Build Opinion Distribution line from final metrics
+    dominant_op = final_metrics.get("dominant_opinion", "unknown")
+    consensus_pct = final_metrics.get("consensus", 0)
+    if isinstance(consensus_pct, (int, float)):
+        consensus_pct = f"{int(consensus_pct * 100)}%"
+
     report_md = (
         report_md
-        + f"\n\nUncertainty Assessment\n\n{uncertainty}"
-        + f"\n\nToken Usage\n\n{budget_lines}"
+        + f"\n\n## Uncertainty Assessment\n\n{uncertainty}"
+        + f"\n\n## Opinion Distribution\n\nDominant: {dominant_op.replace('_', ' ')} {consensus_pct}"
+        + f"\n\n## Token Usage\n\n{budget_lines}"
     )
 
     output_path.write_text(report_md, encoding="utf-8")

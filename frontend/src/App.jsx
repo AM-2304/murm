@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ProjectSetup } from "./components/ProjectSetup";
 import { GraphPanel } from "./components/GraphPanel";
 import { RunForm } from "./components/RunForm";
-import { MetricsDashboard } from "./components/MetricsDashboard";
+import { MetricsDashboard, OpinionBar } from "./components/MetricsDashboard";
 import { ReportView } from "./components/ReportView";
 import { AgentFeed } from "./components/AgentFeed";
 import { AgentRoster } from "./components/AgentRoster";
@@ -422,6 +422,23 @@ export default function App() {
                     status={sim.status}
                     compact
                   />
+                  {sim.latestMetrics?.dominant_opinion && (
+                    <div style={{ background: "#FFFFFF", border: "1px solid #E8E4DF", borderRadius: 2, padding: "16px 20px" }}>
+                      <p style={{ fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "#9B9B9B", marginBottom: 0, fontWeight: 600 }}>
+                        Opinion Distribution
+                      </p>
+                      <OpinionBar metrics={sim.latestMetrics} />
+                    </div>
+                  )}
+                  {sim.budget && (
+                    <div style={{ padding: "12px 16px", background: "#FAFAF8", border: "1px solid #E8E4DF", borderRadius: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <p style={{ fontSize: 11, color: "#6B6B6B" }}>
+                        {sim.budget.total_tokens?.toLocaleString()} tokens used
+                        {sim.budget.budget_used_pct != null && <span style={{ marginLeft: 8, color: "#BDBDBD" }}>({sim.budget.budget_used_pct}%)</span>}
+                      </p>
+                      <p style={{ fontSize: 11, color: "#1A1A1A", fontWeight: 600 }}>${sim.budget.estimated_cost_usd?.toFixed(4)}</p>
+                    </div>
+                  )}
                   <button onClick={() => setStep(1)} style={{
                     width: "100%", padding: "13px 0", fontSize: 11, fontWeight: 700,
                     letterSpacing: "0.15em", textTransform: "uppercase",

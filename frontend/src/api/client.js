@@ -1,6 +1,41 @@
+import * as mock from './mockData';
+
 const BASE = import.meta.env.VITE_API_URL || "";
+const IS_STATIC_DEMO = import.meta.env.VITE_STATIC_DEMO === 'true';
 
 async function request(method, path, body) {
+  if (IS_STATIC_DEMO) {
+    if (path.includes("/api/projects/") && method === "POST") {
+      await mock.MOCK_DELAY(800);
+      return { id: "demo-project-1" };
+    }
+    if (path.includes("/build") && method === "POST") {
+      await mock.MOCK_DELAY(2000); // Simulate graph extraction
+      return { status: "building", project_id: "demo-project-1" };
+    }
+    if (path.includes("/graph/stats") && method === "GET") {
+      return { entities: 7, relations: 7 };
+    }
+    if (path.includes("/graph") && method === "GET") {
+      return mock.MOCK_GRAPH;
+    }
+    if (path.includes("/api/runs/") && method === "POST") {
+      await mock.MOCK_DELAY(500);
+      return { id: "demo-run-1" };
+    }
+    if (path.includes("/metrics") && method === "GET") {
+      return mock.MOCK_METRICS;
+    }
+    if (path.includes("/report") && method === "GET") {
+      await mock.MOCK_DELAY(1500);
+      return { report_text: mock.MOCK_REPORT };
+    }
+    if (path.includes("/api/runs/") && method === "GET") {
+      return { status: "running", config: { agents: 5, rounds: 2 } };
+    }
+    return {};
+  }
+
   const opts = {
     method,
     headers: body ? { "Content-Type": "application/json" } : {},
@@ -45,6 +80,32 @@ export const api = {
 };
 
 export function openStream(runId, onEvent, since = 0) {
+  if (IS_STATIC_DEMO) {
+    let internalClock = 0;
+    let isActive = true;
+    
+    const playStream = async () => {
+      // Stream agent generation sequentially
+      for (let i = 0; i < 5; i++) {
+        if (!isActive) return;
+        onEvent(mock.MOCK_EVENTS[i]);
+        await mock.MOCK_DELAY(800);
+      }
+      
+      // Stream the action rounds
+      for (let i = 5; i < mock.MOCK_EVENTS.length; i++) {
+        if (!isActive) return;
+        onEvent(mock.MOCK_EVENTS[i]);
+        // Simulate realistic thinking delays between agent posts
+        await mock.MOCK_DELAY(1500 + Math.random() * 1500);
+      }
+    };
+    
+    playStream();
+    
+    return () => { isActive = false; };
+  }
+
   const url = `${BASE}/api/stream/${runId}?since=${since}`;
   const es = new EventSource(url);
   es.onmessage = (e) => { try { onEvent(JSON.parse(e.data)); } catch { } };

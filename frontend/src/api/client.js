@@ -3,6 +3,8 @@ import * as mock from './mockData';
 const BASE = import.meta.env.VITE_API_URL || "";
 const IS_STATIC_DEMO = import.meta.env.VITE_STATIC_DEMO === 'true';
 
+let __mockStatus = "completed";
+
 async function request(method, path, body) {
   if (IS_STATIC_DEMO) {
     // ---- Project endpoints ----
@@ -39,6 +41,7 @@ async function request(method, path, body) {
 
     // ---- Run endpoints ----
     if (path === "/api/runs/" && method === "POST") {
+      __mockStatus = "running";
       await mock.MOCK_DELAY(500);
       return { run_id: "demo-run-1" };
     }
@@ -57,7 +60,7 @@ async function request(method, path, body) {
       return { ok: true };
     }
     if (path.includes("/api/runs/") && method === "GET") {
-      return { status: "completed", run_id: "demo-run-1", config: { n_agents: 5, n_rounds: 5 } };
+      return { status: __mockStatus, run_id: "demo-run-1", config: { n_agents: 5, n_rounds: 5 } };
     }
     if (path.includes("/api/runs/") && method === "DELETE") {
       return { ok: true };
@@ -131,6 +134,7 @@ export function openStream(runId, onEvent, since = 0) {
           await mock.MOCK_DELAY(roundDelay);
         } else if (event.type === "simulation_ended") {
           await mock.MOCK_DELAY(1000);
+          __mockStatus = "completed";
         }
 
         if (!isActive) return;

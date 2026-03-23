@@ -1,4 +1,4 @@
-# ️ MURM (pronounced as murmur)- Listen to what people have to say
+# ️MURM (pronounced as murmur)- Listen to what people have to say
 
 Predict how public opinion shifts. Feed in any document, ask a plain-English question, simulate a crowd of autonomous agents reacting to it, and receive a structured report with a confidence score and uncertainty bounds.
 
@@ -75,7 +75,7 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 ### Path 1: PyPI Install (Recommended & Fastest)
 
 ```bash
-python3 -m venv murm_env && source murm_env/bin/activate   # Windows: murm_env\Scripts\activate
+python3 -m venv murm && source murm/bin/activate   # Windows: murm\Scripts\activate
 pip install murm
 ```
 
@@ -84,7 +84,7 @@ pip install murm
 ```bash
 git clone https://github.com/AM-2304/murm
 cd murm
-python3 -m venv murm_env && source murm_env/bin/activate
+python3 -m venv murm && source murm/bin/activate
 pip install -e .
 cp .env.example .env
 ```
@@ -492,7 +492,7 @@ Delete the `data/chroma` directory and restart. This can happen if the database 
 
 **`murm` command not found after install**
 
-You installed the package but are not in the virtual environment. Run `source .venv/bin/activate` and try again.
+You installed the package but are not in the virtual environment. Run `source murm/bin/activate` and try again.
 
 ---
 

@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { api } from "../api/client";
 
+const IS_STATIC_DEMO = import.meta.env.VITE_STATIC_DEMO === 'true';
+
 const inp = {
   width: "100%", padding: "11px 14px", fontSize: 13,
   border: "1px solid #E8E4DF", borderRadius: 2,
@@ -16,9 +18,9 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 export function ProjectSetup({ onReady }) {
   const [phase, setPhase] = useState("form");
-  const [title, setTitle] = useState("");
-  const [seedText, setSeedText] = useState("");
-  const [predQ, setPredQ] = useState("");
+  const [title, setTitle] = useState(IS_STATIC_DEMO ? "Federal Reserve Rate Decision" : "");
+  const [seedText, setSeedText] = useState(IS_STATIC_DEMO ? "The Federal Reserve left interest rates unchanged at 5.25%-5.50% today, citing persistent core inflation. However, the dot plot shows 3 cuts projected for next year." : "");
+  const [predQ, setPredQ] = useState(IS_STATIC_DEMO ? "How will public sentiment shift towards the Fed's competence over the next 30 days?" : "");
   const [files, setFiles] = useState([]);
   const [error, setError] = useState("");
   const [progressMsg, setProgressMsg] = useState("");
@@ -85,34 +87,38 @@ export function ProjectSetup({ onReady }) {
         <label style={lbl}>Project Title *</label>
         <input required value={title} onChange={e => setTitle(e.target.value)}
           placeholder="e.g. AI Regulation Bill 2026"
-          style={inp}
-          onFocus={e => e.target.style.borderColor = "#1A1A1A"}
-          onBlur={e => e.target.style.borderColor = "#E8E4DF"} />
+          disabled={IS_STATIC_DEMO}
+          style={{ ...inp, opacity: IS_STATIC_DEMO ? 0.7 : 1, background: IS_STATIC_DEMO ? "#F9F9F9" : "#FFFFFF" }}
+          onFocus={e => !IS_STATIC_DEMO && (e.target.style.borderColor = "#1A1A1A")}
+          onBlur={e => !IS_STATIC_DEMO && (e.target.style.borderColor = "#E8E4DF")} />
       </div>
       <div style={{ marginBottom: 20 }}>
         <label style={lbl}>Prediction Question *</label>
         <input required value={predQ} onChange={e => setPredQ(e.target.value)}
           placeholder="e.g. How will public sentiment shift over the next 30 days?"
-          style={inp}
-          onFocus={e => e.target.style.borderColor = "#1A1A1A"}
-          onBlur={e => e.target.style.borderColor = "#E8E4DF"} />
+          disabled={IS_STATIC_DEMO}
+          style={{ ...inp, opacity: IS_STATIC_DEMO ? 0.7 : 1, background: IS_STATIC_DEMO ? "#F9F9F9" : "#FFFFFF" }}
+          onFocus={e => !IS_STATIC_DEMO && (e.target.style.borderColor = "#1A1A1A")}
+          onBlur={e => !IS_STATIC_DEMO && (e.target.style.borderColor = "#E8E4DF")} />
       </div>
       <div style={{ marginBottom: 20 }}>
         <label style={lbl}>Seed Text <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}> (optional if uploading a file)</span></label>
         <textarea value={seedText} onChange={e => setSeedText(e.target.value)} rows={6}
           placeholder="Paste your news article, policy document, financial report, or any source material..."
-          style={{ ...inp, resize: "vertical", lineHeight: 1.65 }}
-          onFocus={e => e.target.style.borderColor = "#1A1A1A"}
-          onBlur={e => e.target.style.borderColor = "#E8E4DF"} />
+          disabled={IS_STATIC_DEMO}
+          style={{ ...inp, resize: "vertical", lineHeight: 1.65, opacity: IS_STATIC_DEMO ? 0.7 : 1, background: IS_STATIC_DEMO ? "#F9F9F9" : "#FFFFFF" }}
+          onFocus={e => !IS_STATIC_DEMO && (e.target.style.borderColor = "#1A1A1A")}
+          onBlur={e => !IS_STATIC_DEMO && (e.target.style.borderColor = "#E8E4DF")} />
       </div>
       <div style={{ marginBottom: 28 }}>
         <label style={lbl}>Upload Files <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}> PDF, DOCX, TXT</span></label>
-        <input ref={fileRef} type="file" accept=".pdf,.docx,.txt" multiple
+        <input ref={fileRef} type="file" accept=".pdf,.docx,.txt" multiple disabled={IS_STATIC_DEMO}
           onChange={e => setFiles(Array.from(e.target.files))} style={{ display: "none" }} />
-        <button type="button" onClick={() => fileRef.current?.click()} style={{
+        <button type="button" onClick={() => !IS_STATIC_DEMO && fileRef.current?.click()} style={{
           padding: "10px 18px", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase",
           fontWeight: 600, border: "1px solid #E8E4DF", borderRadius: 2,
-          background: "#FFFFFF", color: "#6B6B6B", cursor: "pointer",
+          background: "#FFFFFF", color: "#6B6B6B", cursor: IS_STATIC_DEMO ? "not-allowed" : "pointer",
+          opacity: IS_STATIC_DEMO ? 0.5 : 1
         }}>
           Choose files
         </button>

@@ -22,6 +22,18 @@ The confidence score is based on the extremely stable entropy trajectory across 
 ## Uncertainty Assessment
 Across independent sensitivity runs, outcomes were highly consistent with nominal variance in the entropy distribution. The prediction is robust to random variation and structural baseline archetypes.
 
+## Opinion Distribution
+
+Dominant: disagree 20%
+
+## Token Usage
+
+Prompt Tokens: 16,800
+Completion Tokens: 6,200
+Total Tokens: 23,000
+Estimated Cost USD: $0.0042
+Budget Used: 100%
+
 ---
 
 ### Artifacts Captured

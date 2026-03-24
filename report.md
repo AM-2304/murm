@@ -14,15 +14,19 @@ The confidence score is based on the strength of the consensus, which is moderat
 ## Limitations
 The simulation does not capture real-world factors such as external events, changes in economic conditions, or shifts in public perception that could alter the prediction. The simulation is based on a limited number of agents and rounds, which may not be representative of the larger population. Additionally, the simulation does not account for the potential impact of social media, news outlets, or other external influences on public sentiment. The lack of knowledge graph data and the limited context of the agent posts may also limit the accuracy of the prediction.
 
-Uncertainty Assessment
+## Uncertainty Assessment
 
 Across 1 independent runs, outcomes were highly consistent (entropy std=0.000). The prediction is robust to random variation.
 
-Token Usage
+## Opinion Distribution
 
-Prompt Tokens: 18188
-Completion Tokens: 6750
-Total Tokens: 24938
-Estimated Cost Usd: 0.0064
+Dominant: disagree 20%
+
+## Token Usage
+
+Prompt Tokens: 18,188
+Completion Tokens: 6,750
+Total Tokens: 24,938
+Estimated Cost USD: $0.0064
 Budget Tokens: 0
 Budget Used Pct: None

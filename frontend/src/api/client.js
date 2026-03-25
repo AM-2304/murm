@@ -13,7 +13,27 @@ async function request(method, path, body) {
         project_id: "demo-project-1",
         title: "Federal Reserve Rate Decision",
         status: "ready",
-        created_at: Math.floor(Date.now() / 1000) - 3600
+        created_at: Math.floor(Date.now() / 1000) - 3600,
+        expert_report_summary: `Prediction Target: How will public sentiment shift towards the Fed's competence over the next 30 days?
+
+Simulation Parameters: 5 agents · 5 rounds · Forum environment · Normal opinion distribution · Seed 42
+
+---
+
+### [EXPERT MODE] ANALYTICAL SYNTHESIS
+
+#### Phase 1: Quantitative Metrics Analysis
+The simulation showed a steady rise in **Opinion Entropy (1.54 -> 1.91)** and a sharp climb in **Polarization (0.62 -> 0.85)**. Unlike typical convergence models, the discussion of Fed policy acted as a wedge, driving agents into fixed, demographic-bound clusters. The low Gini coefficient (0.10) confirms that this polarization wasn't driven by a few loud voices, but was a broad-based structural divergence across the entire simulated population.
+
+#### Phase 2: Trace & Discourse Analysis
+Discourse analysis of the 25 agent actions reveals a "Two Realities" phenomenon. Institutional agents (e.g., Marcus Chen) focused almost exclusively on the **forward-looking signal** of the Dot Plot. In contrast, retail and consumer agents (e.g., Sarah Okonkwo, Elena Vasquez) focused on **historical breach of trust**. The simulation reached a "discursive deadlock" in Round 3, where no further amount of forward-looking data could shift the negative anchors of the consumer-class agents.
+
+#### Phase 3: Graph Grounding
+The local knowledge graph correctly identified the **"Interest Rates" -> "Consumers"** connection as a primary pain node. The emergence of the **"Public Sentiment" -> "Federal Reserve"** negative relationship was grounded in the text's own citation of "Core Inflation," reinforcing that agents were correctly utilizing the seed document's factual constraints to justify their emotional shifts.
+
+---
+
+### 1. Direct Prediction`
       }];
     }
     if (path.includes("/api/projects/") && method === "POST") {
@@ -60,10 +80,25 @@ async function request(method, path, body) {
       return { ok: true };
     }
     if (path.includes("/api/runs/") && method === "GET") {
-      return { status: __mockStatus, run_id: "demo-run-1", config: { n_agents: 5, n_rounds: 5 } };
+      return { status: __mockStatus, run_id: "demo-run-1", config: { n_agents: 5, n_rounds: 5, expert_mode: true } };
     }
     if (path.includes("/api/runs/") && method === "DELETE") {
       return { ok: true };
+    }
+    if (path.includes("/interview") && method === "POST") {
+        await mock.MOCK_DELAY(1200);
+        return {
+            responses: {
+                "agent_0": "As a retail investor, I find the Fed's stance terrifying. The 'Expert' report is right—we are locked in a different reality than the big banks.",
+                "agent_2": "I'm literally counting the days until Q3. If they don't cut now, my employees are gone. The simulation caught my desperation perfectly."
+            }
+        };
+    }
+    if (path.includes("/chat") && method === "POST") {
+        await mock.MOCK_DELAY(1000);
+        return {
+            response: "The Expert Report analyzed the trace across all 5 rounds. It concluded that your 'Main Street' agents had a 92% negative anchor that was structurally impossible to shift with just 'Dot Plot' news."
+        };
     }
 
     // Fallback

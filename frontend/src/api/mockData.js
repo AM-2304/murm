@@ -146,6 +146,19 @@ Simulation Parameters: 5 agents · 5 rounds · Forum environment · Normal opini
 
 ---
 
+### [EXPERT MODE] ANALYTICAL SYNTHESIS
+
+#### Phase 1: Quantitative Metrics Analysis
+The simulation showed a steady rise in **Opinion Entropy (1.54 -> 1.91)** and a sharp climb in **Polarization (0.62 -> 0.85)**. Unlike typical convergence models, the discussion of Fed policy acted as a wedge, driving agents into fixed, demographic-bound clusters. The low Gini coefficient (0.10) confirms that this polarization wasn't driven by a few loud voices, but was a broad-based structural divergence across the entire simulated population.
+
+#### Phase 2: Trace & Discourse Analysis
+Discourse analysis of the 25 agent actions reveals a "Two Realities" phenomenon. Institutional agents (e.g., Marcus Chen) focused almost exclusively on the **forward-looking signal** of the Dot Plot. In contrast, retail and consumer agents (e.g., Sarah Okonkwo, Elena Vasquez) focused on **historical breach of trust**. The simulation reached a "discursive deadlock" in Round 3, where no further amount of forward-looking data could shift the negative anchors of the consumer-class agents.
+
+#### Phase 3: Graph Grounding
+The local knowledge graph correctly identified the **"Interest Rates" -> "Consumers"** connection as a primary pain node. The emergence of the **"Public Sentiment" -> "Federal Reserve"** negative relationship was grounded in the text's own citation of "Core Inflation," reinforcing that agents were correctly utilizing the seed document's factual constraints to justify their emotional shifts.
+
+---
+
 ### 1. Direct Prediction
 
 Public sentiment toward the Federal Reserve's competence will shift net-negative over the next 30 days, with an estimated 12-18 point decline in general public approval. However, this decline will be sharply bifurcated along socioeconomic lines: institutional investors and financial professionals will maintain or slightly increase their confidence in the Fed, while consumers, small business owners, and retail investors will register significant drops in perceived competence.

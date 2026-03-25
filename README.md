@@ -58,11 +58,15 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 | 500 errors on graph build with Groq and non-JSON-mode providers | 3-retry backoff + JSON fallback for every provider |
 | Cannot inject events mid-simulation | Counterfactual event injection at any specified round |
 | No post-simulation A/B scenario testing | 1-click Branch & Compare Counterfactual Simulation generator |
-| No physical graph growth during simulation | Real-time Dynamic GraphRAG visualization that structurally evolves as agents interact, plus pure D3 JSON extraction for external analysis |
-| Low-density or completely missing relations | "Extreme Density" ontology instruction overriding forcing 15-30 nodes and 25-45 edges per document parsing |
+| No physical graph growth during simulation | Real-time Dynamic GraphRAG visualization that structurally evolves as agents interact |
+| Low-density or completely missing relations | "Extreme Density" ontology instruction overriding forcing high node/edge counts |
 | Homogeneous agent populations | Deeply-seeded demographic archetypes for rigorous population diversity |
 | Static simulation contexts without grounding | Real-world Context Grounding via live Wikipedia injection at Round 0 |
 | No emergence metrics | Shannon entropy, Gini coefficient, polarization index, opinion velocity per round |
+| Single-document context only | Multi-document ingestion: fuse multiple PDFs/text files into one unified graph |
+
+> [!IMPORTANT]
+> **Security Advisory (March 2026):** MURM v0.2.2+ explicitly excludes compromised versions of `litellm` (1.82.7, 1.82.8) following the PyPI supply chain attack. Always ensure you are on the latest version of MURM.
 
 ---
 
@@ -243,6 +247,9 @@ You can copy it, download it as a Markdown file, or read the raw text.
 ```bash
 # Basic run
 murm run --seed-file document.pdf --question "..." --agents 30 --rounds 20
+
+# Multi-document ingestion (pass --seed-file multiple times)
+murm run --seed-file doc1.pdf --seed-file doc2.txt --question "..." --agents 50
 
 # With sensitivity analysis (3 independent seeds)
 murm run --seed-file document.txt --question "..." --agents 50 --rounds 30 --seeds 3
@@ -430,7 +437,12 @@ async def run_prediction(seed_text: str, question: str) -> str:
 
     # Build knowledge graph
     extractor = EntityExtractor(llm)
-    result = await extractor.extract(seed_text, title="document")
+    # result = await extractor.extract(seed_text, title="document")
+    # For multi-document:
+    result = await extractor.extract_multi([
+        (seed_text, "doc1"),
+        ("Another document text here", "doc2")
+    ])
     graph_path = Path("data/projects/demo/graph.json")
     graph_path.parent.mkdir(parents=True, exist_ok=True)
     kg = KnowledgeGraph(graph_path)

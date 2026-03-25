@@ -82,6 +82,12 @@ LOG_LEVEL=INFO
 #   Effect: Bypasses knowledge graph extraction. Faster but agents
 #           have no factual grounding — more hallucination risk.
 
+# multi-document ingestion: pass --seed-file multiple times
+#   UI: Multiple file uploads per project
+#   API: Supports multiple seed files + inline text
+#   CLI: --seed-file doc1.pdf --seed-file doc2.txt ...
+#   Effect: Fuses entities and discovers cross-document relations.
+
 # counterfactual_events: list of {round, content, source}
 #   UI: "Counterfactual events" builder in RunForm
 #   API: {"counterfactual_events": [{"round": 10, "content": "New study contradicts claims", "source": "Reuters"}]}

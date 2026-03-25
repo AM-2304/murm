@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 _REPORT_SYSTEM = (
     "You are a rigorous social science analyst. "
     "Write a structured prediction report grounded exclusively in the simulation evidence provided. "
-    "Be direct and concrete. Make a specific prediction. Do not hedge excessively."
+    "Be direct and concrete. Make a specific prediction. Do not hedge excessively. "
+    "CRITICAL: Do not use any bolding or asterisks (**) in your output. Use plain text only for formatting."
 )
 
 
@@ -70,7 +71,9 @@ class ReportAgent:
             return _fallback_report(prediction_question, ctx, str(exc))
 
     async def _generate_expert(self, prediction_question: str, ctx: dict) -> str:
-        logger.info("Starting Expert Mode multi-step analysis...")
+        # Identify injections (God Mode)
+        injection_summary = "\n".join(ctx.get('injections', [])) or "None (Baseline Run)"
+
         try:
             # Step 1: Deep Metrics Analysis
             metrics_prompt = f"Analyze these simulation metrics for anomalies, turning points, and convergence patterns:\n{json.dumps(ctx['metrics'], indent=2)}\nOpinion trend:\n{json.dumps(ctx['opinion_trend'], indent=2)}"
@@ -94,9 +97,11 @@ You are an elite intelligence analyst. Synthesize the findings of your sub-agent
 METRICS ANALYSIS: {metrics_analysis}
 DISCOURSE ANALYSIS: {trace_analysis}
 FACTUAL GROUNDING: {graph_analysis}
+GOD MODE INTERVENTIONS: {injection_summary}
 
 Write a comprehensive report with:
 ## Executive Prediction (Direct answer)
+## Impact of Theoretical Interventions (Contrast baseline vs God Mode injections)
 ## Deep Evidence (Metrics & Turning Points)
 ## Discourse & Influencer Analysis (Who drove the conversation and arguments used)
 ## Contextual Grounding (How the entities shaped opinions)
@@ -154,11 +159,18 @@ Write a comprehensive report with:
                 op = a.get("opinion_shift") or ""
                 trace_lines.append(f"R{a.get('round','?')} [{op}]: {c}")
 
+        # Identify injections (God Mode)
+        injections = []
+        for a in all_actions:
+            if a.get("action_type") == "external_event" or a.get("author_id") == "GodMode":
+                injections.append(f"Round {a.get('round')}: {a.get('content')}")
+
         return {
             "metrics":        self._metrics,
             "opinion_trend":  opinion_trend,
             "trace_sample":   trace_lines,
             "graph_entities": graph_entities,
+            "injections":     injections,
             "n_agents":       self._config.get("n_agents", "?"),
             "n_rounds":       self._config.get("n_rounds", "?"),
             "total_actions":  len(all_actions),

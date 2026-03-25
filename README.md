@@ -15,8 +15,7 @@ Built as a research-grade, local-first, English-language replacement for [MiroFi
 You give MURM a seed document (a news article, a policy draft, a financial report, a story) and a prediction question. It extracts a knowledge graph from that document, generates a population of diverse simulated people with different opinions and communication styles, runs them through repeated rounds of discussion in a simulated environment, and produces a written report answering your question. The report includes a direct prediction, a 0-100 confidence score, evidence from the simulation, and an uncertainty statement that tells you whether the result was consistent across multiple independent runs or highly sensitive to initial conditions.
 
 ---
- ## You can try it yourself here: [murm-live-demo](https://murm-sigma.vercel.app/)
- 
+ ## You can try it yourself here: [murm-live-demo](https://murm-sigma.vercel.app/) (Live static demo)
  
 ### Visual Walkthrough
 
@@ -38,14 +37,14 @@ You give MURM a seed document (a news article, a policy draft, a financial repor
 **5. Final Prediction Report & Analyst Calibration Chat**
 ![Report](demo/assets/report.png)
 
----
+--
 
 ## Why this exists: the problems with MiroFish
 
 MiroFish is a Chinese-language swarm simulation engine that inspired this project. It has genuine ideas but critical practical and methodological problems.
 
 | Problem in MiroFish | How MURM solves it |
-|---------------------|--------------------|
+|-----------|----------|
 | Requires Zep Cloud account (paid, quota-limited, data leaves your machine) | Fully local knowledge graph using NetworkX and ChromaDB - no external accounts needed |
 | Only works with one Chinese AI provider (DashScope) | Works with any AI provider: OpenAI, Anthropic, Groq, local Ollama, Azure, and 100+ others via LiteLLM |
 | Chinese-only UI, docs, and code comments | Built entirely in English |
@@ -77,7 +76,7 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 > [!IMPORTANT]
 > **Security Advisory (March 2026):** MURM v0.2.2+ explicitly excludes compromised versions of `litellm` (1.82.7, 1.82.8) following the PyPI supply chain attack. Always ensure you are on the latest version of MURM.
 
----
+--
 
 ## Requirements
 
@@ -85,7 +84,7 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 - An API key from any of: [Groq](https://console.groq.com) , [OpenAI](https://platform.openai.com), [Anthropic](https://console.anthropic.com), or a local [Ollama](https://ollama.ai) installation
 - Node.js 18+ (only if you want the web UI; the CLI works without it)
 
----
+--
 
 ## Quickstart: four paths to your first run
 
@@ -115,16 +114,16 @@ LLM_API_KEY=your_actual_key_here
 Run a prediction:
 ```bash
 murm run \
-  --seed-text "The city council voted 7-2 to ban short-term rentals in residential zones starting January 2026." \
-  --question "How will public sentiment toward the city council shift over the next 30 days?" \
-  --agents 20 \
-  --rounds 15 \
-  --output report.md
+  -seed-text "The city council voted 7-2 to ban short-term rentals in residential zones starting January 2026." \
+  -question "How will public sentiment toward the city council shift over the next 30 days?" \
+  -agents 20 \
+  -rounds 15 \
+  -output report.md
 ```
 
 See the cost before you run:
 ```bash
-murm estimate --agents 20 --rounds 15
+murm estimate -agents 20 -rounds 15
 ```
 
 ### Path 3: Web UI
@@ -154,7 +153,7 @@ docker compose up
 
 Open `http://localhost:3000`.
 
----
+--
 
 ## Setting up your API key: step by step
 
@@ -206,7 +205,7 @@ You only need one key. Here are the three cheapest options to explore.
    ```
 4. No cost, but slower and less accurate than cloud models
 
----
+--
 
 ## How to use the web interface: step by step
 
@@ -256,40 +255,40 @@ Don't just accept the report. Open the "Deep Interaction" panel to:
 - **Interview Agents**: Select specific agents from the roster and ask them direct questions about their personal experience and opinion shifts.
 - **God-View injection**: Inject a new event and "Branch" the simulation to see if it changes the outcome.
 
----
+--
 
 ## How to use the command line
 
 ```bash
 # Basic run
-murm run --seed-file document.pdf --question "..." --agents 30 --rounds 20
+murm run -seed-file document.pdf -question "..." -agents 30 -rounds 20
 
-# Multi-document ingestion (pass --seed-file multiple times)
-murm run --seed-file doc1.pdf --seed-file doc2.txt --question "..." --agents 50
+# Multi-document ingestion (pass -seed-file multiple times)
+murm run -seed-file doc1.pdf -seed-file doc2.txt -question "..." -agents 50
 
 # With sensitivity analysis (3 independent seeds)
-murm run --seed-file document.txt --question "..." --agents 50 --rounds 30 --seeds 3
+murm run -seed-file document.txt -question "..." -agents 50 -rounds 30 -seeds 3
 
 # Skip knowledge graph for a quick run
-murm run --seed-text "paste text here" --question "..." --skip-graph --agents 20 --rounds 10
+murm run -seed-text "paste text here" -question "..." -skip-graph -agents 20 -rounds 10
 
 # Use a polarized starting population
-murm run --seed-file doc.pdf --question "..." --opinion-dist bimodal
+murm run -seed-file doc.pdf -question "..." -opinion-dist bimodal
 
 # Check cost before committing
-murm estimate --agents 50 --rounds 30 --seeds 3
+murm estimate -agents 50 -rounds 30 -seeds 3
 
 # Run with Expert Analysis Mode
-murm run --seed-file doc.pdf --question "..." --expert
+murm run -seed-file doc.pdf -question "..." -expert
 
 # Start the API server
-murm serve --port 8000
+murm serve -port 8000
 
 # Start with debug logging to see every LLM call
 LOG_LEVEL=DEBUG murm serve
 ```
 
----
+--
 
 ## Customizing beyond the defaults
 
@@ -341,7 +340,7 @@ Then update `_OPINION_VALUES` in `murm/simulation/metrics.py` with the numerical
 
 Create a class in `murm/simulation/environment.py` that extends `Environment` and implements `get_context_feed()`, `ingest_action()`, `inject_external_event()`, and `get_all_posts()`. Register it in the `build_environment()` factory function.
 
----
+--
 
 ## Project structure
 
@@ -402,7 +401,7 @@ paper/
   eval_seeds.json             Example prediction tasks
 ```
 
----
+--
 
 ## API reference
 
@@ -430,7 +429,7 @@ DELETE /api/runs/{run_id}                   Delete run and trace files
 GET    /api/stream/{run_id}?since=0         Real-time event stream (SSE)
 ```
 
----
+--
 
 ## Python SDK
 
@@ -501,7 +500,7 @@ report = asyncio.run(run_prediction(
 print(report)
 ```
 
----
+--
 
 ## Troubleshooting
 
@@ -519,7 +518,7 @@ This usually means the AI provider returned an error. Check `LOG_LEVEL=DEBUG mur
 
 **Simulation is very slow**
 
-Each agent makes one LLM call per round. With 50 agents and 10 concurrent calls allowed (`max_concurrent_agents` in `SimulationConfig`), each round takes roughly time-for-one-call × 5. For faster runs: use a faster model (Groq's Llama 3 is ~10x faster than GPT-4o), reduce agents, increase `max_concurrent_agents` if your API plan allows parallel requests, or use `--skip-graph` to skip the knowledge extraction step.
+Each agent makes one LLM call per round. With 50 agents and 10 concurrent calls allowed (`max_concurrent_agents` in `SimulationConfig`), each round takes roughly time-for-one-call × 5. For faster runs: use a faster model (Groq's Llama 3 is ~10x faster than GPT-4o), reduce agents, increase `max_concurrent_agents` if your API plan allows parallel requests, or use `-skip-graph` to skip the knowledge extraction step.
 
 **ChromaDB error on startup**
 
@@ -529,7 +528,7 @@ Delete the `data/chroma` directory and restart. This can happen if the database 
 
 You installed the package but are not in the virtual environment. Run `source murm/bin/activate` and try again.
 
----
+--
 
 ## Running the tests
 
@@ -540,19 +539,19 @@ python -m pytest tests/ -v
 
 All 44 tests run without an API key and without internet access.
 
----
+--
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
----
+--
 
 ## License
 
 MIT. See [LICENSE](LICENSE).
 
----
+--
 
 ## Acknowledgment
 

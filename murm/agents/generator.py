@@ -80,11 +80,17 @@ class PersonaGenerator:
             n_agents, opinion_dist,
         )
 
-        # Generate in concurrent batches of 5 — faster than sequential,
-        # safe on paid Groq tier (6000 rpm limit, 5 concurrent = trivial load)
+        # Generate in concurrent batches of 5 - faster than sequential
+        profiles: list[AgentProfile] = []
+        tasks = []
+        BATCH = 5
+        
         # If institutions are provided, assign some agents to represent them
         institution_list = institutions or []
         n_inst = min(len(institution_list), max(1, n_agents // 10))
+        
+        # Brainstorm sector-specific archetypes for this topic
+        archetypes = await self._brainstorm_archetypes(topic, context)
         
         for i in range(n_agents):
             opinion, role = assignments[i]
@@ -110,6 +116,24 @@ class PersonaGenerator:
             profiles.extend(batch_profiles)
 
         return profiles
+
+    async def _brainstorm_archetypes(self, topic: str, context: str) -> list[str]:
+        """Dynamically generate sector-relevant archetypes to avoid industry bias."""
+        prompt = (
+            f"Brainstorm 8 diverse person archetypes (demographics and ideological roles) "
+            f"that have a major stake in the following topic: {topic}\n"
+            f"Context: {context[:500]}\n"
+            "Return ONLY a bullet-point list of 8 arcanhetypes, each 5-8 words long. "
+            "Ensure they represent different age groups, socio-economic backgrounds, and expertise levels."
+        )
+        try:
+            raw = await self._llm.complete([{"role": "user", "content": prompt}], max_tokens=300)
+            lines = [line.strip("- ").strip("* ") for line in raw.split("\n") if len(line.strip()) > 10]
+            return lines[:8] if len(lines) >= 4 else [
+                "Young urban professional, tech-savvy", "Small business owner", "Retired educator", "Graduate student"
+            ]
+        except Exception:
+            return ["Community member", "Professional", "Student", "Advocate"]
 
     def _compute_assignments(
         self, n_agents: int, opinion_dist: OpinionDist

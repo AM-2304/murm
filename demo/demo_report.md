@@ -34,7 +34,7 @@ Total Tokens: 23,000
 Estimated Cost USD: $0.0042
 Budget Used: 100%
 
----
+--
 
 ### Artifacts Captured
 

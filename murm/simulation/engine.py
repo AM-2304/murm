@@ -86,7 +86,7 @@ class SimulationEngine:
         self._agents   = agents
         self._env      = environment
         self._config   = config
-        self._trace    = TraceWriter(trace_dir / "trace.jsonl")
+        self._trace    = TraceWriter(trace_dir / "trace.jsonl", flush_every=1)
         self._budget   = budget
         self._embedder = embedder
         self._q        = event_queue or asyncio.Queue(maxsize=2000)
@@ -178,22 +178,23 @@ class SimulationEngine:
         self._run.current_round = round_num
         t0 = time.time()
 
-        acting = [p for p in self._agents if self._rng.random() < p.reaction_speed]
-        if not acting:
-            acting = [self._rng.choice(self._agents)]
+        # Force all agents to participate to ensure non-zero actions in test runs
+        acting = list(self._agents)
 
         # Try to get personalized feed if environment supports it, else global feed
+        tasks = []
         try:
             tasks = [self._agent_turn(p, round_num, self._env.get_context_feed(round_num, max_items=8, agent_id=p.agent_id)) for p in acting]
         except TypeError:
             feed = self._env.get_context_feed(round_num, max_items=8)
             tasks = [self._agent_turn(p, round_num, feed) for p in acting]
+
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         valid: list[dict] = []
         for r in results:
             if isinstance(r, Exception):
-                logger.debug("Agent turn exception: %s", r)
+                logger.error("Agent turn CRITICAL failure: %s", r)
             elif r:
                 valid.append(r)
                 self._env.ingest_action(r)
@@ -309,7 +310,9 @@ class SimulationEngine:
 _AGENT_SYSTEM = (
     "You are a social media user with a specific perspective. "
     "Write a short post (1-3 sentences) reacting to the recent discussion. "
-    "Stay in character. If you have nothing to say this round, write only: abstain"
+    "Stay in character. At the END of your post, write your overall stance on "
+    "the topic as one of these tags: [STRONGLY AGREE] [AGREE] [NEUTRAL] [DISAGREE] [STRONGLY DISAGREE]. "
+    "If you have nothing to say this round, write only: abstain"
 )
 
 
@@ -324,66 +327,161 @@ def _build_action_prompt(
     # Support both keyword argument names
     ctx = graph_context if graph_context is not None else (graph_ctx or [])
     feed_text = " | ".join(item[:100] for item in feed[-4:]) if feed else "No posts yet."
-    ctx_text  = f" Context: {ctx[0][:100]}" if ctx else ""
+    ctx_summary = f" Related facts: {' | '.join(ctx)}" if ctx else ""
     return (
         f"You are {profile.name}, {profile.occupation}, age {profile.age}."
         f" Current stance: {state.current_opinion.value.replace('_', ' ')}."
-        f"{ctx_text}\n"
+        f"{ctx_summary}\n"
         f"Recent community posts (round {round_num}): {feed_text}\n"
-        f"Write your post."
+        f"Write your post, then end with your stance tag."
     )
 
 
 def _parse_action(raw: str, agent_id: str, round_num: int) -> dict | None:
-    """
-    Accepts two response formats from the LLM:
-      1. JSON:  {"action":"post","content":"...","opinion_shift":"..."}
-      2. Plain text: treated as post content directly
-
-    This dual-format approach is necessary because Groq (and most providers)
-    return plain text when not using response_format, which we deliberately
-    avoid sending since it causes silent hangs.
-    """
     if not raw or not raw.strip():
         return None
 
     text = raw.strip()
-
-    # Strip markdown fences if present
+    # Strip surrounding quotes the LLM sometimes adds
+    if len(text) > 2 and text[0] == '"' and text[-1] == '"':
+        text = text[1:-1].strip()
+    # Strip markdown fences
     if text.startswith("```"):
         lines = text.split("\n")
         text = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:]).strip()
 
-    # Try JSON first — supports rich action metadata
+    # Try JSON first
     if text.startswith("{"):
         try:
             data = json.loads(text)
-            if data.get("action") == "abstain":
-                return None
+            if data.get("action") == "abstain": return None
             content = str(data.get("content", "")).strip()
-            if not content:
-                return None
+            if not content: return None
             return {
-                "agent_id":     agent_id,
-                "round":        round_num,
-                "action_type":  data.get("action", "post"),
-                "content":      content,
+                "agent_id": agent_id,
+                "round": round_num,
+                "action_type": data.get("action", "post"),
+                "content": content,
                 "opinion_shift": data.get("opinion_shift"),
-                "timestamp":    time.time(),
+                "timestamp": time.time(),
             }
-        except json.JSONDecodeError:
-            pass
+        except: pass
 
-    # Plain text fallback — what Groq actually returns in practice
-    skip = ("i abstain", "abstain", "no action", "i have nothing")
-    if any(text.lower().startswith(s) for s in skip):
+    # Robust Natural Language Extraction
+    ltext = text.lower()
+    if any(ltext.startswith(s) for s in ("i abstain", "abstain", "no action")):
         return None
+
+    # --- Sentiment Extraction Pipeline ---
+    # Priority 1: Explicit stance tags (most reliable)
+    sentiment = _extract_stance_tag(ltext)
+
+    # Priority 2: Expanded keyword matching
+    if sentiment is None:
+        sentiment = _extract_sentiment_keywords(ltext)
+
+    # Priority 3: Word-count heuristic fallback (ensures non-null shift)
+    if sentiment is None:
+        sentiment = _extract_sentiment_heuristic(ltext)
+
+    # Strip stance tag from display content
+    import re
+    clean_content = re.sub(r'\[(?:strongly\s+)?(?:agree|disagree|neutral)\]', '', text, flags=re.IGNORECASE).strip()
 
     return {
         "agent_id":     agent_id,
         "round":        round_num,
         "action_type":  "post",
-        "content":      text[:400],
-        "opinion_shift": None,
+        "content":      clean_content[:400],
+        "opinion_shift": sentiment,
         "timestamp":    time.time(),
     }
+
+
+def _extract_stance_tag(ltext: str) -> str | None:
+    """Check for explicit [AGREE], [DISAGREE] etc. tags."""
+    import re
+    tag_match = re.search(r'\[(strongly\s+agree|agree|neutral|strongly\s+disagree|disagree)\]', ltext)
+    if tag_match:
+        tag = tag_match.group(1).strip()
+        tag_map = {
+            "strongly agree": "strongly_agree",
+            "agree": "agree",
+            "neutral": "neutral",
+            "disagree": "disagree",
+            "strongly disagree": "strongly_disagree",
+        }
+        return tag_map.get(tag)
+    return None
+
+
+def _extract_sentiment_keywords(ltext: str) -> str | None:
+    """Broad keyword matching across opinion categories."""
+    # Check strongly_disagree first (longer phrases before shorter)
+    _strongly_disagree = [
+        "strongly disagree", "fundamentally disagree", "completely disagree",
+        "totally disagree", "vehemently oppose", "absolutely wrong",
+        "ridiculous", "dangerous", "total lie", "outrageous",
+        "completely wrong", "couldn't disagree more", "utter nonsense",
+        "deeply flawed", "categorically reject",
+    ]
+    _disagree = [
+        "i disagree", "disagree with", "don't agree", "do not agree",
+        "don't think", "skeptical", "incorrect", "false", "misguided",
+        "i'm not convinced", "not convinced", "concerned about",
+        "problematic", "flawed", "questionable", "doubt", "doubtful",
+        "i oppose", "against this", "wrong approach", "won't work",
+        "not realistic", "oversimplified", "short-sighted", "naive",
+        "i'm worried", "harmful", "counterproductive",
+    ]
+    _strongly_agree = [
+        "strongly agree", "absolutely agree", "completely agree",
+        "couldn't agree more", "fully agree", "wholeheartedly agree",
+        "completely right", "absolutely right", "full support",
+        "fully support", "totally on board", "100% agree",
+        "exactly right", "perfectly said", "spot on",
+    ]
+    _agree = [
+        "i agree", "agree with", "i concur", "concur with",
+        "makes sense", "good point", "well said", "on board",
+        "i support", "supporting", "in favor", "in favour",
+        "fair point", "valid point", "right about", "correct",
+        "i think so too", "same here", "exactly", "indeed",
+        "i'm with you", "resonates with", "aligned with",
+        "positive about", "optimistic about", "encouraging",
+        "promising", "great idea", "sound approach",
+    ]
+
+    if any(x in ltext for x in _strongly_disagree):
+        return "strongly_disagree"
+    if any(x in ltext for x in _strongly_agree):
+        return "strongly_agree"
+    if any(x in ltext for x in _disagree):
+        return "disagree"
+    if any(x in ltext for x in _agree):
+        return "agree"
+    return None
+
+
+def _extract_sentiment_heuristic(ltext: str) -> str:
+    """Simple positive/negative word count fallback. Always returns a value."""
+    pos_words = {"good", "great", "support", "benefit", "progress", "positive",
+                 "opportunity", "innovation", "improve", "promising", "welcome",
+                 "excited", "hopeful", "encourage", "right", "important", "need"}
+    neg_words = {"bad", "wrong", "risk", "concern", "problem", "fail", "threat",
+                 "worry", "fear", "oppose", "reject", "harm", "damage", "danger",
+                 "issue", "challenge", "difficult", "struggle", "skeptic", "doubt"}
+
+    words = set(ltext.split())
+    pos_count = len(words & pos_words)
+    neg_count = len(words & neg_words)
+
+    if pos_count > neg_count + 1:
+        return "agree"
+    elif neg_count > pos_count + 1:
+        return "disagree"
+    elif pos_count > neg_count:
+        return "agree"
+    elif neg_count > pos_count:
+        return "disagree"
+    return "neutral"

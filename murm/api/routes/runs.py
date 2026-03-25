@@ -67,9 +67,9 @@ class CreateRunRequest(BaseModel):
     expert_mode:           bool = Field(default=False)
 
 
-# ------------------------------------------------------------------
+# ---------------------------------
 # GET /api/runs/estimate
-# ------------------------------------------------------------------
+# ---------------------------------
 
 @router.get("/estimate")
 async def estimate_cost(
@@ -85,9 +85,9 @@ async def estimate_cost(
     )
 
 
-# ------------------------------------------------------------------
+# ---------------------------------
 # POST /api/runs/
-# ------------------------------------------------------------------
+# ---------------------------------
 
 @router.post("/")
 async def create_run(body: CreateRunRequest, request: Request) -> dict:
@@ -117,9 +117,9 @@ async def create_run(body: CreateRunRequest, request: Request) -> dict:
     return {"run_id": run_id, "status": "running"}
 
 
-# ------------------------------------------------------------------
+# ---------------------------------
 # GET /api/runs/{run_id}
-# ------------------------------------------------------------------
+# ---------------------------------
 
 @router.get("/{run_id}")
 async def get_run(run_id: str, request: Request) -> dict:
@@ -130,9 +130,9 @@ async def get_run(run_id: str, request: Request) -> dict:
     return run
 
 
-# ------------------------------------------------------------------
+# ---------------------------------
 # GET /api/runs/{run_id}/report
-# ------------------------------------------------------------------
+# ---------------------------------
 
 @router.get("/{run_id}/report")
 async def get_report(run_id: str, request: Request) -> dict:
@@ -146,9 +146,9 @@ async def get_report(run_id: str, request: Request) -> dict:
     return {"run_id": run_id, "report": report}
 
 
-# ------------------------------------------------------------------
+# ---------------------------------
 # GET /api/runs/{run_id}/metrics
-# ------------------------------------------------------------------
+# ---------------------------------
 
 @router.get("/{run_id}/metrics")
 async def get_metrics(run_id: str, request: Request) -> dict:
@@ -165,9 +165,9 @@ async def get_metrics(run_id: str, request: Request) -> dict:
     return {"run_id": run_id, "metrics_history": metrics_history}
 
 
-# ------------------------------------------------------------------
+# ---------------------------------
 # POST /api/runs/{run_id}/cancel
-# ------------------------------------------------------------------
+# ---------------------------------
 
 @router.post("/{run_id}/cancel")
 async def cancel_run(run_id: str, request: Request) -> dict:
@@ -180,9 +180,9 @@ async def cancel_run(run_id: str, request: Request) -> dict:
     return {"run_id": run_id, "status": "cancelled"}
 
 
-# ------------------------------------------------------------------
+# ---------------------------------
 # DELETE /api/runs/{run_id}
-# ------------------------------------------------------------------
+# ---------------------------------
 
 @router.delete("/{run_id}")
 async def delete_run(run_id: str, request: Request) -> dict:
@@ -196,9 +196,9 @@ async def delete_run(run_id: str, request: Request) -> dict:
     return {"run_id": run_id, "deleted": True}
 
 
-# ------------------------------------------------------------------
+# ---------------------------------
 # POST /api/runs/{run_id}/inject  (god-view event injection)
-# ------------------------------------------------------------------
+# ---------------------------------
 
 @router.post("/{run_id}/inject")
 async def inject_event(run_id: str, request: Request) -> dict:
@@ -240,9 +240,9 @@ async def inject_event(run_id: str, request: Request) -> dict:
     }
 
 
-# ------------------------------------------------------------------
+# ---------------------------------
 # POST /api/runs/{run_id}/interview  (agent in-character interview)
-# ------------------------------------------------------------------
+# ---------------------------------
 
 @router.post("/{run_id}/interview")
 async def interview_agents(run_id: str, request: Request) -> dict:
@@ -285,9 +285,9 @@ async def interview_agents(run_id: str, request: Request) -> dict:
     return {"responses": responses, "question": question}
 
 
-# ------------------------------------------------------------------
+# ---------------------------------
 # POST /api/runs/{run_id}/chat  (chat with ReportAgent post-simulation)
-# ------------------------------------------------------------------
+# ---------------------------------
 
 @router.post("/{run_id}/chat")
 async def chat_with_report_agent(run_id: str, request: Request) -> dict:
@@ -379,9 +379,9 @@ async def resolve_run(run_id: str, request: Request) -> dict:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ------------------------------------------------------------------
+# ---------------------------------
 # Background simulation task
-# ------------------------------------------------------------------
+# ---------------------------------
 
 async def _run_simulation_safe(
     run_id: str,

@@ -43,29 +43,29 @@ LOG_LEVEL=INFO
 # n_agents: 5-500
 #   UI: "Agents" slider in RunForm
 #   API: {"n_agents": 30}
-#   CLI: --agents 30
+#   CLI: -agents 30
 
 # n_rounds: 5-200
 #   UI: "Rounds" slider in RunForm
 #   API: {"n_rounds": 20}
-#   CLI: --rounds 20
+#   CLI: -rounds 20
 
 # seed: any integer
 #   UI: "Random seed" field
 #   API: {"seed": 99}
-#   CLI: --seed 99
+#   CLI: -seed 99
 
 # n_sensitivity_seeds: 1-5
 #   UI: "Sensitivity seeds" field
 #   API: {"n_sensitivity_seeds": 3}
-#   CLI: --seeds 3
+#   CLI: -seeds 3
 #   Effect: Runs the simulation N times with seed, seed+1, seed+2...
 #           and produces an uncertainty statement comparing outcomes.
 
 # environment_type: "forum", "network", or "town_hall"
 #   UI: "Environment" dropdown
 #   API: {"environment_type": "network"}
-#   CLI: --env network
+#   CLI: -env network
 #   Effect: forum = open discussion noticeboard
 #           network = algorithmic feed (echo chambers, personalized visibility)
 #           town_hall = structured agenda, each round is an agenda item
@@ -73,27 +73,27 @@ LOG_LEVEL=INFO
 # opinion_distribution: "normal", "bimodal", "power_law", "uniform"
 #   UI: "Opinion distribution" dropdown
 #   API: {"opinion_distribution": "bimodal"}
-#   CLI: --opinion-dist bimodal
+#   CLI: -opinion-dist bimodal
 #   Effect: Controls starting stance spread across the population.
 
 # expert_mode: true or false
 #   UI: "Expert Analysis Mode" toggle in RunForm
 #   API: {"expert_mode": true}
-#   CLI: --expert
+#   CLI: -expert
 #   Effect: Runs a multi-step analytical pipeline (Metrics -> Trace -> Graph)
 #           for a 10x deeper final report compared to basic mode.
 
 # skip_graph: true or false
 #   UI: not in UI yet (API and CLI only)
 #   API: {"skip_graph": true}
-#   CLI: --skip-graph
+#   CLI: -skip-graph
 #   Effect: Bypasses knowledge graph extraction. Faster but agents
 #           have no factual grounding — more hallucination risk.
 
-# multi-document ingestion: pass --seed-file multiple times
+# multi-document ingestion: pass -seed-file multiple times
 #   UI: Multiple file uploads per project
 #   API: Supports multiple seed files + inline text
-#   CLI: --seed-file doc1.pdf --seed-file doc2.txt ...
+#   CLI: -seed-file doc1.pdf -seed-file doc2.txt ...
 #   Effect: Fuses entities and discovers cross-document relations.
 
 # counterfactual_events: list of {round, content, source}

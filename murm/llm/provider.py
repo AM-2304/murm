@@ -77,7 +77,7 @@ class LLMProvider:
         if self.api_key:  call_kwargs["api_key"]  = self.api_key
         if self.base_url: call_kwargs["base_url"] = self.base_url
 
-        # --- DEMO MODE MOCK CACHING INTERCEPTOR ---
+        # -- DEMO MODE MOCK CACHING INTERCEPTOR --
         demo_mode = getattr(settings, "demo_mode", False)
         cache_file = None
         if demo_mode:
@@ -92,7 +92,7 @@ class LLMProvider:
                     return json.loads(cache_file.read_text(encoding="utf-8"))["content"]
                 except Exception as e:
                     logger.warning(f"Failed to read demo cache: {e}")
-        # ------------------------------------------
+        # ---------------------
 
         # DEMO MODE MOCK CACHING INTERCEPTOR 
         demo_mode = getattr(settings, "demo_mode", False)

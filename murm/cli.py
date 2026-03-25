@@ -5,9 +5,9 @@ enabling scripted research runs and batch sensitivity analysis.
 
 Usage:
   murm serve                    # Start the API server
-  murm run --help               # Run a simulation from CLI
-  murm estimate --help          # Pre-flight cost estimate
-  murm calibrate --help         # Score a past prediction
+  murm run -help               # Run a simulation from CLI
+  murm estimate -help          # Pre-flight cost estimate
+  murm calibrate -help         # Score a past prediction
 """
 
 from __future__ import annotations
@@ -31,9 +31,9 @@ def main():
 
 
 @main.command()
-@click.option("--host", default="0.0.0.0", show_default=True)
-@click.option("--port", default=8000, show_default=True)
-@click.option("--reload", is_flag=True, default=False)
+@click.option("-host", default="0.0.0.0", show_default=True)
+@click.option("-port", default=8000, show_default=True)
+@click.option("-reload", is_flag=True, default=False)
 def serve(host: str, port: int, reload: bool):
     """Start the MURM API server."""
     import uvicorn
@@ -48,34 +48,34 @@ def serve(host: str, port: int, reload: bool):
 
 
 @main.command()
-@click.option("--seed-file", type=click.Path(exists=True), required=False, multiple=True, help="Path to seed document(s) — repeatable for multi-document ingestion")
-@click.option("--seed-text", type=str, required=False, help="Inline seed text")
-@click.option("--question", type=str, required=True, help="Prediction question")
-@click.option("--agents", type=int, default=50, show_default=True, help="Number of agents")
-@click.option("--rounds", type=int, default=30, show_default=True, help="Simulation rounds")
-@click.option("--seed", type=int, default=42, show_default=True, help="Base random seed")
-@click.option("--seeds", type=int, default=1, show_default=True, help="Number of seed runs for sensitivity analysis")
-@click.option("--env", type=click.Choice(["forum", "town_hall"]), default="forum", show_default=True)
+@click.option("-seed-file", type=click.Path(exists=True), required=False, multiple=True, help="Path to seed document(s) — repeatable for multi-document ingestion")
+@click.option("-seed-text", type=str, required=False, help="Inline seed text")
+@click.option("-question", type=str, required=True, help="Prediction question")
+@click.option("-agents", type=int, default=50, show_default=True, help="Number of agents")
+@click.option("-rounds", type=int, default=30, show_default=True, help="Simulation rounds")
+@click.option("-seed", type=int, default=42, show_default=True, help="Base random seed")
+@click.option("-seeds", type=int, default=1, show_default=True, help="Number of seed runs for sensitivity analysis")
+@click.option("-env", type=click.Choice(["forum", "town_hall"]), default="forum", show_default=True)
 @click.option(
-    "--opinion-dist",
+    "-opinion-dist",
     type=click.Choice(["normal", "bimodal", "power_law", "uniform"]),
     default="normal",
     show_default=True,
 )
 @click.option(
-    "--skip-graph",
+    "-skip-graph",
     is_flag=True,
     default=False,
     help="Skip graph extraction; use raw seed text as agent context only",
 )
 @click.option(
-    "--resample-agents",
+    "-resample-agents",
     is_flag=True,
     default=False,
     help="Regenerate agent population independently for each seed (true Monte Carlo sensitivity)",
 )
-@click.option("--expert", is_flag=True, default=False, help="Run the expert multi-step report generation pipeline")
-@click.option("--output", type=click.Path(), default="report.md", show_default=True)
+@click.option("-expert", is_flag=True, default=False, help="Run the expert multi-step report generation pipeline")
+@click.option("-output", type=click.Path(), default="report.md", show_default=True)
 def run(
     seed_file,
     seed_text,
@@ -93,7 +93,7 @@ def run(
 ):
     """Run a complete simulation and write the report to a file.
 
-    Multi-document: pass --seed-file multiple times to merge several documents
+    Multi-document: pass -seed-file multiple times to merge several documents
     into a single unified knowledge graph with cross-document relation discovery.
     """
     asyncio.run(
@@ -116,9 +116,9 @@ def run(
 
 
 @main.command()
-@click.option("--agents", type=int, default=50)
-@click.option("--rounds", type=int, default=30)
-@click.option("--seeds", type=int, default=1)
+@click.option("-agents", type=int, default=50)
+@click.option("-rounds", type=int, default=30)
+@click.option("-seeds", type=int, default=1)
 def estimate(agents, rounds, seeds):
     """Print a pre-flight token and cost estimate for a simulation run.
 
@@ -141,8 +141,8 @@ def estimate(agents, rounds, seeds):
 
 
 @main.command()
-@click.option("--run-id", type=str, required=True, help="Run ID to resolve")
-@click.option("--truth", type=str, required=True, help="Actual outcome (e.g. 'agree', 'disagree')")
+@click.option("-run-id", type=str, required=True, help="Run ID to resolve")
+@click.option("-truth", type=str, required=True, help="Actual outcome (e.g. 'agree', 'disagree')")
 def calibrate(run_id, truth):
     """Submit ground truth for a completed simulation and compute Brier score.
     
@@ -218,11 +218,11 @@ async def _run_pipeline(
         documents.append((seed_text, "inline_seed"))
 
     if not documents:
-        console.print("[red]Provide --seed-file or --seed-text[/red]")
+        console.print("[red]Provide -seed-file or -seed-text[/red]")
         sys.exit(1)
 
     # Combined text for agent context (all documents concatenated)
-    text = "\n\n---\n\n".join(doc_text for doc_text, _ in documents)
+    text = "\n\n--\n\n".join(doc_text for doc_text, _ in documents)
     is_multi = len(documents) > 1
 
     console.print(f"[bold]MURM[/bold] run {run_id[:8]}")
@@ -394,3 +394,5 @@ async def _run_pipeline(
     output_path.write_text(report_md, encoding="utf-8")
     console.print(f"[green]Report written to {output_path}[/green]")
     console.print(f"Token usage: {budget_lines}")
+if __name__ == "__main__":
+    main()

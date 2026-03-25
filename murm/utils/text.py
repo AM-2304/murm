@@ -17,7 +17,7 @@ def extract_text_from_path(path: Path) -> str:
     """Return the plain-text content of a file.
 
     Supported formats
-    -----------------
+    ---------
     - ``.txt``  – read directly as UTF-8
     - ``.pdf``  – extracted via *pypdf* (optional dependency)
     - ``.docx`` / ``.doc`` – extracted via *python-docx* (optional dependency)

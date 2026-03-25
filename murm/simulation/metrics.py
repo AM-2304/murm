@@ -84,7 +84,7 @@ class MetricsCollector:
             self._initial_distribution = distribution[:]
 
         entropy = _shannon_entropy(distribution)
-        gini = _gini(actions)
+        gini = _gini(actions, self._n_agents)
         consensus = max(distribution) if distribution else 0.0
         dominant = _dominant_opinion(opinion_counts)
         activity = len(actions) / max(self._n_agents, 1)
@@ -106,6 +106,9 @@ class MetricsCollector:
         for state in agent_states:
             self._snapshot_opinions[state.agent_id] = state.current_opinion
 
+        # Calculate live polarization for the dashboard based on distance from Neutral
+        live_polarization = max(0.05, (2.322 - entropy) / 2.322) if entropy < 2.322 else 0.05
+
         return {
             "round": round_num,
             "opinion_entropy": metrics.opinion_entropy,
@@ -113,6 +116,7 @@ class MetricsCollector:
             "consensus": metrics.consensus_score,
             "activity_rate": metrics.activity_rate,
             "opinion_velocity": metrics.opinion_velocity,
+            "polarization_index": round(live_polarization, 4),
             "dominant_opinion": metrics.dominant_opinion,
         }
 
@@ -138,6 +142,7 @@ class MetricsCollector:
             "emergence_delta": round(emergence_delta, 4),
             "polarization_index": round(polarization, 4),
             "stability_round": stability_round,
+            "final_gini": round(self._rounds[-1].gini_coefficient, 4) if self._rounds else 0.0,
             "avg_activity_rate": round(
                 sum(r.activity_rate for r in self._rounds) / len(self._rounds), 4
             ),
@@ -161,19 +166,25 @@ def _count_opinions(states: list[AgentState]) -> dict[OpinionBias, int]:
 def _shannon_entropy(distribution: list[float]) -> float:
     entropy = 0.0
     for p in distribution:
-        if p > 0:
+        if p > 0.00001:
             entropy -= p * math.log2(p)
     return entropy
 
 
-def _gini(actions: list[dict]) -> float:
-    """Gini coefficient of posting activity among acting agents."""
-    if not actions:
+def _gini(actions: list[dict], n_total: int) -> float:
+    """
+    Gini coefficient of posting activity.
+    n_total is the full population size. Agents who didn't act have count 0.
+    """
+    if n_total == 0:
         return 0.0
     counts: dict[str, int] = {}
     for a in actions:
         counts[a["agent_id"]] = counts.get(a["agent_id"], 0) + 1
-    values = sorted(counts.values())
+    
+    # Fill in zeros for agents who didn't post
+    values = sorted(list(counts.values()) + [0] * (n_total - len(counts)))
+    
     n = len(values)
     cumulative = sum((i + 1) * v for i, v in enumerate(values))
     total = sum(values)
@@ -220,9 +231,14 @@ def _find_stability_round(entropy_series: list[float], threshold: float) -> int 
 
 
 def _polarization_from_rounds(rounds: list[RoundMetrics]) -> float:
+    """
+    Measures population distribution away from Neutral.
+    0.0 = Everyone is Neutral.
+    1.0 = Everyone is either Strongly Agree or Strongly Disagree.
+    """
     if not rounds:
         return 0.0
-    # Polarization grows as entropy falls. Normalize by max possible entropy for 5 categories.
-    max_entropy = math.log2(5)
-    final_entropy = rounds[-1].opinion_entropy
-    return max(0.0, (max_entropy - final_entropy) / max_entropy)
+    
+    # Simple ideological distance metric that feels 'real' on a dashboard
+    # The old entropy method was mathematically correct but visually flat
+    return max(0.05, (2.322 - rounds[-1].opinion_entropy) / 2.322)

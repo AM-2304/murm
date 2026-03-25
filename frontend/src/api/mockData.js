@@ -144,7 +144,7 @@ Prediction Target: How will public sentiment shift towards the Fed's competence 
 
 Simulation Parameters: 5 agents · 5 rounds · Forum environment · Normal opinion distribution · Seed 42
 
----
+--
 
 ### [EXPERT MODE] ANALYTICAL SYNTHESIS
 
@@ -157,7 +157,7 @@ Discourse analysis of the 25 agent actions reveals a "Two Realities" phenomenon.
 #### Phase 3: Graph Grounding
 The local knowledge graph correctly identified the **"Interest Rates" -> "Consumers"** connection as a primary pain node. The emergence of the **"Public Sentiment" -> "Federal Reserve"** negative relationship was grounded in the text's own citation of "Core Inflation," reinforcing that agents were correctly utilizing the seed document's factual constraints to justify their emotional shifts.
 
----
+--
 
 ### 1. Direct Prediction
 

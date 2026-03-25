@@ -6,7 +6,7 @@ prediction questions, collects emergence metrics and sensitivity results,
 and writes them to CSV files for analysis.
 
 Usage:
-  python eval.py --seeds-file eval_seeds.json --output-dir results/ --k 3
+  python eval.py -seeds-file eval_seeds.json -output-dir results/ -k 3
 """
 
 from __future__ import annotations
@@ -28,17 +28,17 @@ logger = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option("--seeds-file", type=click.Path(exists=True), required=True,
+@click.option("-seeds-file", type=click.Path(exists=True), required=True,
               help="JSON file with eval tasks: [{title, seed_text, question, expected_direction}]")
-@click.option("--output-dir", type=click.Path(), default="results", show_default=True)
-@click.option("--n-agents", type=int, default=50, show_default=True)
-@click.option("--n-rounds", type=int, default=30, show_default=True)
-@click.option("--k", type=int, default=3, show_default=True,
+@click.option("-output-dir", type=click.Path(), default="results", show_default=True)
+@click.option("-n-agents", type=int, default=50, show_default=True)
+@click.option("-n-rounds", type=int, default=30, show_default=True)
+@click.option("-k", type=int, default=3, show_default=True,
               help="Number of random seeds per task for sensitivity analysis")
-@click.option("--base-seed", type=int, default=42, show_default=True)
-@click.option("--opinion-dist", type=click.Choice(["normal", "bimodal", "power_law", "uniform"]),
+@click.option("-base-seed", type=int, default=42, show_default=True)
+@click.option("-opinion-dist", type=click.Choice(["normal", "bimodal", "power_law", "uniform"]),
               default="normal", show_default=True)
-@click.option("--env-type", type=click.Choice(["forum", "town_hall"]),
+@click.option("-env-type", type=click.Choice(["forum", "town_hall"]),
               default="forum", show_default=True)
 def main(seeds_file, output_dir, n_agents, n_rounds, k, base_seed, opinion_dist, env_type):
     """Run evaluation benchmark and write results to CSV."""

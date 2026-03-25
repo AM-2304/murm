@@ -11,7 +11,7 @@ const TYPE_STYLES = {
 };
 
 function formatLine(event) {
-    const s = TYPE_STYLES[event.type] || { color: "#6B6B6B", prefix: "---" };
+    const s = TYPE_STYLES[event.type] || { color: "#6B6B6B", prefix: "--" };
     const ts = new Date((event.timestamp || Date.now()) * 1000).toTimeString().slice(0, 8);
     let text = "";
     const p = event.payload || {};

@@ -7,7 +7,7 @@ let __mockStatus = "completed";
 
 async function request(method, path, body) {
   if (IS_STATIC_DEMO) {
-    // ---- Project endpoints ----
+    // -- Project endpoints --
     if (path === "/api/projects/" && method === "GET") {
       return [{
         project_id: "demo-project-1",
@@ -18,7 +18,7 @@ async function request(method, path, body) {
 
 Simulation Parameters: 5 agents · 5 rounds · Forum environment · Normal opinion distribution · Seed 42
 
----
+--
 
 ### [EXPERT MODE] ANALYTICAL SYNTHESIS
 
@@ -31,7 +31,7 @@ Discourse analysis of the 25 agent actions reveals a "Two Realities" phenomenon.
 #### Phase 3: Graph Grounding
 The local knowledge graph correctly identified the **"Interest Rates" -> "Consumers"** connection as a primary pain node. The emergence of the **"Public Sentiment" -> "Federal Reserve"** negative relationship was grounded in the text's own citation of "Core Inflation," reinforcing that agents were correctly utilizing the seed document's factual constraints to justify their emotional shifts.
 
----
+--
 
 ### 1. Direct Prediction`
       }];
@@ -47,7 +47,7 @@ The local knowledge graph correctly identified the **"Interest Rates" -> "Consum
       return { ok: true };
     }
 
-    // ---- Graph endpoints ----
+    // -- Graph endpoints --
     if (path.includes("/build") && method === "POST") {
       await mock.MOCK_DELAY(2000);
       return { status: "building", project_id: "demo-project-1" };
@@ -59,7 +59,7 @@ The local knowledge graph correctly identified the **"Interest Rates" -> "Consum
       return mock.MOCK_GRAPH;
     }
 
-    // ---- Run endpoints ----
+    // -- Run endpoints --
     if (path === "/api/runs/" && method === "POST") {
       __mockStatus = "running";
       await mock.MOCK_DELAY(500);
@@ -105,7 +105,7 @@ The local knowledge graph correctly identified the **"Interest Rates" -> "Consum
     return {};
   }
 
-  // ---- Real API mode ----
+  // -- Real API mode --
   const opts = {
     method,
     headers: body ? { "Content-Type": "application/json" } : {},

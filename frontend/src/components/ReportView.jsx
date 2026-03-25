@@ -6,7 +6,7 @@ function renderMd(md) {
     if (line.startsWith("## ")) return <h2 key={i} style={{ fontSize: 14, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: "#1A1A1A", margin: "28px 0 10px", paddingBottom: 8, borderBottom: "1px solid #E8E4DF" }}>{line.slice(3)}</h2>;
     if (line.startsWith("# ")) return <h1 key={i} style={{ fontSize: 20, fontWeight: 300, color: "#1A1A1A", margin: "0 0 20px", lineHeight: 1.3 }}>{line.slice(2)}</h1>;
     if (line.startsWith("### ")) return <h3 key={i} style={{ fontSize: 13, fontWeight: 700, color: "#1A1A1A", margin: "16px 0 6px" }}>{line.slice(4)}</h3>;
-    if (line.startsWith("---")) return <hr key={i} style={{ border: "none", borderTop: "1px solid #E8E4DF", margin: "20px 0" }} />;
+    if (line.startsWith("--")) return <hr key={i} style={{ border: "none", borderTop: "1px solid #E8E4DF", margin: "20px 0" }} />;
     if (line.startsWith("- ")) return (
       <div key={i} style={{ display: "flex", gap: 10, marginBottom: 5, fontSize: 13, lineHeight: 1.7, color: "#2A2A2A" }}>
         <span style={{ color: "#9B9B9B", flexShrink: 0, marginTop: 1 }}>–</span>

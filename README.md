@@ -4,6 +4,7 @@ Predict how public opinion shifts. Feed in any document, ask a plain-English que
 
 Built as a research-grade, local-first, English-language replacement for [MiroFish](https://github.com/666ghj/MiroFish).
 
+![Version](https://img.shields.io/github/v/release/AM-2304/murm)
 ![Stars](https://img.shields.io/github/stars/AM-2304/murm)
 ![Forks](https://img.shields.io/github/forks/AM-2304/murm)
 
@@ -16,27 +17,6 @@ You give MURM a seed document (a news article, a policy draft, a financial repor
 ---
  ## You can try it yourself here: [MURM](https://murm-sigma.vercel.app/)
  
- 
-### Visual Walkthrough
-
-*(Another demo run focused on a Central Bank Rate Decision seed document)*
-
-**1. Setup & Context Grounding**
-![Setup](demo/assets/setup.png)
-
-**2. High-Density Knowledge Graph Extraction (Real-Time Physics & JSON Export)**
-![Graph Panel](demo/assets/graph.png)
-
-**3. Multi-Agent Simulation (Live Stream, Metrics, & Roster)**
-![Metrics](demo/assets/metrics.png)
-![Live Action Feed](demo/assets/livestream.png)
-
-**4. Post-Simulation Counterfactual Analysis (God Mode/Branching)**
-![God Mode](demo/assets/god_mode.png)
-
-**5. Final Prediction Report & Analyst Calibration Chat**
-![Report](demo/assets/report.png)
-
 --
 
 ## Why this exists: the problems with MiroFish

@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.0] - 2026-03-25
+## [0.4.1] - 2026-03-26
 
 ### Added
 - **Expert Analysis Mode**: The simulation now ships with a fully discrete, multi-step thesis-generation report mode by default.

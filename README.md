@@ -17,6 +17,27 @@ You give MURM a seed document (a news article, a policy draft, a financial repor
 ---
  ## You can try it yourself here: [MURM](https://murm-sigma.vercel.app/)
  
+ 
+### Visual Walkthrough
+
+*(Another demo run focused on a Central Bank Rate Decision seed document)*
+
+**1. Setup & Context Grounding**
+![Setup](demo/assets/setup.png)
+
+**2. High-Density Knowledge Graph Extraction (Real-Time Physics & JSON Export)**
+![Graph Panel](demo/assets/graph.png)
+
+**3. Multi-Agent Simulation (Live Stream, Metrics, & Roster)**
+![Metrics](demo/assets/metrics.png)
+![Live Action Feed](demo/assets/livestream.png)
+
+**4. Post-Simulation Counterfactual Analysis (God Mode/Branching)**
+![God Mode](demo/assets/god_mode.png)
+
+**5. Final Prediction Report & Analyst Calibration Chat**
+![Report](demo/assets/report.png)
+
 --
 
 ## Why this exists: the problems with MiroFish

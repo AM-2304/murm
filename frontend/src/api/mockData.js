@@ -183,9 +183,9 @@ The simulation indicates a high probability that public sentiment toward the Fed
 
 ## Deep Evidence & Metrics Breakdown
 The quantitative emergence metrics paint a stark picture of failure to achieve consensus. 
-* **Opinion Entropy (1.54 -> 1.91):** The crowd fragmented. Instead of coming together, agents explored the absolute extremes of the opinion spectrum.
-* **Polarization Index (0.62 -> 0.85):** The divergence was not minor; it was structural. The population physically split into bimodal camps that refused to integrate.
-* **Opinion Velocity (0.40 -> 0.08):** By Round 4, opinions were entirely locked. Agents stopped listening to each other and simply shouted their pre-existing anchors.
+Opinion Entropy (1.54 -> 1.91): The crowd fragmented. Instead of coming together, agents explored the absolute extremes of the opinion spectrum.
+Polarization Index (0.62 -> 0.85): The divergence was not minor; it was structural. The population physically split into bimodal camps that refused to integrate.
+Opinion Velocity (0.40 -> 0.08): By Round 4, opinions were entirely locked. Agents stopped listening to each other and simply shouted their pre-existing anchors.
 
 ## Discourse & Influencer Analysis
 The discourse was initially driven by institutional figures like Marcus Chen, who attempted to establish the narrative using the Dot Plot. However, the narrative control was violently seized in Round 2 by Sarah Okonkwo (the small business owner). Her appeals to immediate payroll realities acted as memetic contagion, forcing even neutral observers like the journalist (Chloe Andersen) to concede that the Fed's communication had failed. This was the critical turning point that cemented the negative trajectory.
@@ -200,8 +200,8 @@ Baseline operations ran without God Mode injection, proving that the system natu
 To track this in reality, analysts must watch the spread between consumer confidence indices and the S&P 500. A widening gap in these two metrics over the next 14 days will serve as absolute confirmation of this simulation's bifurcated prediction.
 
 ## Actionable Takeaways & Strategic Suggestions
-* **For Institutional Investors:** Ignore retail sentiment indicators; they will flash red but will not alter Fed policy timelines.
-* **For Policymakers:** Immediately pivot communication strategies to acknowledge microeconomic pain. Do not rely on the Dot Plot in consumer-facing messaging.
+For Institutional Investors: Ignore retail sentiment indicators; they will flash red but will not alter Fed policy timelines.
+For Policymakers: Immediately pivot communication strategies to acknowledge microeconomic pain. Do not rely on the Dot Plot in consumer-facing messaging.
 
 ## Confidence Assessment & Limitations
 Score: 86

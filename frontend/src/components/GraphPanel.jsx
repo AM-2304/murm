@@ -444,9 +444,10 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
         position: "absolute", bottom: 10, right: 10,
         background: "rgba(0,0,0,0.7)", border: "1px solid rgba(255,255,255,0.1)",
         borderRadius: 3, padding: "8px 12px", maxWidth: 180,
+        maxHeight: "180px", overflowY: "auto"
       }}>
         <p style={{ fontSize: 8, color: "#FFFFFF", opacity: 0.5, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 7, fontWeight: 700 }}>Entity Types</p>
-        {entityTypes.slice(0, 8).map(t => (
+        {entityTypes.map(t => (
           <div key={t.key} style={{
             display: "flex", alignItems: "center", gap: 6, marginBottom: 4,
             opacity: hoveredType && hoveredType !== t.key ? 0.3 : 1, transition: "opacity 0.15s",
@@ -458,7 +459,6 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
             <span style={{ fontSize: 9, color: "#FFFFFF", opacity: 0.8 }}>{t.label}</span>
           </div>
         ))}
-        {entityTypes.length > 8 && <p style={{ fontSize: 8, color: "#FFFFFF", opacity: 0.3, marginTop: 4 }}>+{entityTypes.length - 8} more</p>}
       </div>
 
       {/* Node detail panel */}

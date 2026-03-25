@@ -15,8 +15,8 @@ Built as a research-grade, local-first, English-language replacement for [MiroFi
 You give MURM a seed document (a news article, a policy draft, a financial report, a story) and a prediction question. It extracts a knowledge graph from that document, generates a population of diverse simulated people with different opinions and communication styles, runs them through repeated rounds of discussion in a simulated environment, and produces a written report answering your question. The report includes a direct prediction, a 0-100 confidence score, evidence from the simulation, and an uncertainty statement that tells you whether the result was consistent across multiple independent runs or highly sensitive to initial conditions.
 
 ---
- ## You can try it yourself here: 
- https://murm-sigma.vercel.app/ (Live static demo)
+ ## You can try it yourself here: [murm-live-demo](https://murm-sigma.vercel.app/)
+ 
  
 ### Visual Walkthrough
 

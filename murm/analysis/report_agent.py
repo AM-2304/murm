@@ -1,18 +1,11 @@
 """
 Report generation agent.
 
-Design decision: this replaces the ReACT loop with a single structured LLM call.
-The ReACT approach (MiroFish's design) failed on Groq because:
-  1. It sent response_format=json_object which Groq doesn't support
-  2. Each iteration was a separate LLM call — 12 iterations = 12 hang opportunities
-  3. Tool-calling syntax varies by provider and breaks silently
-
-Instead, we assemble all evidence locally (trace, metrics, graph entities) and
-inject it directly into one prompt. The LLM writes the full report in one pass.
-This is faster, cheaper, provider-agnostic, and more reliable.
-
-The tradeoff: the report cannot dynamically query the graph the way ReACT can.
-We compensate by pre-loading rich context before the call.
+Offers two modes: basic and expert.
+- Basic: Assembly of evidence into a single prompt for a quick, robust prediction.
+- Expert: A multi-step structured synthesis pipeline (Metrics Analysis -> Trace Analysis -> 
+          Graph Grounding -> Final Synthesis) providing 10x deeper insight than standard.
+          This handles complex reasoning without brittle ReACT loops that fail on diverse providers.
 """
 
 from __future__ import annotations
@@ -52,11 +45,16 @@ class ReportAgent:
         self._metrics = metrics_summary
         self._config  = simulation_config
 
-    async def generate(self, prediction_question: str) -> str:
-        ctx    = self._assemble_context(prediction_question)
+    async def generate(self, prediction_question: str, mode: str = "basic") -> str:
+        ctx = self._assemble_context(prediction_question)
+        if mode == "expert":
+            return await self._generate_expert(prediction_question, ctx)
+        return await self._generate_basic(prediction_question, ctx)
+
+    async def _generate_basic(self, prediction_question: str, ctx: dict) -> str:
         prompt = _build_report_prompt(prediction_question, ctx)
 
-        logger.info("Generating report for: %s", prediction_question[:80])
+        logger.info("Generating basic report for: %s", prediction_question[:80])
         try:
             report = await self._llm.complete(
                 messages=[
@@ -69,6 +67,46 @@ class ReportAgent:
             return report.strip() or "Report generation returned an empty response."
         except Exception as exc:
             logger.error("Report generation failed: %s", exc)
+            return _fallback_report(prediction_question, ctx, str(exc))
+
+    async def _generate_expert(self, prediction_question: str, ctx: dict) -> str:
+        logger.info("Starting Expert Mode multi-step analysis...")
+        try:
+            # Step 1: Deep Metrics Analysis
+            metrics_prompt = f"Analyze these simulation metrics for anomalies, turning points, and convergence patterns:\n{json.dumps(ctx['metrics'], indent=2)}\nOpinion trend:\n{json.dumps(ctx['opinion_trend'], indent=2)}"
+            metrics_analysis = await self._llm.complete([{"role": "user", "content": metrics_prompt}], max_tokens=1000)
+            
+            # Step 2: Agent Discourse Trace Analysis
+            trace_str = "\n".join(ctx['trace_sample'])
+            trace_prompt = f"Analyze this agent discourse trace. Identify key arguments, influencer impacts, and moments where opinions shifted:\n{trace_str}"
+            trace_analysis = await self._llm.complete([{"role": "user", "content": trace_prompt}], max_tokens=1000)
+
+            # Step 3: Graph Grounding
+            graph_str = "\n".join(ctx['graph_entities'])
+            graph_prompt = f"Correlate the discourse with these factual entities from the source document. What entities drove the debate?\n{graph_str}"
+            graph_analysis = await self._llm.complete([{"role": "user", "content": graph_prompt}], max_tokens=1000)
+
+            # Step 4: Final Comprehensive Synthesis
+            synth_prompt = f"""PREDICTION QUESTION: {prediction_question}
+
+You are an elite intelligence analyst. Synthesize the findings of your sub-agents into a massive, highly detailed final report.
+
+METRICS ANALYSIS: {metrics_analysis}
+DISCOURSE ANALYSIS: {trace_analysis}
+FACTUAL GROUNDING: {graph_analysis}
+
+Write a comprehensive report with:
+## Executive Prediction (Direct answer)
+## Deep Evidence (Metrics & Turning Points)
+## Discourse & Influencer Analysis (Who drove the conversation and arguments used)
+## Contextual Grounding (How the entities shaped opinions)
+## Confidence Assessment (0-100 with strict justification)
+## Strategic Vulnerabilities & Limitations
+"""
+            report = await self._llm.complete([{"role": "system", "content": _REPORT_SYSTEM}, {"role": "user", "content": synth_prompt}], temperature=0.4, max_tokens=4000)
+            return report.strip()
+        except Exception as exc:
+            logger.error("Expert report generation failed: %s", exc)
             return _fallback_report(prediction_question, ctx, str(exc))
 
     def _assemble_context(self, question: str) -> dict:

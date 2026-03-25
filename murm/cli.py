@@ -73,6 +73,7 @@ def serve(host: str, port: int, reload: bool):
     default=False,
     help="Regenerate agent population independently for each seed (true Monte Carlo sensitivity)",
 )
+@click.option("--expert", is_flag=True, default=False, help="Run the expert multi-step report generation pipeline")
 @click.option("--output", type=click.Path(), default="report.md", show_default=True)
 def run(
     seed_file,
@@ -86,6 +87,7 @@ def run(
     opinion_dist,
     skip_graph,
     resample_agents,
+    expert,
     output,
 ):
     """Run a complete simulation and write the report to a file.
@@ -107,6 +109,7 @@ def run(
             output_path=Path(output),
             skip_graph=skip_graph,
             resample_agents=resample_agents,
+            expert_mode=expert,
         )
     )
 
@@ -149,6 +152,7 @@ async def _run_pipeline(
     output_path: Path,
     skip_graph: bool = False,
     resample_agents: bool = False,
+    expert_mode: bool = False,
 ) -> None:
     # Deferred imports keep CLI startup fast and avoid circular deps at module load
     from murm.config import settings
@@ -331,7 +335,7 @@ async def _run_pipeline(
             "n_rounds": n_rounds,
         },
     )
-    report_md = await report_agent.generate(question)
+    report_md = await report_agent.generate(question, mode="expert" if expert_mode else "basic")
 
     # Format budget snapshot as readable key-value lines rather than raw dict repr
     budget_snapshot = budget.snapshot()

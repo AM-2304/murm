@@ -14,7 +14,7 @@ const lbl = {
 const DEFAULTS = {
   n_agents: 5, n_rounds: 5, seed: 42, n_sensitivity_seeds: 1,
   environment_type: "forum", opinion_distribution: "normal",
-  scenario_description: "",
+  scenario_description: "", expert_mode: false,
 };
 
 function CostBar({ estimate, loading }) {
@@ -144,7 +144,8 @@ export function RunForm({ projectId, onSubmit, disabled }) {
       <div style={{ marginBottom: 16 }}>
         <label style={lbl}>Environment</label>
         <select value={form.environment_type} onChange={e => set("environment_type", e.target.value)} style={inp}>
-          <option value="forum">Forum: open discussion</option>
+          <option value="forum">Forum: chronological feed</option>
+          <option value="network">Network: algorithmic feed (echo chambers)</option>
           <option value="town_hall">Town Hall: structured agenda</option>
         </select>
       </div>
@@ -168,6 +169,27 @@ export function RunForm({ projectId, onSubmit, disabled }) {
           placeholder="Additional framing injected at round 1..."
           style={{ ...inp, resize: "vertical", lineHeight: 1.55 }}
         />
+      </div>
+
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }} onClick={() => set("expert_mode", !form.expert_mode)}>
+            <div style={{ 
+                width: 32, height: 18, borderRadius: 10, background: form.expert_mode ? "#1A1A1A" : "#E8E4DF",
+                position: "relative", transition: "background 0.2s"
+            }}>
+                <div style={{ 
+                    width: 14, height: 14, borderRadius: "50%", background: "#FFF",
+                    position: "absolute", top: 2, left: form.expert_mode ? 16 : 2,
+                    transition: "left 0.2s"
+                }} />
+            </div>
+            <label style={{ ...lbl, marginBottom: 0, cursor: "pointer", color: form.expert_mode ? "#1A1A1A" : "#9B9B9B" }}>
+                Expert Analysis Mode
+            </label>
+        </div>
+        <p style={{ fontSize: 9, color: "#BDBDBD", marginTop: 4, marginLeft: 42 }}>
+            Uses multi-step reasoning (metrics, trace, graph) for a 10x more detailed prediction report.
+        </p>
       </div>
 
       {/* Live cost estimate: updates as user changes inputs */}

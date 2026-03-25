@@ -30,6 +30,7 @@ from pydantic import BaseModel, Field
 from murm.analysis.calibration import compute_sensitivity as sensitivity_analysis
 from murm.analysis.report_agent import ReportAgent
 from murm.agents.generator import PersonaGenerator
+from murm.agents.interviewer import AgentInterviewer
 from murm.config import settings
 from murm.graph.embedder import Embedder
 from murm.graph.engine import KnowledgeGraph
@@ -62,6 +63,7 @@ class CreateRunRequest(BaseModel):
     scenario_description:  str = Field(default="")
     counterfactual_events: list[dict] = Field(default_factory=list)
     skip_graph:            bool = Field(default=False)
+    expert_mode:           bool = Field(default=False)
 
 
 # ------------------------------------------------------------------
@@ -259,55 +261,25 @@ async def interview_agents(run_id: str, request: Request) -> dict:
         raise HTTPException(status_code=422, detail="question is required")
 
     sim_dir = settings.data_dir / "simulations" / run_id
-    trace_path = None
-    for seed_dir in sorted(sim_dir.iterdir()) if sim_dir.exists() else []:
-        candidate = seed_dir / "trace.jsonl"
-        if candidate.exists():
-            trace_path = candidate
-            break
+    last_seed = run.get("config", {}).get("seed", 42) + run.get("config", {}).get("n_sensitivity_seeds", 1) - 1
+    run_dir = sim_dir / f"seed_{last_seed}"
 
-    if not trace_path:
-        raise HTTPException(status_code=404, detail="No trace found for this run")
-
-    trace      = TraceWriter(trace_path)
-    all_actions = trace.read_all()
-
-    # Sample up to 5 agents from the trace if none specified
-    if not agent_ids:
-        seen: list[str] = []
-        for a in all_actions:
-            aid = a.get("agent_id", "")
-            if aid and aid not in seen:
-                seen.append(aid)
-            if len(seen) >= 5:
-                break
-        agent_ids = seen
+    if not (run_dir / "agents.json").exists():
+        raise HTTPException(status_code=404, detail="Agent records not found. The simulation may not have completed successfully or was run on an older version.")
 
     budget = BudgetManager(settings.token_budget)
     llm    = LLMProvider(budget=budget)
+    try:
+        interviewer = AgentInterviewer(run_dir, llm)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    if not agent_ids:
+        agent_ids = [a["agent_id"] for a in interviewer.list_agents()[:5]]
 
     responses: dict[str, str] = {}
-    for aid in agent_ids[:5]:
-        posts = [
-            a.get("content", "")
-            for a in all_actions
-            if a.get("agent_id") == aid and a.get("content")
-        ][-6:]
-        context = "\n".join(f"- {p}" for p in posts) or "(no posts in trace)"
-        prompt  = (
-            f"You are a simulation agent. Your recent posts were:\n{context}\n\n"
-            f"Answer this question based on your perspective:\n{question}\n\n"
-            "Respond in 2-4 sentences in first person, staying in character."
-        )
-        try:
-            answer = await llm.complete(
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7,
-                max_tokens=200,
-            )
-            responses[aid] = answer
-        except Exception:
-            responses[aid] = "(agent unavailable)"
+    for aid in agent_ids:
+        responses[aid] = await interviewer.interview_agent(aid, question)
 
     return {"responses": responses, "question": question}
 
@@ -444,12 +416,16 @@ async def _simulation_body(
                 logger.warning("Could not load embedder for project %s", project_id)
 
         # Generate agent population
-        logger.info("Generating %d agents for run %s", config["n_agents"], run_id)
-        await store.add_event(run_id, {
-            "type": "system_log",
-            "timestamp": time.time(),
-            "payload": {"message": f"Generating {config['n_agents']} agents..."},
-        })
+        # Fetch institutional entities to spawn dedicated representative agents
+        institutions = []
+        if not skip_graph and graph_path.exists():
+            try:
+                kg = KnowledgeGraph(graph_path)
+                # Look for entities explicitly categorised as 'organization' in the graph
+                institutions = [e for e in kg.entities() if e.get("category") == "organization"]
+                logger.info("Found %d institutional entities to represent", len(institutions))
+            except Exception as e:
+                logger.warning("Could not fetch institutions from graph: %s", e)
 
         persona_gen = PersonaGenerator(llm, seed=config["seed"])
         agents = await persona_gen.generate_population(
@@ -457,6 +433,7 @@ async def _simulation_body(
             topic=config["prediction_question"],
             context=(project.get("seed_text", "") or "")[:2000],
             opinion_dist=config.get("opinion_distribution", "normal"),
+            institutions=institutions if institutions else None,
         )
 
         await store.add_event(run_id, {
@@ -569,10 +546,13 @@ async def _simulation_body(
         await store.add_event(run_id, {
             "type": "system_log",
             "timestamp": time.time(),
-            "payload": {"message": "Generating prediction report..."},
+            "payload": {"message": "Generating prediction report (expert mode)..." if config.get("expert_mode") else "Generating prediction report..."},
         })
 
-        report_md = await report_agent.generate(config["prediction_question"])
+        report_md = await report_agent.generate(
+            config["prediction_question"], 
+            mode="expert" if config.get("expert_mode") else "basic"
+        )
 
         await store.update_run(
             run_id,

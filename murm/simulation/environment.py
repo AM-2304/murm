@@ -177,6 +177,74 @@ class TownHallEnvironment(Environment):
         ]
 
 
+class NetworkedEnvironment(Environment):
+    """
+    Simulates a social media algorithmic feed with echo chambers and follower networks.
+    Instead of a pure chronological feed, feeds are personalized per agent.
+    """
+
+    def __init__(self, scenario_description: str = "", seed: int = 42) -> None:
+        self._scenario = scenario_description
+        self._posts: list[EnvironmentPost] = []
+        self._pinned: list[str] = []
+        self._rng = random.Random(seed)
+        if scenario_description:
+            self._pinned.append(f"[Scenario] {scenario_description}")
+
+    def get_context_feed(self, round_num: int, max_items: int = 10, agent_id: str | None = None) -> list[str]:
+        # Algorithmic feed logic: 
+        # 1. Always show pinned/breaking news
+        # 2. Show recent posts, but probabilistically filtered to simulate algorithmic visibility
+        feed = self._pinned.copy()
+        remaining_slots = max_items - len(feed)
+        
+        if remaining_slots > 0 and self._posts:
+            # Sort by recentness
+            recent = self._posts[-50:]
+            # The "algorithm" picks a personalized subset. We use a seeded random based on agent_id
+            # so the feed is stable within the round but unique to the agent's simulated network.
+            algo_rng = random.Random(f"{agent_id}_{round_num}_{self._rng.random()}")
+            
+            selected = algo_rng.sample(recent, min(len(recent), remaining_slots))
+            # Sort chronologically for readibility
+            selected.sort(key=lambda p: p.round_num)
+            
+            feed += [f"[{p.action_type.upper()}] {p.content}" for p in selected]
+            
+        return feed
+
+    def ingest_action(self, action: dict) -> None:
+        if not action.get("content"):
+            return
+        self._posts.append(EnvironmentPost(
+            author_id=action["agent_id"],
+            content=action["content"],
+            round_num=action["round"],
+            action_type=action.get("action_type", "post"),
+        ))
+
+    def inject_external_event(self, content: str, source: str, round_num: int) -> None:
+        pinned_msg = f"[VIRAL ALGORITHM BOOST — {source}] {content}"
+        self._pinned.append(pinned_msg)
+        self._posts.append(EnvironmentPost(
+            author_id=source,
+            content=content,
+            round_num=round_num,
+            action_type="external_event",
+        ))
+
+    def get_all_posts(self) -> list[dict]:
+        return [
+            {
+                "author_id": p.author_id,
+                "content": p.content,
+                "round": p.round_num,
+                "type": p.action_type,
+            }
+            for p in self._posts
+        ]
+
+
 def build_environment(
     env_type: str,
     scenario_description: str = "",
@@ -190,6 +258,7 @@ def build_environment(
     registry: dict[str, type[Environment]] = {
         "forum": ForumEnvironment,
         "town_hall": TownHallEnvironment,
+        "network": NetworkedEnvironment,
     }
     cls = registry.get(env_type.lower())
     if cls is None:

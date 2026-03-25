@@ -72,6 +72,7 @@ class PersonaGenerator:
         topic: str,
         context: str = "",
         opinion_dist: OpinionDist = "normal",
+        institutions: list[dict] | None = None,
     ) -> list[AgentProfile]:
         assignments = self._compute_assignments(n_agents, opinion_dist)
         logger.info(
@@ -81,32 +82,32 @@ class PersonaGenerator:
 
         # Generate in concurrent batches of 5 — faster than sequential,
         # safe on paid Groq tier (6000 rpm limit, 5 concurrent = trivial load)
-        BATCH = 5
-        profiles: list[AgentProfile] = []
+        # If institutions are provided, assign some agents to represent them
+        institution_list = institutions or []
+        n_inst = min(len(institution_list), max(1, n_agents // 10))
         
-        # Massive archetype seeds to ensure highly divergent demographics
-        archetypes = [
-            "Gen Z College Student", "Mid-career Blue Collar Worker", 
-            "Retired Corporate Executive", "Freelance Artist", 
-            "Rural Small Business Owner", "Immigrant Tech Worker", 
-            "Stay-at-home Parent", "Public School Teacher",
-            "Skeptical Investigative Journalist", "Local Government Staff",
-            "Elderly Pensioner", "Young Entrepreneur", "Gig Economy Driver",
-            "Healthcare Professional", "Finance Bro", "Academic Researcher"
-        ]
-        
-        for start in range(0, n_agents, BATCH):
-            batch = assignments[start:start + BATCH]
-            tasks = [
+        for i in range(n_agents):
+            opinion, role = assignments[i]
+            inst = institution_list[i % len(institution_list)] if i < n_inst else None
+            
+            tasks.append(
                 self._generate_one(
-                    start + j, topic, context, opinion, role,
-                    demographic_seed=self._rng.choice(archetypes)
+                    i, topic, context, opinion, role,
+                    demographic_seed=inst["name"] if inst else self._rng.choice(archetypes),
+                    is_institution=bool(inst),
+                    inst_summary=inst.get("summary", "") if inst else ""
                 )
-                for j, (opinion, role) in enumerate(batch)
-            ]
+            )
+            
+            if len(tasks) >= BATCH:
+                batch_profiles = await asyncio.gather(*tasks, return_exceptions=False)
+                profiles.extend(batch_profiles)
+                tasks = []
+                logger.info("Generated agents up to %d / %d", len(profiles), n_agents)
+
+        if tasks:
             batch_profiles = await asyncio.gather(*tasks, return_exceptions=False)
             profiles.extend(batch_profiles)
-            logger.info("Generated agents %d-%d / %d", start + 1, start + len(batch), n_agents)
 
         return profiles
 
@@ -138,14 +139,22 @@ class PersonaGenerator:
         opinion: OpinionBias,
         role: InfluenceRole,
         demographic_seed: str,
+        is_institution: bool = False,
+        inst_summary: str = "",
     ) -> AgentProfile:
+        inst_instruction = (
+            f"\nAGENT TYPE: INSTITUTIONAL REPRESENTATIVE\nYou represent: {demographic_seed}\nEntity Context: {inst_summary}\n"
+            "Your name, background, and occupation must reflect a formal representative or official of this institution."
+            if is_institution else f"Demographic archetype to embody: {demographic_seed}"
+        )
+        
         user_msg = (
             f"Topic: {topic}\n"
             + (f"Context: {context[:600]}\n" if context else "")
             + f"Assigned opinion: {opinion.value.replace('_', ' ')}\n"
             f"Assigned social role: {role.value.replace('_', ' ')}\n"
-            f"Demographic archetype to embody: {demographic_seed}\n"
-            f"Generate agent #{index + 1}. Ensure the name, background, and occupation strongly reflect the archetype and are entirely unique."
+            + inst_instruction +
+            f"\nGenerate agent #{index + 1}. Ensure the name, background, and occupation are entirely unique."
         )
         try:
             data = await self._llm.complete_json(

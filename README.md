@@ -64,6 +64,11 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 | Static simulation contexts without grounding | Real-world Context Grounding via live Wikipedia injection at Round 0 |
 | No emergence metrics | Shannon entropy, Gini coefficient, polarization index, opinion velocity per round |
 | Single-document context only | Multi-document ingestion: fuse multiple PDFs/text files into one unified graph |
+| Single-pass report generation | **Expert Analysis Mode**: multi-step reasoning (Metrics -> Trace -> Graph) |
+| Non-persistent agents (no follow-up) | **Post-Simulation Interviews**: ask agents "why" after the run completes |
+| Linear broadcast feed only | **Algorithmic Topology**: follower networks and echo chambers (Social Realism) |
+| One-time start-up grounding | **Continuous Data Fusion**: live web updates injected every 3 rounds |
+| Generic agent populations | **Institutional Stakeholders**: representative agents for organizations found in text |
 
 > [!IMPORTANT]
 > **Security Advisory (March 2026):** MURM v0.2.2+ explicitly excludes compromised versions of `litellm` (1.82.7, 1.82.8) following the PyPI supply chain attack. Always ensure you are on the latest version of MURM.
@@ -212,9 +217,10 @@ The system reads your document and draws a map of everything in it - every perso
 Set your parameters:
 - Agents: how many simulated people (20-50 for testing, up to 500 for thorough analysis)
 - Rounds: how many interaction cycles (15 for testing, 30-50 for real runs)
-- Environment: Forum (open discussion) or Town Hall (structured agenda)
-- Opinion distribution: Normal (most people neutral), Bimodal (already polarized), Power Law (momentum toward one side), Uniform (perfectly split)
+- Environment: Forum (chronological), Network (algorithmic echo chambers), or Town Hall (structured agenda)
+- Opinion distribution: Normal, Bimodal, Power Law, or Uniform
 - Sensitivity seeds: how many independent runs to compare (1 for quick results, 3-5 for research)
+- **Expert Analysis Mode**: toggle for 10x deeper multi-step reasoning in the final report.
 
 Optionally add counterfactual events - external events you want to inject at a specific round to test alternative futures.
 
@@ -239,6 +245,12 @@ The report appears when the simulation ends. It contains:
 - A limitations section
 
 You can copy it, download it as a Markdown file, or read the raw text.
+**Step 5 - Follow-up and Interview**
+
+Don't just accept the report. Open the "Deep Interaction" panel to:
+- **Chat with the Analyst**: Ask the Report Agent for clarification on specific evidence.
+- **Interview Agents**: Select specific agents from the roster and ask them direct questions about their personal experience and opinion shifts.
+- **God-View injection**: Inject a new event and "Branch" the simulation to see if it changes the outcome.
 
 ---
 
@@ -262,6 +274,9 @@ murm run --seed-file doc.pdf --question "..." --opinion-dist bimodal
 
 # Check cost before committing
 murm estimate --agents 50 --rounds 30 --seeds 3
+
+# Run with Expert Analysis Mode
+murm run --seed-file doc.pdf --question "..." --expert
 
 # Start the API server
 murm serve --port 8000

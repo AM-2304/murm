@@ -126,6 +126,21 @@ class SimulationEngine:
                 if self._cancelled:
                     self._run.status = SimulationStatus.CANCELLED
                     break
+
+                # Ongoing Data Fusion: Fetch new context every 3 rounds to keep simulation grounded in reality
+                # This makes MURM a "Digital Twin of Public Opinion" that evolves with external info.
+                if round_num > 1 and round_num % 3 == 0:
+                    try:
+                        # Use slightly varied queries or just refresh the same search for updates
+                        refresh_ctx = await fetch_real_world_context(self._config.prediction_question)
+                        if refresh_ctx:
+                            await self._inject_event(round_num, {
+                                "content": f"LATEST UPDATE: {refresh_ctx}",
+                                "source": "Real-Time Intelligence Fusion"
+                            })
+                    except Exception as e:
+                        logger.debug("Ongoing web search failed at round %d: %s", round_num, e)
+
                 await self._run_round(round_num)
                 for event in self._config.counterfactual_events:
                     if event.get("round") == round_num:
@@ -167,8 +182,12 @@ class SimulationEngine:
         if not acting:
             acting = [self._rng.choice(self._agents)]
 
-        feed = self._env.get_context_feed(round_num, max_items=8)
-        tasks = [self._agent_turn(p, round_num, feed) for p in acting]
+        # Try to get personalized feed if environment supports it, else global feed
+        try:
+            tasks = [self._agent_turn(p, round_num, self._env.get_context_feed(round_num, max_items=8, agent_id=p.agent_id)) for p in acting]
+        except TypeError:
+            feed = self._env.get_context_feed(round_num, max_items=8)
+            tasks = [self._agent_turn(p, round_num, feed) for p in acting]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         valid: list[dict] = []

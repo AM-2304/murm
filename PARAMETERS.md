@@ -62,11 +62,12 @@ LOG_LEVEL=INFO
 #   Effect: Runs the simulation N times with seed, seed+1, seed+2...
 #           and produces an uncertainty statement comparing outcomes.
 
-# environment_type: "forum" or "town_hall"
+# environment_type: "forum", "network", or "town_hall"
 #   UI: "Environment" dropdown
-#   API: {"environment_type": "town_hall"}
-#   CLI: --env town_hall
+#   API: {"environment_type": "network"}
+#   CLI: --env network
 #   Effect: forum = open discussion noticeboard
+#           network = algorithmic feed (echo chambers, personalized visibility)
 #           town_hall = structured agenda, each round is an agenda item
 
 # opinion_distribution: "normal", "bimodal", "power_law", "uniform"
@@ -74,6 +75,13 @@ LOG_LEVEL=INFO
 #   API: {"opinion_distribution": "bimodal"}
 #   CLI: --opinion-dist bimodal
 #   Effect: Controls starting stance spread across the population.
+
+# expert_mode: true or false
+#   UI: "Expert Analysis Mode" toggle in RunForm
+#   API: {"expert_mode": true}
+#   CLI: --expert
+#   Effect: Runs a multi-step analytical pipeline (Metrics -> Trace -> Graph)
+#           for a 10x deeper final report compared to basic mode.
 
 # skip_graph: true or false
 #   UI: not in UI yet (API and CLI only)

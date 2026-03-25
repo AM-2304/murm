@@ -41,7 +41,7 @@ Given a document and an ontology, extract all entities and relations.
 Return ONLY valid JSON matching this schema exactly:
 {
   "entities": [
-    {"name": "string", "type": "string from ontology", "summary": "1–2 sentence description"}
+    {"name": "string", "type": "string from ontology", "category": "individual|organization|other", "summary": "1–2 sentence description"}
   ],
   "relations": [
     {"source": "entity name", "target": "entity name", "relation": "relation type from ontology"}

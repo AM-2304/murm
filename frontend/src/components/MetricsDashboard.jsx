@@ -66,7 +66,7 @@ export function MetricsDashboard({ currentRound, totalActions, latestMetrics, me
         <Stat label="Gini" value={(m.gini ?? m.gini_coefficient) != null ? (m.gini ?? m.gini_coefficient).toFixed(3) : "—"} sub="posting inequality" />
         <Stat label="Velocity" value={m.opinion_velocity != null ? m.opinion_velocity.toFixed(3) : "—"} sub="mean shift / agent" />
         <Stat label="Activity" value={m.activity_rate != null ? (m.activity_rate * 100).toFixed(0) + "%" : "—"} sub="agents acting" />
-        <Stat label="Brier" value={m.brier_score != null ? m.brier_score.toFixed(4) : "—"} sub="accuracy score" />
+        <Stat label="Brier" value={m.brier_score != null ? m.brier_score.toFixed(4) : "—"} sub="accuracy (needs ground truth)" />
       </div>
 
       {status === "running" && !latestMetrics && (

@@ -158,6 +158,33 @@ class SimulationEngine:
         finally:
             self._run.completed_at = time.time()
             self._trace.flush()
+
+            # Save the final agent states to agents.json for the Interviewer
+            if self._trace_dir:
+                try:
+                    agents_data = []
+                    for agent in self._agents:
+                        adata = {
+                            "agent_id": agent.agent_id,
+                            "name": agent.name,
+                            "occupation": agent.occupation,
+                            "age": agent.age,
+                            "opinion_bias": agent.opinion_bias.value,
+                            "influence_role": agent.influence_role.value,
+                            "expertise_domains": agent.expertise_domains,
+                            "final_state": {
+                                "current_opinion": agent.state.current_opinion.value,
+                                "posts_made": agent.state.posts_made,
+                                "connections": list(agent.state.connections),
+                                "opinion_history": list(agent.state.opinion_history)
+                            }
+                        }
+                        agents_data.append(adata)
+                    with open(self._trace_dir / "agents.json", "w") as f:
+                        json.dump(agents_data, f, indent=2)
+                except Exception as e:
+                    logger.error("Failed to save agents.json: %s", e)
+
             await self._emit("simulation_ended", {
                 "status":        self._run.status.value,
                 "total_actions": self._run.total_actions,

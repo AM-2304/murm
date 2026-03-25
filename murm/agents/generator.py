@@ -123,7 +123,7 @@ class PersonaGenerator:
             f"Brainstorm 8 diverse person archetypes (demographics and ideological roles) "
             f"that have a major stake in the following topic: {topic}\n"
             f"Context: {context[:500]}\n"
-            "Return ONLY a bullet-point list of 8 arcanhetypes, each 5-8 words long. "
+            "Return ONLY a bullet-point list of 8 archetypes, each 5-8 words long. "
             "Ensure they represent different age groups, socio-economic backgrounds, and expertise levels."
         )
         try:

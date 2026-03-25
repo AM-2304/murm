@@ -14,7 +14,7 @@ const lbl = {
 const DEFAULTS = {
   n_agents: 5, n_rounds: 5, seed: 42, n_sensitivity_seeds: 1,
   environment_type: "forum", opinion_distribution: "normal",
-  scenario_description: "", expert_mode: false,
+  scenario_description: "", expert_mode: true,
 };
 
 function CostBar({ estimate, loading }) {

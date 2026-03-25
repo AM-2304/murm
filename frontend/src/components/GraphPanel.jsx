@@ -75,6 +75,18 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadSVG = () => {
+    if (!svgRef.current) return;
+    const svgData = new XMLSerializer().serializeToString(svgRef.current);
+    const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `murm_graph_visual_${Date.now()}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // 1. Sync initial backend graph
   useEffect(() => {
     if (!graphData) return;
@@ -417,9 +429,14 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
       {/* Controls hint */}
       <div style={{ position: "absolute", bottom: 10, left: 12, fontSize: 9, color: "#FFFFFF", opacity: 0.35, letterSpacing: "0.08em", display: "flex", gap: 16 }}>
         <span>SCROLL TO ZOOM · DRAG TO MOVE · CLICK NODE FOR DETAILS</span>
-        <button onClick={handleDownload} style={{ fontSize: 9, background: "none", border: "none", color: "#50E3C2", cursor: "pointer", letterSpacing: "0.08em" }}>
-          [ DOWNLOAD JSON ]
-        </button>
+        <div>
+          <button onClick={handleDownload} style={{ fontSize: 9, background: "none", border: "none", color: "#50E3C2", cursor: "pointer", letterSpacing: "0.08em", marginRight: 12 }}>
+            [ DOWNLOAD JSON ]
+          </button>
+          <button onClick={handleDownloadSVG} style={{ fontSize: 9, background: "none", border: "none", color: "#50E3C2", cursor: "pointer", letterSpacing: "0.08em" }}>
+            [ DOWNLOAD SVG ]
+          </button>
+        </div>
       </div>
 
       {/* Legend */}

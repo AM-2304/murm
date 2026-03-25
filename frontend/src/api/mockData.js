@@ -138,7 +138,34 @@ export const MOCK_SSE_EVENTS = [
   }
 ];
 
-export const MOCK_REPORT = `## MURM Analytical Report: Federal Reserve Competence Perception
+export const MOCK_BASIC_REPORT = `## Definition of the Prediction Target
+Prediction Target: How will public sentiment shift towards the Fed's competence over the next 30 days?
+
+Simulation Parameters: 5 agents · 5 rounds · Forum environment · Normal opinion distribution · Seed 42
+
+--
+
+## Prediction
+Public sentiment toward the Federal Reserve's competence will shift net-negative over the next 30 days, resulting in a substantial and highly visible decline in general public approval. However, the simulation indicates this decline will be sharply bifurcated along socioeconomic lines. Institutional investors and financial professionals will maintain or slightly increase their confidence in the Fed, interpreting the Dot Plot as rational forward guidance. In stark contrast, consumers, small business owners, and retail investors will register significant drops in perceived competence, driven by immediate financial distress and historical distrust.
+
+## Evidence & Quantitative Dynamics
+The simulation provided compelling evidence of this trajectory through its metrics. Opinion Entropy rose from 1.54 bits to 1.91 bits, approaching the theoretical maximum. This indicated that the crowd was not converging on a single shared reality, but rather fragmenting into mutually exclusive camps. Polarization skyrocketed from 0.62 to 0.85, confirming that the agent's interaction deepened existing divides. 
+
+Specifically, agent Sarah Okonkwo repeatedly anchored to her immediate financial reality ("my employees are gone"), completely rejecting the forward-looking signals of agent Marcus Chen, who focused on the Dot Plot. The opinion velocity dropped from 0.40 to 0.08 by Round 5, signaling that these polarized positions hardened quickly and became entirely resistant to new data or counter-arguments.
+
+## Emergence Analysis & Turning Points
+The simulation demonstrated a complex dynamic of "Discursive Deadlock". Initially, institutional agents attempted to sway consumer agents using macroeconomic projections. However, the critical turning point arrived in Round 3, when agent Chloe Andersen noted the communications failure. This broke the institutional echo chamber and validated the consumer frustration. There was no consensus formed; instead, the collective dynamically split into a permanent, intractable two-faction system.
+
+## Confidence Assessment
+Score: 82
+
+This score is justified by the extremely high internal consistency of the simulated run. The velocity decline indicates strong agreement on the trajectory, and the structural causes (class-based realities) are deeply embedded. The score stops short of 90 because the limited agent pool size (N=5) creates minor margin for systemic variance.
+
+## Limitations & Edge Cases
+The simulation is bounded by the current macro environment. An exogenous shock—such as an unexpected geopolitical energy crisis or a catastrophic jobs report—could completely alter this trajectory, forcing the Fed into an emergency cut that would break the identified paradigm. Additionally, irrational viral social media movements were not modeled, which could amplify negative sentiment beyond the 82% confidence threshold.
+`;
+
+export const MOCK_EXPERT_REPORT = `## MURM Intelligence Report: Federal Reserve Competence Perception
 
 Prediction Target: How will public sentiment shift towards the Fed's competence over the next 30 days?
 
@@ -146,73 +173,40 @@ Simulation Parameters: 5 agents · 5 rounds · Forum environment · Normal opini
 
 --
 
-### [EXPERT MODE] ANALYTICAL SYNTHESIS
+## Executive Summary
+The simulation indicates a high probability that public sentiment toward the Federal Reserve will sour significantly over the next thirty days. This decline will not be uniform; it will manifest as a severe, class-based bifurcation. While institutional players will view the Fed's "higher for longer" stance and forward dot-plot guidance as highly competent and necessary, the general public and small-business sector will interpret the exact same data as evidence of catastrophic detachment. 
 
-#### Phase 1: Quantitative Metrics Analysis
-The simulation showed a steady rise in **Opinion Entropy (1.54 -> 1.91)** and a sharp climb in **Polarization (0.62 -> 0.85)**. Unlike typical convergence models, the discussion of Fed policy acted as a wedge, driving agents into fixed, demographic-bound clusters. The low Gini coefficient (0.10) confirms that this polarization wasn't driven by a few loud voices, but was a broad-based structural divergence across the entire simulated population.
+## Key Themes & Findings
+1. The "Two Realities" Disconnect: Macroeconomic projections are actively rejected by agents facing immediate microeconomic distress.
+2. The Limits of Forward Guidance: Future promises (the Dot Plot) hold zero persuasive value for actors experiencing present insolvency.
+3. Communication Over Substance: The Fed's policy substance was largely agreed upon by experts, but the communication strategy was universally condemned as inadequate for Main Street.
 
-#### Phase 2: Trace & Discourse Analysis
-Discourse analysis of the 25 agent actions reveals a "Two Realities" phenomenon. Institutional agents (e.g., Marcus Chen) focused almost exclusively on the **forward-looking signal** of the Dot Plot. In contrast, retail and consumer agents (e.g., Sarah Okonkwo, Elena Vasquez) focused on **historical breach of trust**. The simulation reached a "discursive deadlock" in Round 3, where no further amount of forward-looking data could shift the negative anchors of the consumer-class agents.
+## Deep Evidence & Metrics Breakdown
+The quantitative emergence metrics paint a stark picture of failure to achieve consensus. 
+* **Opinion Entropy (1.54 -> 1.91):** The crowd fragmented. Instead of coming together, agents explored the absolute extremes of the opinion spectrum.
+* **Polarization Index (0.62 -> 0.85):** The divergence was not minor; it was structural. The population physically split into bimodal camps that refused to integrate.
+* **Opinion Velocity (0.40 -> 0.08):** By Round 4, opinions were entirely locked. Agents stopped listening to each other and simply shouted their pre-existing anchors.
 
-#### Phase 3: Graph Grounding
-The local knowledge graph correctly identified the **"Interest Rates" -> "Consumers"** connection as a primary pain node. The emergence of the **"Public Sentiment" -> "Federal Reserve"** negative relationship was grounded in the text's own citation of "Core Inflation," reinforcing that agents were correctly utilizing the seed document's factual constraints to justify their emotional shifts.
+## Discourse & Influencer Analysis
+The discourse was initially driven by institutional figures like Marcus Chen, who attempted to establish the narrative using the Dot Plot. However, the narrative control was violently seized in Round 2 by Sarah Okonkwo (the small business owner). Her appeals to immediate payroll realities acted as memetic contagion, forcing even neutral observers like the journalist (Chloe Andersen) to concede that the Fed's communication had failed. This was the critical turning point that cemented the negative trajectory.
 
---
+## Contextual Grounding & Entity Impact
+The local knowledge graph perfectly grounded this dispute. The relationship between "Federal Reserve" -> "Interest Rates" was weaponized by the "Consumers" generic grouping. The text's citation of "Core Inflation" was utilized by the experts to justify patience, but ignored entirely by the consumers who focused purely on "Public Sentiment" and immediate liquidity.
 
-### 1. Direct Prediction
+## Impact of Theoretical Interventions
+Baseline operations ran without God Mode injection, proving that the system naturally tends toward hostility on this topic. If a "Surprise 50bps Cut" were injected conceptually, the metrics suggest institutional agents would rebel, flipping the polarization dynamic entirely. 
 
-Public sentiment toward the Federal Reserve's competence will shift net-negative over the next 30 days, with an estimated 12-18 point decline in general public approval. However, this decline will be sharply bifurcated along socioeconomic lines: institutional investors and financial professionals will maintain or slightly increase their confidence in the Fed, while consumers, small business owners, and retail investors will register significant drops in perceived competence.
+## Leading Indicators & Warning Signs
+To track this in reality, analysts must watch the spread between consumer confidence indices and the S&P 500. A widening gap in these two metrics over the next 14 days will serve as absolute confirmation of this simulation's bifurcated prediction.
 
-### 2. Evidence from Simulation
+## Actionable Takeaways & Strategic Suggestions
+* **For Institutional Investors:** Ignore retail sentiment indicators; they will flash red but will not alter Fed policy timelines.
+* **For Policymakers:** Immediately pivot communication strategies to acknowledge microeconomic pain. Do not rely on the Dot Plot in consumer-facing messaging.
 
-The multi-agent simulation produced several key findings across 5 rounds of structured deliberation:
+## Confidence Assessment & Limitations
+Score: 86
 
-- Immediate Polarization: Within the first round, agents split into two distinct camps that never reconverged. The polarization index rose from 0.62 to 0.85 across the simulation, indicating deepening — not moderating — divisions.
-- The "Dot Plot Divide": The single most contentious element was the Fed's dot plot showing 3 projected rate cuts. Investor-class agents interpreted this as competent forward guidance. Consumer-class agents interpreted it as an empty promise based on prior broken commitments.
-- Communication Failure Consensus: By Round 3, even the most pro-Fed agent (Marcus Chen, macro-economist) conceded that the Fed's communication strategy had failed, while maintaining that the underlying policy was sound. This nuanced position reflects expert consensus in real-world analysis.
-- Class-Based Perception Split: Agent Chloe Andersen's Round 4 synthesis crystallized the core finding: "The Fed's competence perception will split along class lines. Net negative for general public, net positive for institutional investors."
-
-### 3. Emergence Analysis
-
-- Opinion Entropy: Rose from 1.54 to 1.91 bits across the simulation, indicating increasing diversity of opinion rather than convergence. This suggests the Fed's "wait and see" approach actively generates confusion rather than confidence.
-- Polarization Index: Climbed steadily from 0.62 to 0.85, confirming that discussion of Fed policy amplifies division rather than building consensus. This has direct implications for social media sentiment analysis.
-- Gini Coefficient: Dropped from 0.20 to 0.10, meaning participation became more equal over time — all agents were deeply engaged. This suggests the topic has high salience across demographics.
-- Opinion Velocity: Declined from 0.40 to 0.08, indicating agents locked into their positions quickly. Early impressions of Fed competence are "sticky" and resistant to counter-argument.
-
-### 4. Confidence Assessment
-
-Confidence Score: 82/100
-
-The simulation exhibited high internal consistency: the mechanism of sentiment shift (class-based bifurcation driven by communication failure rather than policy substance) was independently identified by multiple agents with different priors. The velocity decline indicates strong agreement on the direction, even while disagreeing on magnitude. Confidence is reduced from 90 to 82 because: (a) the simulation used 5 agents, which limits emergent complexity, and (b) external shocks (geopolitical events, surprise economic data) could override the baseline trajectory.
-
-### 5. Uncertainty Statement
-
-The primary sources of uncertainty are:
-
-- External Economic Shocks: A sudden spike in core PCE or an unexpected jobs report within the 30-day window could either accelerate or reverse the predicted sentiment shift.
-- Fed Communication Pivot: If the Fed issues an unscheduled statement or the Chair gives an interview that directly addresses public frustration, the communication-failure driver could be partially neutralized.
-- Political Amplification: The proximity to election rhetoric could amplify negative sentiment beyond the simulation's baseline estimate.
-
-Multi-seed variance was low (σ = 0.04 on final entropy), indicating the prediction is robust to initialization differences.
-
-### 6. Limitations
-
-- Population size of 5 agents limits the diversity of perspectives (particularly missing: labor unions, retirees on fixed income, mortgage holders, international investors).
-- The Forum environment encourages confrontation; a Town Hall environment might produce different dynamics.
-- The simulation does not model real-time information flow from financial media, which could accelerate or dampen sentiment shifts.
-- All agents have English-language, US-centric perspectives. International perception of the Fed may diverge significantly.
-
-### 7. Opinion Distribution
-
-Dominant: disagree 20%
-
-### 8. Token Usage
-
-Prompt Tokens: 16,800
-Completion Tokens: 6,200
-Total Tokens: 23,000
-Estimated Cost USD: $0.0042
-Budget Used: 100%
+The confidence in the bifurcation prediction is immensely high due to the structural lockdown observed in the opinion velocity metrics. However, the simulation intentionally restricts the population size, failing to capture the potential mitigating effects of highly targeted regional fiscal policies or the noise introduced by the upcoming election cycle, lowering the score slightly from absolute certainty.
 `;
 
 export const MOCK_COST_ESTIMATE = {

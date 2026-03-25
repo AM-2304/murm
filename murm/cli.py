@@ -47,7 +47,7 @@ def serve(host: str, port: int, reload: bool):
 
 
 @main.command()
-@click.option("--seed-file", type=click.Path(exists=True), required=False, help="Path to seed document")
+@click.option("--seed-file", type=click.Path(exists=True), required=False, multiple=True, help="Path to seed document(s) — repeatable for multi-document ingestion")
 @click.option("--seed-text", type=str, required=False, help="Inline seed text")
 @click.option("--question", type=str, required=True, help="Prediction question")
 @click.option("--agents", type=int, default=50, show_default=True, help="Number of agents")
@@ -88,10 +88,14 @@ def run(
     resample_agents,
     output,
 ):
-    """Run a complete simulation and write the report to a file."""
+    """Run a complete simulation and write the report to a file.
+
+    Multi-document: pass --seed-file multiple times to merge several documents
+    into a single unified knowledge graph with cross-document relation discovery.
+    """
     asyncio.run(
         _run_pipeline(
-            seed_file=seed_file,
+            seed_files=list(seed_file),
             seed_text=seed_text,
             question=question,
             n_agents=agents,
@@ -133,7 +137,7 @@ def estimate(agents, rounds, seeds):
 
 
 async def _run_pipeline(
-    seed_file,
+    seed_files: list[str],
     seed_text,
     question: str,
     n_agents: int,
@@ -159,22 +163,32 @@ async def _run_pipeline(
     from murm.simulation.engine import SimulationConfig, SimulationEngine
     from murm.simulation.environment import build_environment
     from murm.simulation.trace import TraceWriter
-    # extract_text_from_path belongs in a shared utility layer, not in murm.api.routes.graph.
-    # If that utility does not yet exist, create murm/utils/text.py and move _extract_text there.
-    # Both the CLI and the API routes should import from that shared location.
     from murm.utils.text import extract_text_from_path
 
     settings.ensure_dirs()
     run_id = str(uuid.uuid4())
 
-    # Load and normalise seed content
-    if seed_file:
-        text = extract_text_from_path(Path(seed_file))
-    elif seed_text:
-        text = seed_text
-    else:
+    # Load and normalise seed content — supports multi-document
+    documents: list[tuple[str, str]] = []  # (text, title) pairs
+    if seed_files:
+        for fpath in seed_files:
+            p = Path(fpath)
+            extracted = extract_text_from_path(p)
+            if extracted.strip():
+                documents.append((extracted, p.stem))
+            else:
+                console.print(f"[yellow]Warning: could not extract text from {p.name}[/yellow]")
+
+    if seed_text:
+        documents.append((seed_text, "inline_seed"))
+
+    if not documents:
         console.print("[red]Provide --seed-file or --seed-text[/red]")
         sys.exit(1)
+
+    # Combined text for agent context (all documents concatenated)
+    text = "\n\n---\n\n".join(doc_text for doc_text, _ in documents)
+    is_multi = len(documents) > 1
 
     console.print(f"[bold]MURM[/bold] run {run_id[:8]}")
     console.print(f"  Question: {question}")
@@ -189,9 +203,13 @@ async def _run_pipeline(
     embedder = None
 
     if not skip_graph:
-        console.print("[cyan]Extracting knowledge graph...[/cyan]")
         extractor = EntityExtractor(llm)
-        extraction = await extractor.extract(text, title="seed")
+        if is_multi:
+            console.print(f"[cyan]Extracting knowledge graph from {len(documents)} documents (multi-document fusion)...[/cyan]")
+            extraction = await extractor.extract_multi(documents)
+        else:
+            console.print("[cyan]Extracting knowledge graph...[/cyan]")
+            extraction = await extractor.extract(text, title=documents[0][1])
 
         project_id = run_id
         graph_path = settings.data_dir / "projects" / project_id / "graph.json"

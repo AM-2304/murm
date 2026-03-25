@@ -86,18 +86,22 @@ async def _run_graph_build(project_id: str, body: dict, store: ProjectStore) -> 
         if project is None:
             return
 
-        seed_text = project.get("seed_text", "")
-        upload_dir = settings.data_dir / "projects" / project_id / "uploads"
+        # Collect all document sources as (text, title) pairs
+        documents: list[tuple[str, str]] = []
 
-        # Extract text from uploaded files
+        seed_text = project.get("seed_text", "")
+        if seed_text.strip():
+            documents.append((seed_text, project.get("title", "inline_text")))
+
+        upload_dir = settings.data_dir / "projects" / project_id / "uploads"
         for fname in project.get("seed_files", []):
             file_path = upload_dir / fname
             if file_path.exists():
                 extracted = extract_text_from_path(file_path)
-                if extracted:
-                    seed_text = seed_text + "\n\n" + extracted
+                if extracted.strip():
+                    documents.append((extracted, file_path.stem))
 
-        if not seed_text.strip():
+        if not documents:
             await store.update_project(project_id, status="error")
             logger.error("Project %s has no seed text to extract from", project_id)
             return
@@ -106,10 +110,8 @@ async def _run_graph_build(project_id: str, body: dict, store: ProjectStore) -> 
         llm = LLMProvider(budget=budget)
         extractor = EntityExtractor(llm)
 
-        result = await extractor.extract(
-            document_text=seed_text,
-            title=project.get("title", "Document"),
-        )
+        # Use multi-document extraction when there are multiple sources
+        result = await extractor.extract_multi(documents)
 
         graph_dir = settings.data_dir / "projects" / project_id
         graph_dir.mkdir(parents=True, exist_ok=True)

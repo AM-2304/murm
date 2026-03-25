@@ -7,6 +7,7 @@ Usage:
   murm serve                    # Start the API server
   murm run --help               # Run a simulation from CLI
   murm estimate --help          # Pre-flight cost estimate
+  murm calibrate --help         # Score a past prediction
 """
 
 from __future__ import annotations
@@ -137,6 +138,36 @@ def estimate(agents, rounds, seeds):
     for k, v in est.items():
         table.add_row(k.replace("_", " ").title(), str(v))
     console.print(table)
+
+
+@main.command()
+@click.option("--run-id", type=str, required=True, help="Run ID to resolve")
+@click.option("--truth", type=str, required=True, help="Actual outcome (e.g. 'agree', 'disagree')")
+def calibrate(run_id, truth):
+    """Submit ground truth for a completed simulation and compute Brier score.
+    
+    This allows you to benchmark MURM's accuracy against real-world events.
+    Calibration requires a local data directory with a murm.db present.
+    """
+    from murm.config import settings
+    from murm.api.store import ProjectStore
+
+    async def _resolve():
+        store = ProjectStore(settings.data_dir / "murm.db")
+        await store.initialize()
+        try:
+            res = await store.resolve_run(run_id, truth)
+            table = Table(title=f"Calibration Result: {run_id[:8]}", show_header=True)
+            table.add_column("Metric", style="cyan")
+            table.add_column("Value", justify="right")
+            table.add_row("Outcome Match", "YES" if res["match"] else "NO")
+            table.add_row("Brier Score", f"{res['brier_score']:.4f}")
+            table.add_row("Interpretation", "Perfect" if res["brier_score"] == 0 else "Good" if res["brier_score"] < 0.1 else "Poor")
+            console.print(table)
+        except Exception as e:
+            console.print(f"[red]Error resolving run: {e}[/red]")
+
+    asyncio.run(_resolve())
 
 
 async def _run_pipeline(

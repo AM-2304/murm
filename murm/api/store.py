@@ -5,7 +5,7 @@ scattered JSON file writes with a single SQLite database per data directory.
 
 Schema:
   projects:    project_id, title, created_at, seed_text, seed_filenames, ontology_json, status
-  runs:        run_id, project_id, config_json, status, created_at, completed_at, report_md, error
+  runs:        run_id, project_id, config_json, status, created_at, completed_at, report_md, error, ground_truth, brier_score
   events:      event_id, run_id, round, event_type, payload_json, ts
 """
 
@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS runs (
     report_md    TEXT DEFAULT '',
     error        TEXT DEFAULT '',
     metrics      TEXT DEFAULT '{}',
+    ground_truth TEXT,
+    brier_score  REAL,
     FOREIGN KEY (project_id) REFERENCES projects(project_id)
 );
 
@@ -144,7 +146,7 @@ class ProjectStore:
         return rid
 
     async def update_run(self, run_id: str, **fields: Any) -> None:
-        allowed = {"status", "completed_at", "report_md", "error", "metrics"}
+        allowed = {"status", "completed_at", "report_md", "error", "metrics", "ground_truth", "brier_score"}
         updates = {k: (json.dumps(v) if isinstance(v, (dict, list)) else v)
                    for k, v in fields.items() if k in allowed}
         if not updates:
@@ -198,10 +200,6 @@ class ProjectStore:
     # Deletion
 
     async def delete_project(self, project_id: str) -> None:
-        """
-        Remove a project and all its runs and events from the database.
-        Disk-side artifacts (graph files, uploads) are the caller's responsibility.
-        """
         async with aiosqlite.connect(self._db_path) as db:
             await db.execute(
                 "DELETE FROM events WHERE run_id IN "
@@ -213,10 +211,6 @@ class ProjectStore:
             await db.commit()
 
     async def delete_run(self, run_id: str) -> None:
-        """
-        Remove a single run and all its events from the database.
-        Trace files on disk are the caller's responsibility.
-        """
         async with aiosqlite.connect(self._db_path) as db:
             await db.execute("DELETE FROM events WHERE run_id = ?", (run_id,))
             await db.execute("DELETE FROM runs WHERE run_id = ?", (run_id,))
@@ -237,19 +231,27 @@ class ProjectStore:
             result.append(d)
         return result
 
-    # Compatibility aliases used by runs.py
-
     async def get_events(self, run_id: str, since: float = 0.0) -> list[dict]:
-        """Alias for get_events_since with a positional-friendly `since` kwarg."""
         return await self.get_events_since(run_id, since_ts=since)
 
     async def add_event(self, run_id: str, event: dict) -> None:
-        """Adapter: accepts the flat event dicts produced by SimulationEngine.
-
-        Expected shape: {"type": str, "payload": dict, "timestamp": float, ...}
-        Maps to append_event(run_id, event_type, payload, round_num).
-        """
         event_type = event.get("type", "unknown")
-        payload    = event.get("payload", event)   # fall back to whole dict if no payload key
+        payload    = event.get("payload", event)
         round_num  = event.get("round") or (payload.get("round") if isinstance(payload, dict) else None)
         await self.append_event(run_id, event_type, payload if isinstance(payload, dict) else {"data": payload}, round_num)
+
+    async def resolve_run(self, run_id: str, ground_truth: str) -> dict:
+        run = await self.get_run(run_id)
+        if not run:
+            raise ValueError(f"Run {run_id} not found")
+        
+        from murm.analysis.calibration import compute_brier_score
+        dominant = run.get("metrics", {}).get("dominant_opinion", "neutral")
+        
+        # Binary Brier Mapping
+        confidence = 0.8 # Default trust level
+        match = (ground_truth.lower() == dominant.lower())
+        brier = compute_brier_score(confidence, match)
+
+        await self.update_run(run_id, ground_truth=ground_truth, brier_score=brier)
+        return {"run_id": run_id, "brier_score": round(brier, 4), "match": match}

@@ -12,6 +12,7 @@ Endpoints:
   POST /api/runs/{run_id}/interview  In-character agent interview
   POST /api/runs/{run_id}/inject   God-view: inject an event mid-simulation
   POST /api/runs/{run_id}/chat     Chat with the ReportAgent post-simulation
+  POST /api/runs/{run_id}/resolve  Resolve a prediction with ground truth (Brier Score)
 """
 
 from __future__ import annotations
@@ -265,7 +266,7 @@ async def interview_agents(run_id: str, request: Request) -> dict:
     run_dir = sim_dir / f"seed_{last_seed}"
 
     if not (run_dir / "agents.json").exists():
-        raise HTTPException(status_code=404, detail="Agent records not found. The simulation may not have completed successfully or was run on an older version.")
+        raise HTTPException(status_code=404, detail='Agent records not found. The simulation may not have completed successfully or was run on an older version = "0.3.0"')
 
     budget = BudgetManager(settings.token_budget)
     llm    = LLMProvider(budget=budget)
@@ -357,6 +358,25 @@ async def chat_with_report_agent(run_id: str, request: Request) -> dict:
         raise HTTPException(status_code=503, detail=f"LLM error: {exc}")
 
     return {"response": response, "role": "assistant"}
+@router.post("/{run_id}/resolve")
+async def resolve_run(run_id: str, request: Request) -> dict:
+    """
+    Submit ground truth for a completed simulation.
+    Calculates the Brier score for the prediction.
+    """
+    store: ProjectStore = request.app.state.store
+    body = await request.json()
+    ground_truth = body.get("ground_truth")
+    if not ground_truth:
+        raise HTTPException(status_code=422, detail="ground_truth is required")
+    
+    try:
+        result = await store.resolve_run(run_id, ground_truth)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ------------------------------------------------------------------

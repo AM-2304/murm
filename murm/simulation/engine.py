@@ -164,20 +164,13 @@ class SimulationEngine:
                 try:
                     agents_data = []
                     for agent in self._agents:
-                        adata = {
-                            "agent_id": agent.agent_id,
-                            "name": agent.name,
-                            "occupation": agent.occupation,
-                            "age": agent.age,
-                            "opinion_bias": agent.opinion_bias.value,
-                            "influence_role": agent.influence_role.value,
-                            "expertise_domains": agent.expertise_domains,
-                            "final_state": {
-                                "current_opinion": agent.state.current_opinion.value,
-                                "posts_made": agent.state.posts_made,
-                                "connections": list(agent.state.connections),
-                                "opinion_history": list(agent.state.opinion_history)
-                            }
+                        state = self._states[agent.agent_id]
+                        adata = agent.to_dict()  # gets all profile info
+                        adata["final_state"] = {
+                            "current_opinion": state.current_opinion.value,
+                            "posts_made": state.posts_made,
+                            "connections": list(state.connections),
+                            "opinion_history": list(state.opinion_history)
                         }
                         agents_data.append(adata)
                     with open(self._trace_dir / "agents.json", "w") as f:

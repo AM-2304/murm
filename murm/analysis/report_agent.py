@@ -92,21 +92,42 @@ class ReportAgent:
             # Step 4: Final Comprehensive Synthesis
             synth_prompt = f"""PREDICTION QUESTION: {prediction_question}
 
-You are an elite intelligence analyst. Synthesize the findings of your sub-agents into a massive, highly detailed final report.
+You are an elite intelligence analyst drafting an exhaustive, thesis-level prediction report. Synthesize the findings of your sub-agents into a massive, highly detailed final report.
 
 METRICS ANALYSIS: {metrics_analysis}
 DISCOURSE ANALYSIS: {trace_analysis}
 FACTUAL GROUNDING: {graph_analysis}
 GOD MODE INTERVENTIONS: {injection_summary}
 
-Write a comprehensive report with:
-## Executive Prediction (Direct answer)
-## Impact of Theoretical Interventions (Contrast baseline vs God Mode injections)
-## Deep Evidence (Metrics & Turning Points)
-## Discourse & Influencer Analysis (Who drove the conversation and arguments used)
-## Contextual Grounding (How the entities shaped opinions)
-## Confidence Assessment (0-100 with strict justification)
-## Strategic Vulnerabilities & Limitations
+Write an incredibly comprehensive, in-depth thesis report with the following structure. Do not hold back on detail. Exceed standard lengths. Include sub-bullets where helpful.
+
+## Executive Summary
+Provide a powerful, direct answer to the prediction question. Outline the core trajectory of the simulation in 2-3 substantial paragraphs.
+
+## Key Themes & Findings
+Identify the top 3-5 macro themes that defined the simulation. What overarching narratives dominated the population's shifting opinions?
+
+## Deep Evidence & Metrics Breakdown
+Provide a meticulous breakdown of the quantitative metrics (Entropy, Polarization, Velocity). Explain exactly what these numbers mean in the context of the prediction.
+
+## Discourse & Influencer Analysis
+Who drove the conversation? What specific arguments gained traction, and when did the major turning points occur? Detail the memetic spread of ideas.
+
+## Contextual Grounding & Entity Impact
+How did the specific factual entities from the source material shape the debate? Which entities acted as catalysts for opinion shifts?
+
+## Impact of Theoretical Interventions
+Contrast the baseline trajectory against any God Mode injections. How resilient was the population's consensus to external shocks?
+
+## Leading Indicators & Warning Signs
+What statistical or narrative signals emerged that observers should watch out for in the real world to track this prediction?
+
+## Actionable Takeaways & Strategic Suggestions
+Provide concrete, pragmatic suggestions based on the emergent dynamics. What should the stakeholders do next?
+
+## Confidence Assessment & Limitations
+Score: [write a number 0-100]
+Provide a strict, critical justification for this score. Outline the strategic vulnerabilities and real-world factors the simulation failed to capture.
 """
             report = await self._llm.complete([{"role": "system", "content": _REPORT_SYSTEM}, {"role": "user", "content": synth_prompt}], temperature=0.4, max_tokens=4000)
             return report.strip()
@@ -200,27 +221,23 @@ REPRESENTATIVE AGENT POSTS FROM SIMULATION:
 KNOWLEDGE GRAPH ENTITIES:
 {graph_str}
 
-Write a complete prediction report with EXACTLY these five sections:
+Write a very detailed, thorough analytical prediction report with EXACTLY these five sections. Do not use brief summaries; write expansive, multi-paragraph analyses for each section.
 
 ## Prediction
-State your direct, specific answer to the prediction question in one clear paragraph.
-Commit to a direction. Do not say "it depends" without specifying what it depends on.
+State your direct, specific answer to the prediction question in a comprehensive opening analysis. Commit to a direction. Explore the nuances of why the simulation naturally gravitated toward this outcome.
 
-## Evidence
-Cite specific metrics (entropy trajectory, polarization, velocity) and specific
-agent behaviors from the trace that support your prediction.
+## Evidence & Quantitative Dynamics
+Cite specific metrics (entropy trajectory, polarization, velocity) and quote specific agent behaviors from the trace that support your prediction. Analyze the velocity of opinion changes and the fragmentation (entropy) of the crowd in extreme detail.
 
-## Emergence Analysis
-What collective dynamics emerged from the agent interactions?
-Did opinion shift, stabilise, or split? What drove the dominant pattern?
+## Emergence Analysis & Turning Points
+What complex collective dynamics emerged from the agent interactions? Did opinion shift, stabilize, or split into factions? Identify the precise turning points or dominant arguments that broke echo chambers or solidified consensus.
 
 ## Confidence Assessment
 Score: [write a number 0-100]
-Justify the score based on consensus strength, entropy trajectory, and how
-consistent the simulation results were across rounds.
+Justify the score rigorously based on consensus strength, entropy stability, and how consistent the simulation results were across rounds. Discuss the margin of error.
 
-## Limitations
-What real-world factors are not captured by this simulation that could alter the prediction?"""
+## Limitations & Edge Cases
+What real-world factors, irrational behaviors, or exogenous shocks are not captured by this simulation that could completely alter the prediction? Be hyper-critical of the simulation's boundaries."""
 
 
 def _fallback_report(question: str, ctx: dict, error: str) -> str:

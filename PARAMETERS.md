@@ -144,6 +144,14 @@ LOG_LEVEL=INFO
 # To change globally:
 #   def get_context_feed(self, round_num: int, max_items: int = 5) -> list[str]:
 
+# Live Web Grounding Refresh Rate
+# File: murm/simulation/engine.py, method: execute()
+# What: The modulo (n % 3 == 0) that triggers a context refresh.
+# Effect: Fetches new Wikipedia data to update the simulation's factual context.
+#         Default is every 3 rounds. Use 0 or -1 in code to disable.
+#         This enables "Continuous Data Fusion" to stay current with dynamic topics.
+
+
 # RAG context per agent turn
 # File: murm/simulation/engine.py, inside _agent_turn method
 # Variable: top_k in embedder.query call (currently 3)

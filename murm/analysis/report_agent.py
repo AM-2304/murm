@@ -169,7 +169,7 @@ Provide a strict, critical justification for this score. Outline the strategic v
         # Top entities from graph
         graph_entities: list[str] = []
         try:
-            for n in (self._graph.get_all_nodes() or [])[:10]:
+            for n in (self._graph.entities() or [])[:10]:
                 s = n.get("summary", "")[:80]
                 graph_entities.append(f"{n.get('name','')} ({n.get('entity_type','')}): {s}")
         except Exception:

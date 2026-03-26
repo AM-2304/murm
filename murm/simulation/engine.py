@@ -86,6 +86,7 @@ class SimulationEngine:
         self._agents   = agents
         self._env      = environment
         self._config   = config
+        self._trace_dir = trace_dir
         self._trace    = TraceWriter(trace_dir / "trace.jsonl", flush_every=1)
         self._budget   = budget
         self._embedder = embedder
@@ -497,9 +498,9 @@ def _extract_sentiment_heuristic(ltext: str) -> str:
     neg_count = len(words & neg_words)
 
     if pos_count > neg_count + 1:
-        return "agree"
+        return "strongly_agree"
     elif neg_count > pos_count + 1:
-        return "disagree"
+        return "strongly_disagree"
     elif pos_count > neg_count:
         return "agree"
     elif neg_count > pos_count:

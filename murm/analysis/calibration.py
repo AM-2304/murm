@@ -81,7 +81,7 @@ def compute_sensitivity(metrics_per_run: list[dict]) -> SensitivityResult:
     entropies = [m.get("final_entropy", 0.0) for m in metrics_per_run]
     polarizations = [m.get("polarization_index", 0.0) for m in metrics_per_run]
     dominant_opinions = [
-        _mode_of_list(m.get("entropy_time_series", [])) for m in metrics_per_run
+        _mode_of_list(m.get("dominant_opinion_time_series", [])) for m in metrics_per_run
     ]
 
     mean_entropy = statistics.mean(entropies) if entropies else 0.0

@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.2] - 2026-03-26
+
+### Fixed
+- **Indexing Error**: Resolved the critical `Cannot index into list[str]` type error in `murm/simulation/web.py` by transitioning all list slicing to the more robust `itertools.islice()` mechanism, ensuring cross-version compatibility for type checkers and runtimes.
+
 ## [0.4.1] - 2026-03-26
 
 ### Added

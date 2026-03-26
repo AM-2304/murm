@@ -1,10 +1,17 @@
+from __future__ import annotations
 import logging
 import asyncio
 import httpx
+import itertools
 
 logger = logging.getLogger(__name__)
 
+_OFFLINE_MODE = False
+
 async def fetch_real_world_context(query: str, max_words: int = 100) -> str | None:
+    global _OFFLINE_MODE
+    if _OFFLINE_MODE:
+        return None
     """
     Fetches real-world factual context from Wikipedia to ground the simulation.
     Uses the public MediaWiki API. No auth required.
@@ -17,7 +24,8 @@ async def fetch_real_world_context(query: str, max_words: int = 100) -> str | No
     words = search_term.split()
     if len(words) > 5:
         # Just use the first few significant words if it's a long sentence
-        search_term = " ".join([w for w in words if len(w) > 3][:3])
+        filtered_words = [w for w in words if len(w) > 3]
+        search_term = " ".join(itertools.islice(filtered_words, 3))
 
     url = "https://en.wikipedia.org/w/api.php"
     params = {
@@ -58,10 +66,11 @@ async def fetch_real_world_context(query: str, max_words: int = 100) -> str | No
                     text = page_info["extract"].replace("\n", " ").strip()
                     # Truncate to word limit
                     words = text.split()
-                    truncated = " ".join(words[:max_words])
+                    truncated = " ".join(itertools.islice(words, max_words))
                     return f"Real-world fact ({title}): {truncated}..."
                     
     except Exception as e:
         logger.debug(f"Web search failed for query '{query}': {e}")
+        _OFFLINE_MODE = True
         
     return None

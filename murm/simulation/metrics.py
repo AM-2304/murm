@@ -149,6 +149,7 @@ class MetricsCollector:
             "avg_opinion_velocity": round(
                 sum(r.opinion_velocity for r in self._rounds) / len(self._rounds), 4
             ),
+            "dominant_opinion_time_series": [r.dominant_opinion for r in self._rounds],
             "entropy_time_series": [r.opinion_entropy for r in self._rounds],
             "consensus_time_series": [r.consensus_score for r in self._rounds],
         }

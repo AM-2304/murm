@@ -6,7 +6,6 @@ a hard limit. Also provides pre-flight cost estimation before expensive runs.
 from __future__ import annotations
 
 import logging
-import threading
 from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
@@ -81,20 +80,16 @@ class BudgetExceeded(Exception):
 
 
 class BudgetManager:
-    _lock: threading.Lock
-
     def __init__(self, budget_tokens: int = 0) -> None:
         self._budget  = budget_tokens
         self._usage   = TokenUsage()
-        self._lock    = threading.Lock()
 
     def record(self, prompt_tokens: int, completion_tokens: int, model: str) -> None:
         cost = _model_cost(prompt_tokens, completion_tokens, model)
-        with self._lock:
-            self._usage.prompt_tokens      += prompt_tokens
-            self._usage.completion_tokens  += completion_tokens
-            self._usage.estimated_cost_usd += cost
-            if self._budget > 0 and self._usage.total_tokens > self._budget:
+        self._usage.prompt_tokens      += prompt_tokens
+        self._usage.completion_tokens  += completion_tokens
+        self._usage.estimated_cost_usd += cost
+        if self._budget > 0 and self._usage.total_tokens > self._budget:
                 raise BudgetExceeded(
                     f"Token budget of {self._budget:,} exceeded "
                     f"(used {self._usage.total_tokens:,}). "
@@ -161,12 +156,11 @@ class BudgetManager:
 
     @property
     def usage(self) -> TokenUsage:
-        with self._lock:
-            return TokenUsage(
-                prompt_tokens=self._usage.prompt_tokens,
-                completion_tokens=self._usage.completion_tokens,
-                estimated_cost_usd=self._usage.estimated_cost_usd,
-            )
+        return TokenUsage(
+            prompt_tokens=self._usage.prompt_tokens,
+            completion_tokens=self._usage.completion_tokens,
+            estimated_cost_usd=self._usage.estimated_cost_usd,
+        )
 
     def snapshot(self) -> dict:
         u = self.usage
@@ -182,8 +176,7 @@ class BudgetManager:
         }
 
     def reset(self) -> None:
-        with self._lock:
-            self._usage = TokenUsage()
+        self._usage = TokenUsage()
 
 
 

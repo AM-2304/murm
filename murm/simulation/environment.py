@@ -124,11 +124,11 @@ class TownHallEnvironment(Environment):
 
     def __init__(
         self,
-        agenda_items: list[str],
+        agenda_items: list[str] | None = None,
         scenario_description: str = "",
         seed: int = 42,
     ) -> None:
-        self._agenda = agenda_items
+        self._agenda = agenda_items or []
         self._scenario = scenario_description
         self._posts: list[EnvironmentPost] = []
         self._external_events: list[str] = []
@@ -185,6 +185,7 @@ class NetworkedEnvironment(Environment):
 
     def __init__(self, scenario_description: str = "", seed: int = 42) -> None:
         self._scenario = scenario_description
+        self._seed = seed
         self._posts: list[EnvironmentPost] = []
         self._pinned: list[str] = []
         self._rng = random.Random(seed)
@@ -203,7 +204,7 @@ class NetworkedEnvironment(Environment):
             recent = self._posts[-50:]
             # The "algorithm" picks a personalized subset. We use a seeded random based on agent_id
             # so the feed is stable within the round but unique to the agent's simulated network.
-            algo_rng = random.Random(f"{agent_id}_{round_num}_{self._rng.random()}")
+            algo_rng = random.Random(f"{agent_id}_{round_num}_{self._seed}")
             
             selected = algo_rng.sample(recent, min(len(recent), remaining_slots))
             # Sort chronologically for readibility

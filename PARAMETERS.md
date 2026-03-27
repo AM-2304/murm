@@ -147,9 +147,25 @@ LOG_LEVEL=INFO
 # Live Web Grounding Refresh Rate
 # File: murm/simulation/engine.py, method: execute()
 # What: The modulo (n % 3 == 0) that triggers a context refresh.
-# Effect: Fetches new Wikipedia data to update the simulation's factual context.
+# Effect: Fetches new real-world data to update the simulation's factual context.
 #         Default is every 3 rounds. Use 0 or -1 in code to disable.
 #         This enables "Continuous Data Fusion" to stay current with dynamic topics.
+
+# News / Real-Time Grounding Provider
+# File: murm/simulation/web.py
+# Env vars: NEWS_PROVIDER, NEWS_API_KEY
+# Supported providers:
+#   gnews     - Google News headlines via GNews API (recommended, 100 req/day free)
+#   newsdata  - NewsData.io articles (200 req/day free, 50+ languages)
+#   newsapi   - NewsAPI.org headlines (free dev tier, localhost only)
+#   wikipedia - MediaWiki extracts (unlimited, no key needed, zero-config default)
+# Behavior:
+#   If NEWS_API_KEY is set, uses the specified NEWS_PROVIDER (defaults to gnews).
+#   If no key is set, falls back to Wikipedia automatically.
+#   If the configured provider fails, Wikipedia is used as ultimate fallback.
+# Example .env:
+#   NEWS_PROVIDER=gnews
+#   NEWS_API_KEY=abc123def456
 
 
 # RAG context per agent turn

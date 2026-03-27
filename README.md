@@ -17,8 +17,7 @@ You give MURM a seed document (a news article, a policy draft, a financial repor
 ---
  ## You can try it yourself here: [MURM](https://murm-sigma.vercel.app/)
  
- 
-### Visual Walkthrough
+ ### Visual Walkthrough
 
 *(Another demo run focused on a Central Bank Rate Decision seed document)*
 
@@ -65,13 +64,13 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 | No physical graph growth during simulation | Real-time Dynamic GraphRAG visualization that structurally evolves as agents interact |
 | Low-density or completely missing relations | "Extreme Density" ontology instruction overriding forcing high node/edge counts |
 | Homogeneous agent populations | Deeply-seeded demographic archetypes for rigorous population diversity |
-| Static simulation contexts without grounding | Real-world Context Grounding via live Wikipedia injection at Round 0 |
+| Static simulation contexts without grounding | Real-world Context Grounding via live News/Wikipedia injection at Round 0 |
 | No emergence metrics | Shannon entropy, Gini coefficient, polarization index, opinion velocity per round |
 | Single-document context only | Multi-document ingestion: fuse multiple PDFs/text files into one unified graph |
 | Single-pass report generation | **Expert Analysis Mode**: multi-step reasoning (Metrics -> Trace -> Graph) |
 | Non-persistent agents (no follow-up) | **Post-Simulation Interviews**: ask agents "why" after the run completes |
 | Linear broadcast feed only | **Algorithmic Topology**: follower networks and echo chambers (Social Realism) |
-| One-time start-up grounding | **Continuous Data Fusion**: live web updates injected every 3 rounds |
+| One-time start-up grounding | **Continuous Data Fusion**: live real-time news updates injected every 3 rounds |
 | Generic agent populations | **Institutional Stakeholders**: representative agents for organizations found in text |
 
 > [!IMPORTANT]

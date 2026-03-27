@@ -59,6 +59,10 @@ class Settings(BaseSettings):
     default_rounds: int = Field(default=30, alias="DEFAULT_ROUNDS")
     default_seed: int = Field(default=42, alias="DEFAULT_SEED")
 
+    # News / Real-time grounding
+    news_provider: str = Field(default="wikipedia", alias="NEWS_PROVIDER")
+    news_api_key: str | None = Field(default=None, alias="NEWS_API_KEY")
+
     # Log level
     log_level: LogLevel = Field(default=LogLevel.INFO, alias="LOG_LEVEL")
 

@@ -1,15 +1,18 @@
 """
-Report generation agent.
+Report generation agent — Analytical-grade intelligence reports.
 
-Offers two modes: basic and expert.
-- Basic: Assembly of evidence into a single prompt for a quick, robust prediction.
-- Expert: A multi-step structured synthesis pipeline (Metrics Analysis -> Trace Analysis -> 
-          Graph Grounding -> Final Synthesis) providing 10x deeper insight than standard.
-          This handles complex reasoning without brittle ReACT loops that fail on diverse providers.
+Two modes:
+- Basic: Single-prompt structured prediction.
+- Expert: Multi-step synthesis pipeline (Metrics → Discourse → Graph → Synthesis)
+  producing numbered-section intelligence briefs with cited evidence.
+
+Report style: Numbered findings (01, 02, 03...), evidence blockquotes,
+academic tone, no emojis, no markdown bold. Clean, minimalist, yet deeply analytical.
 """
 
 from __future__ import annotations
 
+import itertools
 import json
 import logging
 from pathlib import Path
@@ -21,14 +24,20 @@ from murm.simulation.trace import TraceWriter
 
 logger = logging.getLogger(__name__)
 
+# ─── System Prompt ───────────────────────────────────────────────────────────
+
 _REPORT_SYSTEM = (
-    "You are a rigorous, highly-professional social science analyst. "
-    "Write a structured prediction report grounded exclusively in the simulation evidence provided. "
-    "Be direct and concrete. Make a specific prediction. Do not hedge excessively. "
-    "CRITICAL NOTICES ON FORMATTING: \n"
-    "1. NEVER use any emojis or emoticons under any circumstances.\n"
-    "2. NEVER use markdown bolding (**text**) or italics (*text*). Use pure plain text only.\n"
-    "3. NEVER use dramatic conversational filler, stylistic decorators, or AI cliches. Provide clean, academic, intelligence-grade text."
+    "You are an elite intelligence analyst producing structured prediction reports. "
+    "Your reports follow the style of professional policy analysis and social science intelligence briefs.\n\n"
+    "ABSOLUTE RULES:\n"
+    "1. NEVER use any emojis, emoticons, or unicode decorators.\n"
+    "2. NEVER use markdown bold (**text**) or italics (*text*) or headers with more than two # marks.\n"
+    "3. Use numbered section prefixes (01, 02, 03) for major findings.\n"
+    "4. When citing specific agent discourse or simulated posts, wrap them in blockquotes (> lines).\n"
+    "5. Write in precise, academic prose. No filler, no hedging, no AI cliches.\n"
+    "6. Section titles must be DECLARATIVE FINDINGS, not questions.\n"
+    "7. Keep the report between 6-8 focused sections. Quality over quantity.\n"
+    "8. Start with an assertive, specific title that states your core prediction — not the question restated."
 )
 
 
@@ -55,10 +64,12 @@ class ReportAgent:
             return await self._generate_expert(prediction_question, ctx)
         return await self._generate_basic(prediction_question, ctx)
 
+    # ─── Basic Mode ──────────────────────────────────────────────────────
+
     async def _generate_basic(self, prediction_question: str, ctx: dict) -> str:
         prompt = _build_report_prompt(prediction_question, ctx)
 
-        logger.info("Generating basic report for: %s", prediction_question[:80])
+        logger.info("Generating basic report for: %s", str(prediction_question)[0:80])
         try:
             report = await self._llm.complete(
                 messages=[
@@ -66,77 +77,113 @@ class ReportAgent:
                     {"role": "user",   "content": prompt},
                 ],
                 temperature=0.3,
-                max_tokens=3000,
+                max_tokens=3500,
             )
-            return report.strip() or "Report generation returned an empty response."
+            return str(report).strip() or "Report generation returned an empty response."
         except Exception as exc:
             logger.error("Report generation failed: %s", exc)
             return _fallback_report(prediction_question, ctx, str(exc))
 
+    # ─── Expert Mode (Multi-Step Synthesis) ──────────────────────────────
+
     async def _generate_expert(self, prediction_question: str, ctx: dict) -> str:
-        # Identify injections (God Mode)
         injection_summary = "\n".join(ctx.get('injections', [])) or "None (Baseline Run)"
 
         try:
             # Step 1: Deep Metrics Analysis
-            metrics_prompt = f"Analyze these simulation metrics for anomalies, turning points, and convergence patterns:\n{json.dumps(ctx['metrics'], indent=2)}\nOpinion trend:\n{json.dumps(ctx['opinion_trend'], indent=2)}"
-            metrics_analysis = await self._llm.complete([{"role": "user", "content": metrics_prompt}], max_tokens=1000)
-            
+            metrics_prompt = (
+                "Analyze these simulation metrics for anomalies, turning points, "
+                "convergence patterns, and inflection moments. Identify which rounds "
+                "showed the most volatile shifts and why.\n"
+                f"Metrics:\n{json.dumps(ctx['metrics'], indent=2)}\n"
+                f"Opinion trend by round:\n{json.dumps(ctx['opinion_trend'], indent=2)}"
+            )
+            metrics_analysis = await self._llm.complete(
+                [{"role": "user", "content": metrics_prompt}], max_tokens=1200
+            )
+
             # Step 2: Agent Discourse Trace Analysis
             trace_str = "\n".join(ctx['trace_sample'])
-            trace_prompt = f"Analyze this agent discourse trace. Identify key arguments, influencer impacts, and moments where opinions shifted:\n{trace_str}"
-            trace_analysis = await self._llm.complete([{"role": "user", "content": trace_prompt}], max_tokens=1000)
+            trace_prompt = (
+                "Analyze this agent discourse trace from a social simulation. "
+                "Identify: (a) the 3 most influential arguments that shifted opinions, "
+                "(b) specific turning point moments, (c) echo chamber formation or breaking, "
+                "(d) the memetic spread pattern of dominant narratives.\n"
+                "Cite specific agent posts as evidence using blockquotes.\n"
+                f"Trace:\n{trace_str}"
+            )
+            trace_analysis = await self._llm.complete(
+                [{"role": "user", "content": trace_prompt}], max_tokens=1200
+            )
 
             # Step 3: Graph Grounding
             graph_str = "\n".join(ctx['graph_entities'])
-            graph_prompt = f"Correlate the discourse with these factual entities from the source document. What entities drove the debate?\n{graph_str}"
-            graph_analysis = await self._llm.complete([{"role": "user", "content": graph_prompt}], max_tokens=1000)
+            graph_prompt = (
+                "Correlate the simulation discourse with these factual entities "
+                "extracted from the source document. Which entities acted as catalysts? "
+                "Which were ignored despite their importance? How did factual grounding "
+                "shape opinion trajectories?\n"
+                f"Entities:\n{graph_str}"
+            )
+            graph_analysis = await self._llm.complete(
+                [{"role": "user", "content": graph_prompt}], max_tokens=1000
+            )
 
             # Step 4: Final Comprehensive Synthesis
             synth_prompt = f"""PREDICTION QUESTION: {prediction_question}
 
-You are an elite intelligence analyst drafting an exhaustive, thesis-level prediction report. Synthesize the findings of your sub-agents into a massive, highly detailed final report.
+You are drafting a professional intelligence prediction report. Synthesize the findings below into a structured report that follows the MiroFish intelligence brief format.
 
-METRICS ANALYSIS: {metrics_analysis}
-DISCOURSE ANALYSIS: {trace_analysis}
-FACTUAL GROUNDING: {graph_analysis}
-GOD MODE INTERVENTIONS: {injection_summary}
+SUB-ANALYSIS INPUTS:
+Metrics Analysis: {str(metrics_analysis)}
+Discourse Analysis: {str(trace_analysis)}
+Factual Grounding: {str(graph_analysis)}
+Intervention Log: {injection_summary}
+Simulation Parameters: {ctx['n_agents']} agents, {ctx['n_rounds']} rounds, {ctx['total_actions']} total actions
 
-Write an incredibly comprehensive, in-depth thesis report with the following structure. Do not hold back on detail. Exceed standard lengths. Include sub-bullets where helpful.
+REPORT STRUCTURE (follow this exactly):
 
-## Executive Summary
-Provide a powerful, direct answer to the prediction question. Outline the core trajectory of the simulation in 2-3 substantial paragraphs.
+# [Write an assertive title that states your core prediction as a declarative finding]
 
-## Key Themes & Findings
-Identify the top 3-5 macro themes that defined the simulation. What overarching narratives dominated the population's shifting opinions?
+## Executive Intelligence Summary
+Write 2-3 dense paragraphs providing your direct, confident answer to the prediction question. State the outcome, the confidence level, and the primary mechanism that drove the result. This section alone should give a busy reader everything they need.
 
-## Deep Evidence & Metrics Breakdown
-Provide a meticulous breakdown of the quantitative metrics (Entropy, Polarization, Velocity). Explain exactly what these numbers mean in the context of the prediction.
+## 01 -- [Primary Finding: Write a declarative title about the core opinion trajectory]
+Explain the dominant opinion shift using metrics (entropy, polarization, velocity). Ground your analysis in specific numbers. Cite 1-2 specific agent posts as blockquote evidence. Conclude with the structural mechanism that produced this outcome.
 
-## Discourse & Influencer Analysis
-Who drove the conversation? What specific arguments gained traction, and when did the major turning points occur? Detail the memetic spread of ideas.
+## 02 -- [Secondary Finding: Write a declarative title about discourse dynamics and influence]
+Who drove the debate? What arguments gained traction? When did the major turning points occur? Cite specific agent posts. Analyze the memetic spread of dominant narratives and whether echo chambers formed or broke.
 
-## Contextual Grounding & Entity Impact
-How did the specific factual entities from the source material shape the debate? Which entities acted as catalysts for opinion shifts?
+## 03 -- [Tertiary Finding: Write a declarative title about real-world grounding impact]
+How did the factual entities from the knowledge graph shape agent behavior? Which real-world facts acted as anchors? Were any critical facts ignored? Connect the simulation dynamics back to the real world.
 
-## Impact of Theoretical Interventions
-Contrast the baseline trajectory against any God Mode injections. How resilient was the population's consensus to external shocks?
+## 04 -- [Intervention Resilience Analysis]
+If any God Mode interventions or counterfactual events were injected, analyze how the population responded. Was consensus fragile or robust? How quickly did the group adapt to external shocks? If no interventions occurred, analyze the natural resilience of the emergent consensus.
 
-## Leading Indicators & Warning Signs
-What statistical or narrative signals emerged that observers should watch out for in the real world to track this prediction?
+## Quantitative Dashboard
+Present the key metrics in a clean, interpretive format:
+- Opinion Entropy: [value] -- [1-sentence interpretation]
+- Polarization Index: [value] -- [1-sentence interpretation]  
+- Opinion Velocity: [value] -- [1-sentence interpretation]
+- Consensus Strength: [value] -- [1-sentence interpretation]
+- Total Opinion Shifts: [value]
 
-## Actionable Takeaways & Strategic Suggestions
-Provide concrete, pragmatic suggestions based on the emergent dynamics. What should the stakeholders do next?
-
-## Confidence Assessment & Limitations
-Score: [write a number 0-100]
-Provide a strict, critical justification for this score. Outline the strategic vulnerabilities and real-world factors the simulation failed to capture.
+## Strategic Outlook and Confidence
+Confidence Score: [0-100]
+Write a rigorous justification for this score. Outline the top 3 limitations of the simulation. Identify the specific real-world factors, irrational behaviors, or exogenous shocks not captured that could alter this prediction. End with 2-3 concrete, actionable recommendations for stakeholders.
 """
-            report = await self._llm.complete([{"role": "system", "content": _REPORT_SYSTEM}, {"role": "user", "content": synth_prompt}], temperature=0.4, max_tokens=4000)
-            return report.strip()
+            report = await self._llm.complete(
+                [{"role": "system", "content": _REPORT_SYSTEM},
+                 {"role": "user", "content": synth_prompt}],
+                temperature=0.35,
+                max_tokens=4500,
+            )
+            return str(report).strip()
         except Exception as exc:
             logger.error("Expert report generation failed: %s", exc)
             return _fallback_report(prediction_question, ctx, str(exc))
+
+    # ─── Context Assembly ────────────────────────────────────────────────
 
     def _assemble_context(self, question: str) -> dict:
         # Read all trace actions
@@ -146,10 +193,11 @@ Provide a strict, critical justification for this score. Outline the strategic v
         except Exception:
             pass
 
-        # Subsample evenly for the prompt (40 actions max to stay within token budget)
-        n = min(40, len(all_actions))
+        # Subsample evenly for the prompt (50 actions max for richer evidence)
+        n = min(50, len(all_actions))
         step = max(1, len(all_actions) // n) if n else 1
-        sampled = all_actions[::step][:n]
+        sampled_indices = list(range(0, len(all_actions), step))
+        sampled = [all_actions[i] for i in list(itertools.islice(sampled_indices, n))]
 
         # Build opinion trend by round
         by_round: dict[int, list[str]] = {}
@@ -157,31 +205,37 @@ Provide a strict, critical justification for this score. Outline the strategic v
             r = a.get("round", 0)
             op = a.get("opinion_shift") or a.get("current_opinion", "")
             if op:
-                by_round.setdefault(r, []).append(op)
+                by_round.setdefault(r, []).append(str(op))
 
         opinion_trend: dict[str, str] = {}
         for r, ops in sorted(by_round.items()):
             counts: dict[str, int] = {}
             for o in ops:
                 counts[o] = counts.get(o, 0) + 1
-            opinion_trend[f"round_{r}"] = max(counts, key=counts.get) if counts else "neutral"
+            opinion_trend[f"round_{r}"] = max(counts, key=lambda k: counts[k]) if counts else "neutral"
 
         # Top entities from graph
         graph_entities: list[str] = []
         try:
-            for n in (self._graph.entities() or [])[:10]:
-                s = n.get("summary", "")[:80]
-                graph_entities.append(f"{n.get('name','')} ({n.get('entity_type','')}): {s}")
+            entities = self._graph.entities() or []
+            for node in list(itertools.islice(entities, 12)):
+                s = str(node.get("summary", ""))[0:100]
+                graph_entities.append(
+                    f"{node.get('name', '')} ({node.get('entity_type', '')}): {s}"
+                )
         except Exception:
             pass
 
-        # Format trace sample
+        # Format trace sample with richer context
         trace_lines = []
         for a in sampled:
-            c = (a.get("content") or "")[:120]
-            if c:
+            content = str(a.get("content") or "")[0:150]
+            if content:
                 op = a.get("opinion_shift") or ""
-                trace_lines.append(f"R{a.get('round','?')} [{op}]: {c}")
+                agent = a.get("agent_id", "?")[0:8]
+                trace_lines.append(
+                    f"Round {a.get('round', '?')} | Agent {agent} [{op}]: {content}"
+                )
 
         # Identify injections (God Mode)
         injections = []
@@ -201,6 +255,8 @@ Provide a strict, critical justification for this score. Outline the strategic v
         }
 
 
+# ─── Prompt Builders ─────────────────────────────────────────────────────────
+
 def _build_report_prompt(question: str, ctx: dict) -> str:
     metrics_str = json.dumps(ctx["metrics"], indent=2) if ctx["metrics"] else "(no metrics)"
     trend_str   = json.dumps(ctx["opinion_trend"], indent=2) if ctx["opinion_trend"] else "(no trend data)"
@@ -215,57 +271,62 @@ Agents: {ctx['n_agents']}  |  Rounds: {ctx['n_rounds']}  |  Total actions: {ctx[
 FINAL EMERGENCE METRICS:
 {metrics_str}
 
-DOMINANT OPINION BY ROUND (tracks how collective stance shifted):
+DOMINANT OPINION BY ROUND:
 {trend_str}
 
-REPRESENTATIVE AGENT POSTS FROM SIMULATION:
+REPRESENTATIVE AGENT DISCOURSE:
 {trace_str}
 
 KNOWLEDGE GRAPH ENTITIES:
 {graph_str}
 
-Write a very detailed, thorough analytical prediction report with EXACTLY these five sections. Do not use brief summaries; write expansive, multi-paragraph analyses for each section.
+Write a structured intelligence prediction report following this format exactly:
 
-## Prediction
-State your direct, specific answer to the prediction question in a comprehensive opening analysis. Commit to a direction. Explore the nuances of why the simulation naturally gravitated toward this outcome.
+# [Assertive prediction title — state your finding, not the question]
 
-## Evidence & Quantitative Dynamics
-Cite specific metrics (entropy trajectory, polarization, velocity) and quote specific agent behaviors from the trace that support your prediction. Analyze the velocity of opinion changes and the fragmentation (entropy) of the crowd in extreme detail.
+## Executive Intelligence Summary
+2-3 paragraphs. Direct answer. Core trajectory. Primary mechanism.
 
-## Emergence Analysis & Turning Points
-What complex collective dynamics emerged from the agent interactions? Did opinion shift, stabilize, or split into factions? Identify the precise turning points or dominant arguments that broke echo chambers or solidified consensus.
+## 01 -- [Primary Finding: declarative title about the core opinion shift]
+Detailed analysis with metrics. Cite agent posts in blockquotes. Explain the mechanism.
 
-## Confidence Assessment
-Score: [write a number 0-100]
-Justify the score rigorously based on consensus strength, entropy stability, and how consistent the simulation results were across rounds. Discuss the margin of error.
+## 02 -- [Secondary Finding: declarative title about discourse dynamics]
+Influential arguments. Turning points. Echo chamber analysis.
 
-## Limitations & Edge Cases
-What real-world factors, irrational behaviors, or exogenous shocks are not captured by this simulation that could completely alter the prediction? Be hyper-critical of the simulation's boundaries."""
+## 03 -- [Tertiary Finding: declarative title about contextual grounding]
+Entity impact. Real-world anchoring. Factual basis of the debate.
+
+## Quantitative Dashboard
+- Opinion Entropy: [value] -- [interpretation]
+- Polarization Index: [value] -- [interpretation]
+- Opinion Velocity: [value] -- [interpretation]
+
+## Strategic Outlook and Confidence
+Score: [0-100]
+Justified rigorously. Top 3 limitations. Actionable recommendations."""
 
 
 def _fallback_report(question: str, ctx: dict, error: str) -> str:
     """Minimal data-only report when the LLM call fails entirely."""
     metrics = ctx.get("metrics") or {}
     trend   = ctx.get("opinion_trend") or {}
-    last_r  = max(trend.keys(), default="—") if trend else "—"
-    dominant = trend.get(last_r, "unknown").replace("_", " ") if trend else "unknown"
+    last_r  = max(trend.keys(), default="--") if trend else "--"
+    dominant = str(trend.get(last_r, "unknown")).replace("_", " ") if trend else "unknown"
 
-    return f"""## Prediction
-Based on raw simulation data, the dominant stance at the end of the simulation was **{dominant}**.
-Full LLM analysis was unavailable (error: {error}).
+    return f"""# Simulation Data Summary (LLM Unavailable)
 
-## Evidence
+## Executive Intelligence Summary
+Based on raw simulation data, the dominant stance at the end of the simulation was {dominant}.
+Full LLM-powered analysis was unavailable due to: {error}
+
+## 01 -- Raw Metrics
 Agents: {ctx.get('n_agents')} | Rounds: {ctx.get('n_rounds')} | Actions: {ctx.get('total_actions', 0)}
-Final metrics: {json.dumps(metrics, indent=2)}
+{json.dumps(metrics, indent=2)}
 
-## Emergence Analysis
-Opinion trend across rounds:
+## 02 -- Opinion Trend
 {json.dumps(trend, indent=2)}
 
-## Confidence Assessment
-Score: 20
-Raw simulation data only — LLM-based analysis was not available.
-
-## Limitations
-The report was generated from raw data without LLM analysis due to an error.
-Please retry the report generation or check your API key and server logs."""
+## Strategic Outlook and Confidence
+Score: 15
+This report contains raw data only. LLM analysis was not available.
+Retry report generation or check API configuration."""

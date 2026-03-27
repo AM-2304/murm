@@ -15,15 +15,19 @@ Architecture compared to MiroFish:
 from __future__ import annotations
 
 import asyncio
+import itertools
 import json
 import logging
+import math
 import random
 import time
+import uuid
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
+from typing import Any, AsyncGenerator, Dict, List, Optional, Union, Iterable
 
-from murm.agents.model import AgentProfile, AgentState, OpinionBias
+from murm.agents.model import AgentProfile, AgentState, OpinionBias, InfluenceRole
 from murm.llm.budget import BudgetManager
 from murm.llm.provider import AgentLLMProvider
 from murm.simulation.environment import Environment
@@ -34,11 +38,22 @@ from murm.simulation.web import fetch_real_world_context
 logger = logging.getLogger(__name__)
 
 
+def _safe_slice(obj: Any, start: int = 0, stop: int | None = None) -> Any:
+    """Robust slicing for both lists and strings to satisfy strict type checkers."""
+    if isinstance(obj, str):
+        if stop is None: return obj[start:]
+        # Use joining of islice for string truncation if standard slicing is rejected
+        return "".join(itertools.islice(obj, start, stop))
+    if isinstance(obj, list):
+        return list(itertools.islice(obj, start, stop))
+    return obj
+
+
 class SimulationStatus(str, Enum):
     PENDING   = "pending"
     RUNNING   = "running"
     COMPLETED = "completed"
-    FAILED    = "failed"
+    FAILED = "failed"
     CANCELLED = "cancelled"
 
 
@@ -83,7 +98,7 @@ class SimulationEngine:
         embedder=None,
     ) -> None:
         self._run_id   = run_id
-        self._agents   = agents
+        self._agents   = {p.agent_id: (p, AgentState(agent_id=p.agent_id, current_opinion=p.opinion_bias)) for p in agents}
         self._env      = environment
         self._config   = config
         self._trace_dir = trace_dir
@@ -164,9 +179,8 @@ class SimulationEngine:
             if self._trace_dir:
                 try:
                     agents_data = []
-                    for agent in self._agents:
-                        state = self._states[agent.agent_id]
-                        adata = agent.to_dict()  # gets all profile info
+                    for agent_id, (profile, state) in self._agents.items():
+                        adata = profile.to_dict()  # gets all profile info
                         adata["final_state"] = {
                             "current_opinion": state.current_opinion.value,
                             "posts_made": state.posts_made,
@@ -200,15 +214,15 @@ class SimulationEngine:
         t0 = time.time()
 
         # Force all agents to participate to ensure non-zero actions in test runs
-        acting = list(self._agents)
+        acting = list(self._agents.keys())
 
         # Try to get personalized feed if environment supports it, else global feed
         tasks = []
         try:
-            tasks = [self._agent_turn(p, round_num, self._env.get_context_feed(round_num, max_items=8, agent_id=p.agent_id)) for p in acting]
+            tasks = [self._agent_turn(agent_id, round_num, self._env.get_context_feed(round_num, max_items=8, agent_id=agent_id)) for agent_id in acting]
         except TypeError:
             feed = self._env.get_context_feed(round_num, max_items=8)
-            tasks = [self._agent_turn(p, round_num, feed) for p in acting]
+            tasks = [self._agent_turn(agent_id, round_num, feed) for agent_id in acting]
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -216,7 +230,7 @@ class SimulationEngine:
         for r in results:
             if isinstance(r, Exception):
                 logger.error("Agent turn CRITICAL failure: %s", r)
-            elif r:
+            elif isinstance(r, dict):
                 valid.append(r)
                 self._env.ingest_action(r)
                 self._trace.write(r)
@@ -224,7 +238,7 @@ class SimulationEngine:
 
         metrics = self._metrics.record_round(
             round_num=round_num,
-            agent_states=list(self._states.values()),
+            agent_states=[state for _, state in self._agents.values()],
             actions=valid,
             elapsed=time.time() - t0,
         )
@@ -235,16 +249,15 @@ class SimulationEngine:
                 "agent_id":    a.get("agent_id", ""),
                 "round":       a.get("round", round_num),
                 "action_type": a.get("action_type", "post"),
-                "content":     a.get("content", "")[:200],
+                "content":     _safe_slice(a.get("content", ""), 0, 600),
                 "opinion_shift": a.get("opinion_shift"),
             }
-            for a in valid[:5] if a.get("content")
+            for a in list(itertools.islice(valid, 5)) if a.get("content")
         ]
         # Derive live polarization from per-round entropy so the dashboard card updates each round.
         # Uses the same formula as MetricsCollector.final_summary(): (max_entropy - entropy) / max_entropy
-        import math as _math
-        _max_entropy = _math.log2(5)   # 5 opinion categories
-        _entropy = metrics.get("opinion_entropy", 0) or 0
+        _max_entropy = math.log2(5)   # 5 opinion categories
+        _entropy = float(metrics.get("opinion_entropy", 0) or 0)
         live_polarization = max(0.0, round((_max_entropy - _entropy) / _max_entropy, 4))
         metrics_with_polarization = {**metrics, "polarization_index": live_polarization}
 
@@ -258,15 +271,15 @@ class SimulationEngine:
         })
 
     async def _agent_turn(
-        self,
-        profile: AgentProfile,
-        round_num: int,
-        feed: list[str],
+        self, agent_id: str, round_num: int, feed: list[str], graph_context: list[str] | None = None
     ) -> dict | None:
-        async with self._sem:
-            state = self._states[profile.agent_id]
-            state.current_round = round_num
+        agent_data = self._agents.get(agent_id)
+        if not agent_data: return None
+        
+        profile, state = agent_data
+        state.current_round = round_num
 
+        async with self._sem:
             # Optional RAG: inject relevant graph facts into the prompt
             graph_ctx: list[str] = []
             if self._embedder and state.last_action_summary:
@@ -276,7 +289,10 @@ class SimulationEngine:
                 except Exception:
                     pass
 
-            prompt = _build_action_prompt(profile, state, feed, round_num, graph_ctx=graph_ctx)
+            prompt = _build_action_prompt(
+                profile, state, feed, round_num, graph_ctx=graph_context or graph_ctx
+            )
+            
             try:
                 raw = await self._llm.complete(
                     messages=[
@@ -284,26 +300,24 @@ class SimulationEngine:
                         {"role": "user",   "content": prompt},
                     ],
                     temperature=0.85,
-                    max_tokens=300,
+                    max_tokens=800,
                 )
-            except Exception as exc:
-                logger.debug("Agent turn failed for %s: %s", profile.agent_id, exc)
+                action = _parse_action(raw, profile.agent_id, round_num)
+                if action:
+                    state.posts_made += 1
+                    state.last_action_summary = _safe_slice(action.get("content", ""), 0, 300)
+                    shift = action.get("opinion_shift")
+                    if shift:
+                        try:
+                            state.shift_opinion(OpinionBias(str(shift)))
+                        except ValueError: pass
+                return action
+            except Exception as e:
+                logger.warning("Agent %s turn failed: %s", agent_id, e)
                 return None
 
-            action = _parse_action(raw, profile.agent_id, round_num)
-            if action:
-                state.posts_made += 1
-                state.last_action_summary = action.get("content", "")[:120]
-                shift = action.get("opinion_shift")
-                if shift:
-                    try:
-                        state.shift_opinion(OpinionBias(shift))
-                    except ValueError:
-                        pass
-            return action
-
     async def _inject_event(self, round_num: int, event: dict) -> None:
-        logger.info("Injecting event at round %d: %s", round_num, event.get("content", "")[:60])
+        logger.info("Injecting event at round %d: %s", round_num, _safe_slice(event.get("content", ""), 0, 60))
         self._env.inject_external_event(
             content=event.get("content", ""),
             source=event.get("source", "external"),
@@ -347,13 +361,24 @@ def _build_action_prompt(
 ) -> str:
     # Support both keyword argument names
     ctx = graph_context if graph_context is not None else (graph_ctx or [])
-    feed_text = " | ".join(item[:100] for item in feed[-4:]) if feed else "No posts yet."
-    ctx_summary = f" Related facts: {' | '.join(ctx)}" if ctx else ""
+    
+    # Separate pinned/breaking news from regular posts to ensure grounding visibility
+    pinned = [item for item in feed if any(tag in item for tag in ["[Scenario]", "[BREAKING", "[VIRAL", "[AGENDA"])]
+    posts = [item for item in feed if item not in pinned]
+    
+    # Take the 2 most recent breaking news/grounding events + last 6 regular posts
+    visible_grounding = " | ".join(_safe_slice(item, 0, 300) for item in _safe_slice(list(reversed(pinned)), 0, 3)) if pinned else ""
+    visible_posts = " | ".join(_safe_slice(item, 0, 250) for item in _safe_slice(list(reversed(posts)), 0, 8)) if posts else "No posts yet."
+    
+    grounding_summary = f"Grounding Context: {visible_grounding}\n" if visible_grounding else ""
+    ctx_summary = f"Related knowledge graph facts: {' | '.join(ctx)}" if ctx else ""
+    
     return (
         f"You are {profile.name}, {profile.occupation}, age {profile.age}."
-        f" Current stance: {state.current_opinion.value.replace('_', ' ')}."
+        f" Current stance: {state.current_opinion.value.replace('_', ' ')}.\n"
+        f"{grounding_summary}"
         f"{ctx_summary}\n"
-        f"Recent community posts (round {round_num}): {feed_text}\n"
+        f"Recent community posts (round {round_num}): {visible_posts}\n"
         f"Write your post, then end with your stance tag."
     )
 
@@ -364,12 +389,13 @@ def _parse_action(raw: str, agent_id: str, round_num: int) -> dict | None:
 
     text = raw.strip()
     # Strip surrounding quotes the LLM sometimes adds
-    if len(text) > 2 and text[0] == '"' and text[-1] == '"':
+    if len(text) > 2 and text.startswith('"') and text.endswith('"'):
         text = text[1:-1].strip()
     # Strip markdown fences
     if text.startswith("```"):
         lines = text.split("\n")
-        text = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:]).strip()
+        content_lines = _safe_slice(lines, 1, len(lines)-1) if lines[-1].strip() == "```" else _safe_slice(lines, 1)
+        text = "\n".join(content_lines).strip()
 
     # Try JSON first
     if text.startswith("{"):
@@ -413,7 +439,7 @@ def _parse_action(raw: str, agent_id: str, round_num: int) -> dict | None:
         "agent_id":     agent_id,
         "round":        round_num,
         "action_type":  "post",
-        "content":      clean_content[:400],
+        "content":      clean_content[:1200],
         "opinion_shift": sentiment,
         "timestamp":    time.time(),
     }

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.3] - 2026-03-27
+
+### Fixed
+- **Agent Output Truncation**: Increased the token limit (300 to 800) and character limits across the simulation engine (`engine.py`) to prevent agent responses and context from being truncated during live simulation feeds.
+- **Static Analysis Import Errors**: Resolved IDE local import issues (`Could not find import`) by adding a properly configured `pyrightconfig.json` to define search roots, virtual environment paths, and explicitly typing asyncio gather results.
+
 ## [0.4.2] - 2026-03-26
 
 ### Fixed

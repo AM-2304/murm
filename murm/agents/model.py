@@ -46,6 +46,8 @@ class AgentProfile:
     name: str
     age: int
     occupation: str
+    location: str                   # city/region/country
+    ethnicity: str                  # ethnic/cultural background
     background: str                 # 2–3 sentence life context
     opinion_bias: OpinionBias
     influence_role: InfluenceRole
@@ -60,13 +62,14 @@ class AgentProfile:
         Render as a compact persona block for injection into agent prompts.
         """
         return (
-            f"You are {self.name}, {self.age} years old, {self.occupation}.\n"
+            f"You are {self.name}, {self.age} years old, {self.occupation} from {self.location}.\n"
+            f"Ethnicity: {self.ethnicity}\n"
             f"Background: {self.background}\n"
             f"Communication style: {self.communication_style}\n"
             f"Expertise: {', '.join(self.expertise_domains)}\n"
             f"Trusted sources: {', '.join(self.trusted_sources)}\n"
-            f"Current stance on the topic: {self.opinion_bias.value.replace('_', ' ')}\n"
-            f"You are a {self.influence_role.value.replace('_', ' ')}."
+            f"Current stance on the topic: {self.opinion_bias.value}\n"
+            f"You are a {self.influence_role.value}."
         )
 
     def to_dict(self) -> dict:
@@ -75,6 +78,8 @@ class AgentProfile:
             "name": self.name,
             "age": self.age,
             "occupation": self.occupation,
+            "location": self.location,
+            "ethnicity": self.ethnicity,
             "background": self.background,
             "opinion_bias": self.opinion_bias.value,
             "influence_role": self.influence_role.value,
@@ -92,6 +97,8 @@ class AgentProfile:
             name=d["name"],
             age=d["age"],
             occupation=d["occupation"],
+            location=d.get("location", "unknown"),
+            ethnicity=d.get("ethnicity", "diverse"),
             background=d["background"],
             opinion_bias=OpinionBias(d["opinion_bias"]),
             influence_role=InfluenceRole(d["influence_role"]),

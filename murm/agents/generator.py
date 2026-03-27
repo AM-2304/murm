@@ -12,6 +12,7 @@ shot it produces a homogeneous cluster. Instead MURM uses a seeded quota system:
 from __future__ import annotations
 
 import asyncio
+import itertools
 import json
 import logging
 import math
@@ -53,9 +54,13 @@ _OPINION_ORDER = [
 # Note: no JSON fences instruction needed here — complete_json() appends it automatically
 _PERSONA_SYSTEM = """You are a social scientist creating realistic simulation personas.
 Generate exactly ONE person profile. The person must fit the assigned opinion and role.
+If a specific geography (country/region) is assigned, the person MUST belong to that culture/location.
+Otherwise, use a diverse, random global or national demographic.
+
 Return ONLY a JSON object with these exact keys:
 name (full name string), age (integer 18-75), occupation (specific job title string),
-background (2 sentence string of life context relevant to the topic),
+location (city/region/country string), ethnicity (string),
+background (2 sentence string of life context including cultural/geographic nuance),
 communication_style (one of: formal casual sarcastic empathetic aggressive analytical),
 expertise_domains (list of 2 strings), trusted_sources (list of 2 strings),
 reaction_speed (float 0.1-1.0), susceptibility (float 0.1-1.0)"""
@@ -75,9 +80,13 @@ class PersonaGenerator:
         institutions: list[dict] | None = None,
     ) -> list[AgentProfile]:
         assignments = self._compute_assignments(n_agents, opinion_dist)
+        
+        # Detect primary geography from context to ground demographics
+        geography = await self._detect_geography(topic, context)
+        
         logger.info(
-            "Generating %d agents, distribution=%s",
-            n_agents, opinion_dist,
+            "Generating %d agents in %s, distribution=%s",
+            n_agents, geography or "global/random", opinion_dist,
         )
 
         # Generate in concurrent batches of 5 - faster than sequential
@@ -92,14 +101,14 @@ class PersonaGenerator:
         # Brainstorm sector-specific archetypes for this topic
         archetypes = await self._brainstorm_archetypes(topic, context)
         
-        for i in range(n_agents):
-            opinion, role = assignments[i]
+        for i, (opinion, role) in enumerate(assignments):
             inst = institution_list[i % len(institution_list)] if i < n_inst else None
             
             tasks.append(
                 self._generate_one(
                     i, topic, context, opinion, role,
                     demographic_seed=inst["name"] if inst else self._rng.choice(archetypes),
+                    geography=geography,
                     is_institution=bool(inst),
                     inst_summary=inst.get("summary", "") if inst else ""
                 )
@@ -116,6 +125,23 @@ class PersonaGenerator:
             profiles.extend(batch_profiles)
 
         return profiles
+
+    async def _detect_geography(self, topic: str, context: str) -> str | None:
+        """Extracts the primary country/region mentioned in the context, if any."""
+        if not context:
+            return None
+        prompt = (
+            f"Given this topic and context, identify the primary country or region it pertains to.\n"
+            f"Topic: {topic}\nContext: {context[:1000]}\n"
+            "If a specific country or city is mentioned as the primary location, return only the name (e.g. 'United States' or 'New York'). "
+            "If multiple or none, return 'None'."
+        )
+        try:
+            res = await self._llm.complete([{"role": "user", "content": prompt}], max_tokens=20)
+            clean = str(res).strip().strip("'\"")
+            return None if clean == "None" or len(clean) > 30 else clean
+        except Exception:
+            return None
 
     async def _brainstorm_archetypes(self, topic: str, context: str) -> list[str]:
         """Dynamically generate sector-relevant archetypes to avoid industry bias."""
@@ -163,9 +189,12 @@ class PersonaGenerator:
         opinion: OpinionBias,
         role: InfluenceRole,
         demographic_seed: str,
+        geography: str | None = None,
         is_institution: bool = False,
         inst_summary: str = "",
     ) -> AgentProfile:
+        geo_instruction = f"\nGEOGRAPHY: {geography}" if geography else "\nGEOGRAPHY: Random diverse global origins (different ethnicities/countries)"
+        
         inst_instruction = (
             f"\nAGENT TYPE: INSTITUTIONAL REPRESENTATIVE\nYou represent: {demographic_seed}\nEntity Context: {inst_summary}\n"
             "Your name, background, and occupation must reflect a formal representative or official of this institution."
@@ -174,9 +203,10 @@ class PersonaGenerator:
         
         user_msg = (
             f"Topic: {topic}\n"
-            + (f"Context: {context[:600]}\n" if context else "")
+            + (f"Context: {str(context)[0:600]}\n" if context else "")
             + f"Assigned opinion: {opinion.value.replace('_', ' ')}\n"
             f"Assigned social role: {role.value.replace('_', ' ')}\n"
+            + geo_instruction
             + inst_instruction +
             f"\nGenerate agent #{index + 1}. Ensure the name, background, and occupation are entirely unique."
         )
@@ -193,19 +223,26 @@ class PersonaGenerator:
             logger.warning("Agent %d generation failed (%s) — using fallback", index, exc)
             data = _fallback_persona(index)
 
+        # Augment data with opinion and role for robust enum instantiation
+        final_data = dict(data) if isinstance(data, dict) else {}
+        final_data["opinion_bias"] = str(opinion.value)
+        final_data["influence_role"] = str(role.value)
+
         return AgentProfile(
             agent_id=str(uuid.uuid4()),
-            name=str(data.get("name", f"Agent_{index}")),
-            age=int(data.get("age", 30)),
-            occupation=str(data.get("occupation", "professional")),
-            background=str(data.get("background", "")),
+            name=str(final_data.get("name", f"Agent_{index}")),
+            age=int(final_data.get("age", 30)),
+            occupation=str(final_data.get("occupation", "professional")),
+            location=str(final_data.get("location", "unknown")),
+            ethnicity=str(final_data.get("ethnicity", "diverse")),
+            background=str(final_data.get("background", "")),
             opinion_bias=opinion,
             influence_role=role,
-            communication_style=str(data.get("communication_style", "casual")),
-            expertise_domains=list(data.get("expertise_domains", [])),
-            trusted_sources=list(data.get("trusted_sources", [])),
-            reaction_speed=float(data.get("reaction_speed", 0.5)),
-            susceptibility=float(data.get("susceptibility", 0.5)),
+            communication_style=str(final_data.get("communication_style", "casual")),
+            expertise_domains=list(final_data.get("expertise_domains", [])),
+            trusted_sources=list(final_data.get("trusted_sources", [])),
+            reaction_speed=float(final_data.get("reaction_speed", 0.5)),
+            susceptibility=float(final_data.get("susceptibility", 0.5)),
         )
 
     @staticmethod

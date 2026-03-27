@@ -51,14 +51,36 @@ _OPINION_ORDER = [
     OpinionBias.STRONGLY_DISAGREE,
 ]
 
+# Explicitly cycling through 16 world regions forces the LLM to produce
+# genuinely diverse populations instead of repeating one ethnicity.
+_GLOBAL_REGIONS = [
+    "Nigeria (West Africa)",
+    "Japan (East Asia)",
+    "Brazil (South America)",
+    "Germany (Western Europe)",
+    "India (South Asia)",
+    "Mexico (Central America)",
+    "South Korea (East Asia)",
+    "Kenya (East Africa)",
+    "United States (North America)",
+    "Turkey (Middle East/Europe)",
+    "Australia (Oceania)",
+    "Poland (Eastern Europe)",
+    "Egypt (North Africa)",
+    "Argentina (South America)",
+    "Philippines (Southeast Asia)",
+    "Canada (North America)",
+]
+
 # Note: no JSON fences instruction needed here — complete_json() appends it automatically
 _PERSONA_SYSTEM = """You are a social scientist creating realistic simulation personas.
 Generate exactly ONE person profile. The person must fit the assigned opinion and role.
-If a specific geography (country/region) is assigned, the person MUST belong to that culture/location.
-Otherwise, use a diverse, random global or national demographic.
+The person MUST belong to the ASSIGNED GEOGRAPHY. Use a culturally authentic name, location, and background for that region.
+Do NOT repeat names or demographics from previous agents.
 
 Return ONLY a JSON object with these exact keys:
-name (full name string), age (integer 18-75), occupation (specific job title string),
+name (full name string — must be culturally authentic for the assigned geography),
+age (integer 18-75), occupation (specific job title string),
 location (city/region/country string), ethnicity (string),
 background (2 sentence string of life context including cultural/geographic nuance),
 communication_style (one of: formal casual sarcastic empathetic aggressive analytical),
@@ -193,7 +215,12 @@ class PersonaGenerator:
         is_institution: bool = False,
         inst_summary: str = "",
     ) -> AgentProfile:
-        geo_instruction = f"\nGEOGRAPHY: {geography}" if geography else "\nGEOGRAPHY: Random diverse global origins (different ethnicities/countries)"
+        if geography:
+            geo_instruction = f"\nASSIGNED GEOGRAPHY: {geography}"
+        else:
+            # Rotate through global regions so every agent gets a different one
+            region = _GLOBAL_REGIONS[index % len(_GLOBAL_REGIONS)]
+            geo_instruction = f"\nASSIGNED GEOGRAPHY: {region}. The agent MUST be from this region with an authentic name and background."
         
         inst_instruction = (
             f"\nAGENT TYPE: INSTITUTIONAL REPRESENTATIVE\nYou represent: {demographic_seed}\nEntity Context: {inst_summary}\n"

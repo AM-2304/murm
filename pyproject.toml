@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "murm"
-version = "0.5.0"
+version = "0.5.1"
 description = "Multi-agent Uncertainty Resolution Machine - predict public opinion with local-first swarm intelligence"
 readme = "README.md"
 requires-python = ">=3.11"

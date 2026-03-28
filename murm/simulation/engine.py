@@ -370,9 +370,9 @@ def _build_action_prompt(
     pinned = [item for item in feed if any(tag in item for tag in ["[Scenario]", "[BREAKING", "[VIRAL", "[AGENDA"])]
     posts = [item for item in feed if item not in pinned]
     
-    # Take the 2 most recent breaking news/grounding events + last 6 regular posts
-    visible_grounding = " | ".join(_safe_slice(item, 0, 300) for item in _safe_slice(list(reversed(pinned)), 0, 3)) if pinned else ""
-    visible_posts = " | ".join(_safe_slice(item, 0, 250) for item in _safe_slice(list(reversed(posts)), 0, 8)) if posts else "No posts yet."
+    # Take the 3 most recent breaking news/grounding events + last 15 regular posts, extending character slices
+    visible_grounding = " | ".join(_safe_slice(item, 0, 600) for item in _safe_slice(list(reversed(pinned)), 0, 3)) if pinned else ""
+    visible_posts = " | ".join(_safe_slice(item, 0, 800) for item in _safe_slice(list(reversed(posts)), 0, 15)) if posts else "No posts yet."
     
     grounding_summary = f"Grounding Context: {visible_grounding}\n" if visible_grounding else ""
     ctx_summary = f"Related knowledge graph facts: {' | '.join(ctx)}" if ctx else ""
@@ -409,11 +409,18 @@ def _parse_action(raw: str, agent_id: str, round_num: int) -> dict | None:
             if data.get("action") == "abstain": return None
             content = str(data.get("content", "")).strip()
             if not content: return None
+            
+            import re
+            clean_content = re.sub(r'\[(?:strongly\s+)?(?:agree|disagree|neutral)\]', '', content, flags=re.IGNORECASE).strip()
+            action_type = data.get("action", "post")
+            if clean_content.lower().startswith("reply to"):
+                action_type = "reply"
+                
             return {
                 "agent_id": agent_id,
                 "round": round_num,
-                "action_type": data.get("action", "post"),
-                "content": content,
+                "action_type": action_type,
+                "content": clean_content[:1200],
                 "opinion_shift": data.get("opinion_shift"),
                 "timestamp": time.time(),
             }

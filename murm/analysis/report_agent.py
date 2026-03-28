@@ -140,6 +140,7 @@ Discourse Analysis: {str(trace_analysis)}
 Factual Grounding: {str(graph_analysis)}
 Intervention Log: {injection_summary}
 Simulation Parameters: {ctx['n_agents']} agents, {ctx['n_rounds']} rounds, {ctx['total_actions']} total actions
+Raw Metrics for Dashboard: {json.dumps(ctx['metrics'], indent=2)}
 
 REPORT STRUCTURE (follow this exactly):
 
@@ -148,25 +149,25 @@ REPORT STRUCTURE (follow this exactly):
 ## Executive Intelligence Summary
 Write 2-3 dense paragraphs providing your direct, confident answer to the prediction question. State the outcome, the confidence level, and the primary mechanism that drove the result. This section alone should give a busy reader everything they need.
 
-## 01 -- [Primary Finding: Write a declarative title about the core opinion trajectory]
+## 01: [Primary Finding: Write a declarative title about the core opinion trajectory]
 Explain the dominant opinion shift using metrics (entropy, polarization, velocity). Ground your analysis in specific numbers. Cite 1-2 specific agent posts as blockquote evidence. Conclude with the structural mechanism that produced this outcome.
 
-## 02 -- [Secondary Finding: Write a declarative title about discourse dynamics and influence]
+## 02: [Secondary Finding: Write a declarative title about discourse dynamics and influence]
 Who drove the debate? What arguments gained traction? When did the major turning points occur? Cite specific agent posts. Analyze the memetic spread of dominant narratives and whether echo chambers formed or broke.
 
-## 03 -- [Tertiary Finding: Write a declarative title about real-world grounding impact]
+## 03: [Tertiary Finding: Write a declarative title about real-world grounding impact]
 How did the factual entities from the knowledge graph shape agent behavior? Which real-world facts acted as anchors? Were any critical facts ignored? Connect the simulation dynamics back to the real world.
 
-## 04 -- [Intervention Resilience Analysis]
+## 04: [Intervention Resilience Analysis]
 If any God Mode interventions or counterfactual events were injected, analyze how the population responded. Was consensus fragile or robust? How quickly did the group adapt to external shocks? If no interventions occurred, analyze the natural resilience of the emergent consensus.
 
 ## Quantitative Dashboard
-Present the key metrics in a clean, interpretive format:
-- Opinion Entropy: [value] -- [1-sentence interpretation]
-- Polarization Index: [value] -- [1-sentence interpretation]  
-- Opinion Velocity: [value] -- [1-sentence interpretation]
-- Consensus Strength: [value] -- [1-sentence interpretation]
-- Total Opinion Shifts: [value]
+Present the EXACT raw numbers from 'Raw Metrics for Dashboard' below. DO NOT guess or hallucinate these values.
+- Opinion Entropy: [entropy value from raw metrics] : [1-sentence interpretation]
+- Polarization Index: [polarization value from raw metrics] : [1-sentence interpretation]  
+- Opinion Velocity: [velocity value from raw metrics] : [1-sentence interpretation]
+- Consensus Strength: [consensus value from raw metrics] : [1-sentence interpretation]
+- Total Opinion Shifts: [total_shifts value from raw metrics]
 
 ## Strategic Outlook and Confidence
 Confidence Score: [0-100]
@@ -183,7 +184,7 @@ Write a rigorous justification for this score. Outline the top 3 limitations of 
             logger.error("Expert report generation failed: %s", exc)
             return _fallback_report(prediction_question, ctx, str(exc))
 
-    # ─── Context Assembly ────────────────────────────────────────────────
+    # Context Assembly
 
     def _assemble_context(self, question: str) -> dict:
         # Read all trace actions
@@ -255,7 +256,7 @@ Write a rigorous justification for this score. Outline the top 3 limitations of 
         }
 
 
-# ─── Prompt Builders ─────────────────────────────────────────────────────────
+# Prompt Builders
 
 def _build_report_prompt(question: str, ctx: dict) -> str:
     metrics_str = json.dumps(ctx["metrics"], indent=2) if ctx["metrics"] else "(no metrics)"
@@ -282,24 +283,24 @@ KNOWLEDGE GRAPH ENTITIES:
 
 Write a structured intelligence prediction report following this format exactly:
 
-# [Assertive prediction title — state your finding, not the question]
+# [Assertive prediction title - state your finding, not the question]
 
 ## Executive Intelligence Summary
 2-3 paragraphs. Direct answer. Core trajectory. Primary mechanism.
 
-## 01 -- [Primary Finding: declarative title about the core opinion shift]
+## 01: [Primary Finding: declarative title about the core opinion shift]
 Detailed analysis with metrics. Cite agent posts in blockquotes. Explain the mechanism.
 
-## 02 -- [Secondary Finding: declarative title about discourse dynamics]
+## 02: [Secondary Finding: declarative title about discourse dynamics]
 Influential arguments. Turning points. Echo chamber analysis.
 
-## 03 -- [Tertiary Finding: declarative title about contextual grounding]
+## 03: [Tertiary Finding: declarative title about contextual grounding]
 Entity impact. Real-world anchoring. Factual basis of the debate.
 
 ## Quantitative Dashboard
-- Opinion Entropy: [value] -- [interpretation]
-- Polarization Index: [value] -- [interpretation]
-- Opinion Velocity: [value] -- [interpretation]
+- Opinion Entropy: [value] : [interpretation]
+- Polarization Index: [value] : [interpretation]
+- Opinion Velocity: [value] : [interpretation]
 
 ## Strategic Outlook and Confidence
 Score: [0-100]

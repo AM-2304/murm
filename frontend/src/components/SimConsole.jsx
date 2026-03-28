@@ -11,7 +11,7 @@ const TYPE_STYLES = {
 };
 
 function formatLine(event) {
-    const s = TYPE_STYLES[event.type] || { color: "#6B6B6B", prefix: "--" };
+    const s = TYPE_STYLES[event.type] || { color: "#6B6B6B", prefix: ":" };
     const ts = new Date((event.timestamp || Date.now()) * 1000).toTimeString().slice(0, 8);
     let text = "";
     const p = event.payload || {};
@@ -23,19 +23,19 @@ function formatLine(event) {
             text = `${p.n_agents || (p.profiles ? p.profiles.length : "undefined")} agents generated`;
             break;
         case "round_completed":
-            text = `Round ${p.round} — ${p.actions} actions — entropy ${p.metrics?.opinion_entropy?.toFixed(3) ?? "—"}`;
+            text = `Round ${p.round} - ${p.actions} actions — entropy ${p.metrics?.opinion_entropy?.toFixed(3) ?? "—"}`;
             break;
         case "event_injected":
             text = `Event injected: "${(p.content || "").slice(0, 80)}"`;
             break;
         case "simulation_ended":
-            text = `Simulation complete — ${p.total_actions} total actions`;
+            text = `Simulation complete - ${p.total_actions} total actions`;
             break;
         case "simulation_failed":
             text = `Failed: ${p.error || "unknown error"}`;
             break;
         case "simulation_started":
-            text = `Simulation started — ${p.n_agents} agents`;
+            text = `Simulation started - ${p.n_agents} agents`;
             break;
         default:
             text = event.type;

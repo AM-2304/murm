@@ -67,13 +67,13 @@ class CreateRunRequest(BaseModel):
     expert_mode:           bool = Field(default=False)
 
 
-# ---------------------------------
+
 # GET /api/runs/estimate
-# ---------------------------------
+
 
 @router.get("/estimate")
 async def estimate_cost(
-    agents: int = 5,
+    agents: int = 10,
     rounds: int = 5,
     seeds:  int = 1,
 ) -> dict:
@@ -85,9 +85,8 @@ async def estimate_cost(
     )
 
 
-# ---------------------------------
 # POST /api/runs/
-# ---------------------------------
+
 
 @router.post("/")
 async def create_run(body: CreateRunRequest, request: Request) -> dict:
@@ -117,9 +116,8 @@ async def create_run(body: CreateRunRequest, request: Request) -> dict:
     return {"run_id": run_id, "status": "running"}
 
 
-# ---------------------------------
 # GET /api/runs/{run_id}
-# ---------------------------------
+
 
 @router.get("/{run_id}")
 async def get_run(run_id: str, request: Request) -> dict:
@@ -130,9 +128,8 @@ async def get_run(run_id: str, request: Request) -> dict:
     return run
 
 
-# ---------------------------------
 # GET /api/runs/{run_id}/report
-# ---------------------------------
+
 
 @router.get("/{run_id}/report")
 async def get_report(run_id: str, request: Request) -> dict:
@@ -146,9 +143,8 @@ async def get_report(run_id: str, request: Request) -> dict:
     return {"run_id": run_id, "report": report}
 
 
-# ---------------------------------
 # GET /api/runs/{run_id}/metrics
-# ---------------------------------
+
 
 @router.get("/{run_id}/metrics")
 async def get_metrics(run_id: str, request: Request) -> dict:
@@ -165,9 +161,8 @@ async def get_metrics(run_id: str, request: Request) -> dict:
     return {"run_id": run_id, "metrics_history": metrics_history}
 
 
-# ---------------------------------
 # POST /api/runs/{run_id}/cancel
-# ---------------------------------
+
 
 @router.post("/{run_id}/cancel")
 async def cancel_run(run_id: str, request: Request) -> dict:
@@ -180,9 +175,8 @@ async def cancel_run(run_id: str, request: Request) -> dict:
     return {"run_id": run_id, "status": "cancelled"}
 
 
-# ---------------------------------
 # DELETE /api/runs/{run_id}
-# ---------------------------------
+
 
 @router.delete("/{run_id}")
 async def delete_run(run_id: str, request: Request) -> dict:
@@ -196,9 +190,8 @@ async def delete_run(run_id: str, request: Request) -> dict:
     return {"run_id": run_id, "deleted": True}
 
 
-# ---------------------------------
 # POST /api/runs/{run_id}/inject  (god-view event injection)
-# ---------------------------------
+
 
 @router.post("/{run_id}/inject")
 async def inject_event(run_id: str, request: Request) -> dict:
@@ -271,7 +264,14 @@ async def inject_event(run_id: str, request: Request) -> dict:
             # Update the vector store if possible
             try:
                 emb = Embedder(settings.chroma_path, project_id)
-                emb.insert(text, {"source": source, "round": current_round, "type": "god_mode_injection"})
+                emb.upsert_batch([
+                    {
+                        "id": e["name"].strip().lower().replace(" ", "_"),
+                        "text": f"{e['name']}: {e.get('desc', '')} (from Round {current_round} injection)",
+                        "metadata": {"entity_type": e.get("type", ""), "source": source, "round": current_round}
+                    }
+                    for e in res.entities
+                ])
             except Exception as e:
                 logger.warning("Failed to update embedder for injection: %s", e)
                 
@@ -287,9 +287,8 @@ async def inject_event(run_id: str, request: Request) -> dict:
     }
 
 
-# ---------------------------------
 # POST /api/runs/{run_id}/interview  (agent in-character interview)
-# ---------------------------------
+
 
 @router.post("/{run_id}/interview")
 async def interview_agents(run_id: str, request: Request) -> dict:
@@ -309,11 +308,26 @@ async def interview_agents(run_id: str, request: Request) -> dict:
         raise HTTPException(status_code=422, detail="question is required")
 
     sim_dir = settings.data_dir / "simulations" / run_id
-    last_seed = run.get("config", {}).get("seed", 42) + run.get("config", {}).get("n_sensitivity_seeds", 1) - 1
-    run_dir = sim_dir / f"seed_{last_seed}"
-
-    if not (run_dir / "agents.json").exists():
-        raise HTTPException(status_code=404, detail='Agent records not found. The simulation may not have completed successfully or was run on an older version = "0.3.0"')
+    config  = run.get("config", {})
+    base_seed = config.get("seed", 42)
+    n_seeds   = config.get("n_sensitivity_seeds", 1)
+    
+    # Try looking for agents.json from latest seed down to base seed
+    run_dir = None
+    for offset in reversed(range(n_seeds)):
+        candidate = sim_dir / f"seed_{base_seed + offset}"
+        if (candidate / "agents.json").exists():
+            run_dir = candidate
+            break
+            
+    if run_dir is None:
+        raise HTTPException(
+            status_code=404, 
+            detail=(
+                "Agent records not found. The simulation may not have completed successfully or "
+                "is still preparing its final trace. Wait for 'Generation complete' to appear."
+            )
+        )
 
     budget = BudgetManager(settings.token_budget)
     llm    = LLMProvider(budget=budget)
@@ -332,9 +346,9 @@ async def interview_agents(run_id: str, request: Request) -> dict:
     return {"responses": responses, "question": question}
 
 
-# ---------------------------------
+
 # POST /api/runs/{run_id}/chat  (chat with ReportAgent post-simulation)
-# ---------------------------------
+
 
 @router.post("/{run_id}/chat")
 async def chat_with_report_agent(run_id: str, request: Request) -> dict:
@@ -426,9 +440,8 @@ async def resolve_run(run_id: str, request: Request) -> dict:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ---------------------------------
 # Background simulation task
-# ---------------------------------
+
 
 async def _run_simulation_safe(
     run_id: str,

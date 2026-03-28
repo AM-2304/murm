@@ -94,7 +94,7 @@ class ForumEnvironment(Environment):
         ))
 
     def inject_external_event(self, content: str, source: str, round_num: int) -> None:
-        pinned_msg = f"[BREAKING — {source}] {content}"
+        pinned_msg = f"[BREAKING - {source}] {content}"
         self._pinned.append(pinned_msg)
         self._posts.append(EnvironmentPost(
             author_id=source,

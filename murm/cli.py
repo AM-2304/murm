@@ -6,8 +6,9 @@ enabling scripted research runs and batch sensitivity analysis.
 Usage:
   murm serve                    # Start the API server
   murm run -help               # Run a simulation from CLI
-  murm estimate -help          # Pre-flight cost estimate
-  murm calibrate -help         # Score a past prediction
+  murm run :help               # Run a simulation from CLI
+  murm estimate :help          # Pre-flight cost estimate
+  murm calibrate :help         # Score a past prediction
 """
 
 from __future__ import annotations
@@ -220,7 +221,7 @@ async def _run_pipeline(
         sys.exit(1)
 
     # Combined text for agent context (all documents concatenated)
-    text = "\n\n--\n\n".join(doc_text for doc_text, _ in documents)
+    text = "\n\n:\n\n".join(doc_text for doc_text, _ in documents)
     is_multi = len(documents) > 1
 
     console.print(f"[bold]MURM[/bold] run {run_id[:8]}")

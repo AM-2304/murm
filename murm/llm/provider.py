@@ -34,10 +34,9 @@ if settings.log_level.value != "DEBUG":
     logging.getLogger("LiteLLM").setLevel(logging.WARNING)
 
 _BASE_WAIT  = 2.0
-_MAX_WAIT   = 30.0
+_MAX_WAIT   = 60.0
 _JITTER     = 0.5
-_CALL_TIMEOUT = 60.0  # hard per-call timeout in seconds
-
+_CALL_TIMEOUT = 300.0  # 5 minutes to accommodate large report generation with Heavy models
 
 class LLMProvider:
     def __init__(

@@ -8,13 +8,13 @@ Built as a research-grade, local-first, English-language replacement for [MiroFi
 ![Stars](https://img.shields.io/github/stars/AM-2304/murm)
 ![Forks](https://img.shields.io/github/forks/AM-2304/murm)
 
----
+:-
 
 ## What it does
 
 You give MURM a seed document (a news article, a policy draft, a financial report, a story) and a prediction question. It extracts a knowledge graph from that document, generates a population of diverse simulated people with different opinions and communication styles, runs them through repeated rounds of discussion in a simulated environment, and produces a written report answering your question. The report includes a direct prediction, a 0-100 confidence score, evidence from the simulation, and an uncertainty statement that tells you whether the result was consistent across multiple independent runs or highly sensitive to initial conditions.
 
----
+:-
  ## You can try it yourself here: [MURM](https://murm-sigma.vercel.app/)
  
  ### Visual Walkthrough
@@ -37,14 +37,14 @@ You give MURM a seed document (a news article, a policy draft, a financial repor
 **5. Final Prediction Report & Analyst Calibration Chat**
 ![Report](demo/assets/report.png)
 
---
+:
 
 ## Why this exists: the problems with MiroFish
 
 MiroFish is a Chinese-language swarm simulation engine that inspired this project. It has genuine ideas but critical practical and methodological problems.
 
 | Problem in MiroFish | How MURM solves it |
-|-----------|----------|
+|:::::-|:::::|
 | Requires Zep Cloud account (paid, quota-limited, data leaves your machine) | Fully local knowledge graph using NetworkX and ChromaDB - no external accounts needed |
 | Only works with one Chinese AI provider (DashScope) | Works with any AI provider: OpenAI, Anthropic, Groq, local Ollama, Azure, and 100+ others via LiteLLM |
 | Chinese-only UI, docs, and code comments | Built entirely in English |
@@ -80,7 +80,7 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 | Injected events don't update knowledge | **Live Graph Evolution**: God Mode injections structurally evolve the Knowledge Graph |
 | Agent state loss on malformed LLM outputs | **Robust Persistence**: fail-safe agent serialization for post-simulation interviews |
 
---
+:
 
 ## Requirements
 
@@ -88,7 +88,7 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 - An API key from any of: [Groq](https://console.groq.com) , [OpenAI](https://platform.openai.com), [Anthropic](https://console.anthropic.com), or a local [Ollama](https://ollama.ai) installation
 - Node.js 18+ (only if you want the web UI; the CLI works without it)
 
---
+:
 
 ## Quickstart: four paths to your first run
 
@@ -157,7 +157,7 @@ docker compose up
 
 Open `http://localhost:3000`.
 
---
+:
 
 ## Setting up your API key: step by step
 
@@ -209,7 +209,7 @@ You only need one key. Here are the three cheapest options to explore.
    ```
 4. No cost, but slower and less accurate than cloud models
 
---
+:
 
 ## How to use the web interface: step by step
 
@@ -259,7 +259,7 @@ Don't just accept the report. Open the "Deep Interaction" panel to:
 - **Interview Agents**: Select specific agents from the roster and ask them direct questions about their personal experience and opinion shifts.
 - **God-View injection**: Inject a new event and "Branch" the simulation to see if it changes the outcome.
 
---
+:
 
 ## How to use the command line
 
@@ -292,7 +292,7 @@ murm serve -port 8000
 LOG_LEVEL=DEBUG murm serve
 ```
 
---
+:
 
 ## Customizing beyond the defaults
 
@@ -344,7 +344,7 @@ Then update `_OPINION_VALUES` in `murm/simulation/metrics.py` with the numerical
 
 Create a class in `murm/simulation/environment.py` that extends `Environment` and implements `get_context_feed()`, `ingest_action()`, `inject_external_event()`, and `get_all_posts()`. Register it in the `build_environment()` factory function.
 
---
+:
 
 ## Project structure
 
@@ -405,7 +405,7 @@ paper/
   eval_seeds.json             Example prediction tasks
 ```
 
---
+:
 
 ## API reference
 
@@ -433,7 +433,7 @@ DELETE /api/runs/{run_id}                   Delete run and trace files
 GET    /api/stream/{run_id}?since=0         Real-time event stream (SSE)
 ```
 
---
+:
 
 ## Python SDK
 
@@ -504,7 +504,7 @@ report = asyncio.run(run_prediction(
 print(report)
 ```
 
---
+:
 
 ## Troubleshooting
 
@@ -532,7 +532,7 @@ Delete the `data/chroma` directory and restart. This can happen if the database 
 
 You installed the package but are not in the virtual environment. Run `source murm/bin/activate` and try again.
 
---
+:
 
 ## Running the tests
 
@@ -543,19 +543,19 @@ python -m pytest tests/ -v
 
 All 44 tests run without an API key and without internet access.
 
---
+:
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
---
+:
 
 ## License
 
 MIT. See [LICENSE](LICENSE).
 
---
+:
 
 ## Acknowledgment
 

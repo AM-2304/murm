@@ -78,7 +78,7 @@ class ForumEnvironment(Environment):
 
     def get_context_feed(self, round_num: int, max_items: int = 10) -> list[str]:
         recent = [
-            f"[{p.action_type.upper()}] {p.content}"
+            f"[@{p.author_id[:8]}] {p.content}"
             for p in self._posts[-(max_items - len(self._pinned)):]
         ]
         return self._pinned + recent
@@ -143,7 +143,7 @@ class TownHallEnvironment(Environment):
         feed = [f"[AGENDA ITEM {round_num}] {agenda_item}"]
         feed += self._external_events[-3:]
         recent_posts = self._posts[-(max_items - len(feed)):]
-        feed += [f"{p.author_id[:8]}: {p.content}" for p in recent_posts]
+        feed += [f"[@{p.author_id[:8]}] {p.content}" for p in recent_posts]
         return feed
 
     def ingest_action(self, action: dict) -> None:
@@ -210,7 +210,7 @@ class NetworkedEnvironment(Environment):
             # Sort chronologically for readibility
             selected.sort(key=lambda p: p.round_num)
             
-            feed += [f"[{p.action_type.upper()}] {p.content}" for p in selected]
+            feed += [f"[@{p.author_id[:8]}] {p.content}" for p in selected]
             
         return feed
 

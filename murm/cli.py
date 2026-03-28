@@ -25,15 +25,16 @@ console = Console()
 
 
 @click.group()
+@click.version_option(version="0.5.0", prog_name="MURM")
 def main():
     """MURM - swarm intelligence prediction engine."""
     pass
 
 
 @main.command()
-@click.option("-host", default="0.0.0.0", show_default=True)
-@click.option("-port", default=8000, show_default=True)
-@click.option("-reload", is_flag=True, default=False)
+@click.option("--host", default="0.0.0.0", show_default=True)
+@click.option("--port", default=8000, show_default=True)
+@click.option("--reload", is_flag=True, default=False)
 def serve(host: str, port: int, reload: bool):
     """Start the MURM API server."""
     import uvicorn
@@ -48,34 +49,34 @@ def serve(host: str, port: int, reload: bool):
 
 
 @main.command()
-@click.option("-seed-file", type=click.Path(exists=True), required=False, multiple=True, help="Path to seed document(s) — repeatable for multi-document ingestion")
-@click.option("-seed-text", type=str, required=False, help="Inline seed text")
-@click.option("-question", type=str, required=True, help="Prediction question")
-@click.option("-agents", type=int, default=50, show_default=True, help="Number of agents")
-@click.option("-rounds", type=int, default=30, show_default=True, help="Simulation rounds")
-@click.option("-seed", type=int, default=42, show_default=True, help="Base random seed")
-@click.option("-seeds", type=int, default=1, show_default=True, help="Number of seed runs for sensitivity analysis")
-@click.option("-env", type=click.Choice(["forum", "town_hall"]), default="forum", show_default=True)
+@click.option("--seed-file", type=click.Path(exists=True), required=False, multiple=True, help="Path to seed document(s) — repeatable for multi-document ingestion")
+@click.option("--seed-text", type=str, required=False, help="Inline seed text")
+@click.option("--question", type=str, required=True, help="Prediction question")
+@click.option("--agents", type=int, default=50, show_default=True, help="Number of agents")
+@click.option("--rounds", type=int, default=30, show_default=True, help="Simulation rounds")
+@click.option("--seed", type=int, default=42, show_default=True, help="Base random seed")
+@click.option("--seeds", type=int, default=1, show_default=True, help="Number of seed runs for sensitivity analysis")
+@click.option("--env", type=click.Choice(["forum", "town_hall"]), default="forum", show_default=True)
 @click.option(
-    "-opinion-dist",
+    "--opinion-dist",
     type=click.Choice(["normal", "bimodal", "power_law", "uniform"]),
     default="normal",
     show_default=True,
 )
 @click.option(
-    "-skip-graph",
+    "--skip-graph",
     is_flag=True,
     default=False,
     help="Skip graph extraction; use raw seed text as agent context only",
 )
 @click.option(
-    "-resample-agents",
+    "--resample-agents",
     is_flag=True,
     default=False,
     help="Regenerate agent population independently for each seed (true Monte Carlo sensitivity)",
 )
-@click.option("-expert", is_flag=True, default=False, help="Run the expert multi-step report generation pipeline")
-@click.option("-output", type=click.Path(), default="report.md", show_default=True)
+@click.option("--expert", is_flag=True, default=False, help="Run the expert multi-step report generation pipeline")
+@click.option("--output", type=click.Path(), default="report.md", show_default=True)
 def run(
     seed_file,
     seed_text,
@@ -141,8 +142,8 @@ def estimate(agents, rounds, seeds):
 
 
 @main.command()
-@click.option("-run-id", type=str, required=True, help="Run ID to resolve")
-@click.option("-truth", type=str, required=True, help="Actual outcome (e.g. 'agree', 'disagree')")
+@click.option("--run-id", "-run-id", type=str, required=True, help="Run ID to resolve")
+@click.option("--truth", "-truth", type=str, required=True, help="Actual outcome (e.g. 'agree', 'disagree')")
 def calibrate(run_id, truth):
     """Submit ground truth for a completed simulation and compute Brier score.
     

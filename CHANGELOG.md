@@ -2,16 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.5.0] - 2026-03-27
+## [0.5.0] - 2026-03-28
 
 ### Added
-- **Real-Time News API Integration**: MURM now supports live news grounding via GNews, NewsData.io, and NewsAPI.org. Set `NEWS_PROVIDER` and `NEWS_API_KEY` in `.env` to activate. Falls back to Wikipedia (zero-config) when no key is configured.
-- **Geographic Persona Generation**: Agent demographics are now context-aware. If a specific country or region is mentioned in the prediction question, agents are generated with culturally appropriate names, locations, and backgrounds. Otherwise, agents reflect multi-ethnic, multi-geographic global diversity.
-- **Agent Profile Fields**: `location` and `ethnicity` fields added to `AgentProfile` for full demographic transparency in traces and reports.
+- **LLM-Powered News Grounding**: Upgraded the news injection pipeline to use LLM-based keyword extraction. This ensures search queries are hyper-relevant to the simulation topic (e.g., specific supply chain disruptions rather than generic news).
+- **Live Knowledge Graph Updates**: God Mode event injections now trigger background graph extraction. Injected entities and relations are automatically appended to the project's Knowledge Graph and Vector Store mid-simulation.
+- **Cross-Agent Interaction**: Implemented direct agent-to-agent replies. Agents can now tag and respond to each other (e.g., `Reply to @Name`), enabling deeper multi-party deliberation.
+- **Robust Agent Persistence**: Added detailed error tracking and fallback serialization for `agents.json`, ensuring agent states are always saved for post-simulation interviews even if LLM outputs are malformed.
 
 ### Changed
-- **Report Engine Redesign**: Complete rewrite of `report_agent.py` to produce MiroFish-grade intelligence briefs with numbered findings (01, 02, 03), evidence blockquotes, declarative section titles, and a quantitative dashboard. Both basic and expert modes now follow the new format.
-- **Grounding Visibility**: Agent prompts now explicitly separate pinned breaking news from regular discussion feed, ensuring real-world context is always visible to agents during simulation.
+- **CLI Compatibility**: Restored single-dash aliases (`-port`, `-host`, etc.) to support legacy workflows alongside standard POSIX flags.
+- **Real-Time News API Integration**: MURM now supports live news grounding via GNews, NewsData.io, and NewsAPI.org. Set `NEWS_PROVIDER` and `NEWS_API_KEY` in `.env` to activate. Falls back to Wikipedia (zero-config) when no key is configured.
+- **Geographic Persona Generation**: Agent demographics are now context-aware. If a specific country or region is mentioned in the prediction question, agents are generated with culturally appropriate names, locations, and backgrounds.
+- **Report Engine Redesign**: Complete rewrite of `report_agent.py` to produce high-quality intelligence briefs with numbered findings, evidence blockquotes, and quantitative dashboards.
+- **Grounding Visibility**: Agent prompts now explicitly separate pinned breaking news from regular discussion feed, ensuring real-world context is always visible.
 - **Provider Architecture**: `web.py` rewritten with a provider-agnostic dispatcher pattern supporting pluggable news sources.
 
 ## [0.4.3] - 2026-03-27

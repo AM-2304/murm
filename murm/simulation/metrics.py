@@ -69,6 +69,7 @@ class MetricsCollector:
         self._rounds: list[RoundMetrics] = []
         self._initial_distribution: list[float] | None = None
         self._snapshot_opinions: dict[str, OpinionBias] = {}
+        self._cumulative_counts: dict[str, int] = {}
 
     def record_round(
         self,
@@ -83,8 +84,14 @@ class MetricsCollector:
         if self._initial_distribution is None:
             self._initial_distribution = distribution[:]
 
+        # Update cumulative counts for a truly representative Gini of 'dominant voices'
+        for a in actions:
+            aid = a.get("agent_id")
+            if aid:
+                self._cumulative_counts[aid] = self._cumulative_counts.get(aid, 0) + 1
+
         entropy = _shannon_entropy(distribution)
-        gini = _gini(actions, self._n_agents)
+        gini = _gini(self._cumulative_counts, self._n_agents)
         consensus = max(distribution) if distribution else 0.0
         dominant = _dominant_opinion(opinion_counts)
         activity = len(actions) / max(self._n_agents, 1)
@@ -134,6 +141,9 @@ class MetricsCollector:
 
         emergence_delta = abs(final_entropy - initial_entropy)
         polarization = _polarization_from_rounds(self._rounds)
+        
+        # Calculate final Gini based on total simulation activity
+        final_gini = _gini(self._cumulative_counts, self._n_agents)
 
         return {
             "total_rounds": len(self._rounds),
@@ -142,7 +152,7 @@ class MetricsCollector:
             "emergence_delta": round(emergence_delta, 4),
             "polarization_index": round(polarization, 4),
             "stability_round": stability_round,
-            "final_gini": round(self._rounds[-1].gini_coefficient, 4) if self._rounds else 0.0,
+            "final_gini": round(final_gini, 4),
             "avg_activity_rate": round(
                 sum(r.activity_rate for r in self._rounds) / len(self._rounds), 4
             ),
@@ -172,18 +182,16 @@ def _shannon_entropy(distribution: list[float]) -> float:
     return entropy
 
 
-def _gini(actions: list[dict], n_total: int) -> float:
+def _gini(counts: dict[str, int], n_total: int) -> float:
     """
     Gini coefficient of posting activity.
+    counts is a mapping of agent_id -> total_posts.
     n_total is the full population size. Agents who didn't act have count 0.
     """
     if n_total == 0:
         return 0.0
-    counts: dict[str, int] = {}
-    for a in actions:
-        counts[a["agent_id"]] = counts.get(a["agent_id"], 0) + 1
     
-    # Fill in zeros for agents who didn't post
+    # Fill in zeros for agents who haven't posted at all
     values = sorted(list(counts.values()) + [0] * (n_total - len(counts)))
     
     n = len(values)

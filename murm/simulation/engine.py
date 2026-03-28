@@ -181,16 +181,19 @@ class SimulationEngine:
                     agents_data = []
                     for agent_id, (profile, state) in self._agents.items():
                         adata = profile.to_dict()  # gets all profile info
+                        co = getattr(state.current_opinion, 'value', str(state.current_opinion))
                         adata["final_state"] = {
-                            "current_opinion": state.current_opinion.value,
+                            "current_opinion": co,
                             "posts_made": state.posts_made,
-                            "connections": list(state.connections),
                             "opinion_history": list(state.opinion_history)
                         }
                         agents_data.append(adata)
                     with open(self._trace_dir / "agents.json", "w") as f:
                         json.dump(agents_data, f, indent=2)
                 except Exception as e:
+                    import traceback
+                    with open(self._trace_dir / "agents_error.log", "w") as f:
+                        f.write(traceback.format_exc())
                     logger.error("Failed to save agents.json: %s", e)
 
             await self._emit("simulation_ended", {
@@ -345,6 +348,7 @@ class SimulationEngine:
 _AGENT_SYSTEM = (
     "You are a social media user with a specific perspective. "
     "Write a short post (1-3 sentences) reacting to the recent discussion. "
+    "If you want to directly address another person's post, start with 'Reply to @Name: '. otherwise just write your post. "
     "Stay in character. At the END of your post, write your overall stance on "
     "the topic as one of these tags: [STRONGLY AGREE] [AGREE] [NEUTRAL] [DISAGREE] [STRONGLY DISAGREE]. "
     "If you have nothing to say this round, write only: abstain"
@@ -379,7 +383,8 @@ def _build_action_prompt(
         f"{grounding_summary}"
         f"{ctx_summary}\n"
         f"Recent community posts (round {round_num}): {visible_posts}\n"
-        f"Write your post, then end with your stance tag."
+        f"You can write a standalone post OR directly reply to someone by starting with 'Reply to @Name:'. "
+        f"Write your post/reply, then end with your stance tag."
     )
 
 
@@ -435,10 +440,14 @@ def _parse_action(raw: str, agent_id: str, round_num: int) -> dict | None:
     import re
     clean_content = re.sub(r'\[(?:strongly\s+)?(?:agree|disagree|neutral)\]', '', text, flags=re.IGNORECASE).strip()
 
+    action_type = "post"
+    if clean_content.lower().startswith("reply to"):
+        action_type = "reply"
+
     return {
         "agent_id":     agent_id,
         "round":        round_num,
-        "action_type":  "post",
+        "action_type":  action_type,
         "content":      clean_content[:1200],
         "opinion_shift": sentiment,
         "timestamp":    time.time(),

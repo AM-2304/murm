@@ -124,15 +124,17 @@ class PersonaGenerator:
         archetypes = await self._brainstorm_archetypes(topic, context)
         
         for i, (opinion, role) in enumerate(assignments):
-            inst = institution_list[i % len(institution_list)] if i < n_inst else None
+            # Determine if this agent should be an institutional representative
+            is_institution_agent = i < n_inst
+            inst_data = institution_list[i % len(institution_list)] if is_institution_agent else None
             
             tasks.append(
                 self._generate_one(
                     i, topic, context, opinion, role,
-                    demographic_seed=inst["name"] if inst else self._rng.choice(archetypes),
+                    demographic_seed=inst_data["name"] if inst_data else self._rng.choice(archetypes),
                     geography=geography,
-                    is_institution=bool(inst),
-                    inst_summary=inst.get("summary", "") if inst else ""
+                    is_institution=is_institution_agent,
+                    inst_summary=inst_data.get("summary", "") if inst_data else ""
                 )
             )
             
@@ -144,9 +146,9 @@ class PersonaGenerator:
 
         if tasks:
             batch_profiles = await asyncio.gather(*tasks, return_exceptions=False)
-            profiles.extend(batch_profiles)
+            profiles.extend([p for p in batch_profiles if p is not None])
 
-        return profiles
+        return profiles[:n_agents]
 
     async def _detect_geography(self, topic: str, context: str) -> str | None:
         """Extracts the primary country/region mentioned in the context, if any."""

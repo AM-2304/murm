@@ -73,6 +73,9 @@ class AgentProfile:
         )
 
     def to_dict(self) -> dict:
+        def _get_val(obj):
+            return obj.value if hasattr(obj, 'value') else str(obj)
+            
         return {
             "agent_id": self.agent_id,
             "name": self.name,
@@ -81,8 +84,8 @@ class AgentProfile:
             "location": self.location,
             "ethnicity": self.ethnicity,
             "background": self.background,
-            "opinion_bias": self.opinion_bias.value,
-            "influence_role": self.influence_role.value,
+            "opinion_bias": _get_val(self.opinion_bias),
+            "influence_role": _get_val(self.influence_role),
             "communication_style": self.communication_style,
             "expertise_domains": self.expertise_domains,
             "trusted_sources": self.trusted_sources,

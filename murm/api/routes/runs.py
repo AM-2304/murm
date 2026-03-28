@@ -233,6 +233,53 @@ async def inject_event(run_id: str, request: Request) -> dict:
         "injected_live": True,
     })
 
+    # Fire and forget graph update
+    async def _update_graph(text: str, rid: str):
+        try:
+            store: ProjectStore = request.app.state.store
+            run = await store.get_run(rid)
+            if not run: return
+            project_id = run.get("config", {}).get("project_id")
+            if not project_id: return
+            
+            graph_path = settings.data_dir / "projects" / project_id / "graph.json"
+            if not graph_path.exists(): return
+            
+            from murm.llm.budget import BudgetManager
+            from murm.llm.provider import LLMProvider
+            from murm.graph.extractor import EntityExtractor
+            from murm.graph.engine import KnowledgeGraph
+            from murm.graph.embedder import Embedder
+            
+            b = BudgetManager(settings.token_budget)
+            llm = LLMProvider(budget=b)
+            extractor = EntityExtractor(llm)
+            
+            # Extract entities from the injected context
+            res = await extractor.extract(text, f"Injected context (Round {current_round})")
+            
+            # Update the physical JSON Knowledge Graph
+            kg = KnowledgeGraph(graph_path)
+            for e in res.entities:
+                kg.add_entity(e["name"], e["type"], e.get("desc", ""))
+            for r in res.relations:
+                try:
+                    kg.add_relation(r["source"], r["target"], r["relation"])
+                except ValueError:
+                    pass # ignore missing source/target edges
+                    
+            # Update the vector store if possible
+            try:
+                emb = Embedder(settings.chroma_path, project_id)
+                emb.insert(text, {"source": source, "round": current_round, "type": "god_mode_injection"})
+            except Exception as e:
+                logger.warning("Failed to update embedder for injection: %s", e)
+                
+        except Exception as e:
+            logger.error("Failed to extract graph entities for injected event: %s", e)
+            
+    asyncio.create_task(_update_graph(content, run_id))
+
     return {
         "injected":       True,
         "content":        content,

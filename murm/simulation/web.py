@@ -70,14 +70,13 @@ async def fetch_real_world_context(query: str, max_words: int = 120) -> str | No
         return None
 
 
-# ---------------------------------------------------------------------------
-# Provider: GNews (recommended)
-# ---------------------------------------------------------------------------
+
+# Provider: GNews 
 
 async def _fetch_gnews(query: str, max_words: int) -> str | None:
     """Fetch top headline from GNews API (gnews.io)."""
     api_key = settings.news_api_key or ""
-    search_term = _clean_query(query)
+    search_term = await _clean_query(query)
 
     url = "https://gnews.io/api/v4/search"
     params = {
@@ -113,14 +112,13 @@ async def _fetch_gnews(query: str, max_words: int) -> str | None:
     return "Breaking news context: " + " | ".join(headlines)
 
 
-# ---------------------------------------------------------------------------
 # Provider: NewsData.io
-# ---------------------------------------------------------------------------
+
 
 async def _fetch_newsdata(query: str, max_words: int) -> str | None:
     """Fetch latest articles from NewsData.io."""
     api_key = settings.news_api_key or ""
-    search_term = _clean_query(query)
+    search_term = await _clean_query(query)
 
     url = "https://newsdata.io/api/1/latest"
     params = {
@@ -155,14 +153,13 @@ async def _fetch_newsdata(query: str, max_words: int) -> str | None:
     return "Latest news context: " + " | ".join(headlines)
 
 
-# ---------------------------------------------------------------------------
 # Provider: NewsAPI.org
-# ---------------------------------------------------------------------------
+
 
 async def _fetch_newsapi(query: str, max_words: int) -> str | None:
     """Fetch headlines from NewsAPI.org (free tier: dev only)."""
     api_key = settings.news_api_key or ""
-    search_term = _clean_query(query)
+    search_term = await _clean_query(query)
 
     url = "https://newsapi.org/v2/everything"
     params = {
@@ -198,13 +195,12 @@ async def _fetch_newsapi(query: str, max_words: int) -> str | None:
     return "News intelligence: " + " ".join(headlines)
 
 
-# ---------------------------------------------------------------------------
 # Provider: Wikipedia (zero-config fallback)
-# ---------------------------------------------------------------------------
+
 
 async def _fetch_wikipedia(query: str, max_words: int) -> str | None:
     """Fetch factual context from Wikipedia. No API key required."""
-    search_term = _clean_query(query)
+    search_term = await _clean_query(query)
 
     url = "https://en.wikipedia.org/w/api.php"
     search_params = {
@@ -247,15 +243,31 @@ async def _fetch_wikipedia(query: str, max_words: int) -> str | None:
     return None
 
 
-# ---------------------------------------------------------------------------
 # Helpers
-# ---------------------------------------------------------------------------
 
-def _clean_query(query: str) -> str:
-    """Clean a prediction question into a search-friendly query string."""
-    search_term = query.replace("?", "").replace("!", "").strip()
-    words = search_term.split()
-    if len(words) > 5:
-        filtered = [w for w in words if len(w) > 3]
-        search_term = " ".join(itertools.islice(filtered, 4))
-    return search_term
+
+async def _clean_query(query: str) -> str:
+    """Use an LLM to extract highly relevant search keywords from the scenario."""
+    try:
+        from murm.llm.provider import AgentLLMProvider
+        
+        prompt = (
+            f"Extract a concise news search query (3-5 core keywords max) for the following topic: {query}\n"
+            "Exclude placeholder verbs and interrogatives (will, does, what, how, if).\n"
+            "Include ONLY the core entities, actors, and the specific event.\n"
+            "Return NOTHING but the space-separated keywords."
+        )
+        llm = AgentLLMProvider() # using basic provider to not burn trackable budget
+        res = await llm.complete([{"role": "user", "content": prompt}], max_tokens=15, temperature=0.0)
+        clean = res.strip().replace('"', '').replace("'", "")
+        return clean if len(clean.split()) <= 6 else query[:40]
+    except Exception as e:
+        logger.debug("Failed to extract LLM query keywords, falling back: %s", e)
+        search_term = query.replace("?", "").replace("!", "").strip()
+        words = search_term.split()
+        if len(words) > 5:
+            # strip common English stopwords simply to improve fallback
+            stops = {"will", "how", "what", "is", "are", "do", "does", "the", "a", "an", "and", "or"}
+            filtered = [w for w in words if len(w) > 2 and w.lower() not in stops]
+            search_term = " ".join(itertools.islice(filtered, 4))
+        return search_term

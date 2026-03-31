@@ -74,7 +74,7 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 | Generic agent populations | **Institutional Stakeholders**: representative agents for organizations found in text |
 
 > [!IMPORTANT]
-> **Production Ready (March 2026):** MURM v0.5.0 is the baseline for high-fidelity social simulation. It includes LLM-powered news grounding, cross-agent deliberation, and live knowledge graph evolution. Always ensure you are on the latest version of MURM.
+> **MURM** v0.5.1 is the baseline for high-fidelity social simulation. It includes LLM-powered news grounding, cross-agent deliberation, and live knowledge graph evolution. Always ensure you are on the latest version of MURM as previous versions had maliciour versions of LiteLLM which have now been specifcally excluded from the package as well as requirements list.
 | News injection is static/unreliable | **LLM News Grounding**: hyper-relevant keyword extraction for real-time data fusion |
 | Agents only post standalone content | **Cross-Agent Deliberation**: direct @replies and threaded logic for deep interaction |
 | Injected events don't update knowledge | **Live Graph Evolution**: God Mode injections structurally evolve the Knowledge Graph |

@@ -4,7 +4,7 @@
 
 **Prediction Question:** "What will be the dominant market and public sentiment narrative around this rate decision over the next 2 weeks?"
 
-*(Note: Data derived from 10 Agent Swarm interacting over 10 rounds)*
+*(Note: Data derived from 5 Agent Swarm interacting over 5 rounds)*
 
 ## Prediction
 The dominant market and public sentiment narrative around the rate decision over the next 2 weeks will be one of cautious optimism regarding the labor market's resilience. This narrative will be driven by the perceived effectiveness of current monetary policies and the potential for continued economic growth, despite some lingering concerns about the adequacy of minimum wage laws and the impact of high-frequency trading regulations.

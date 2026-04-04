@@ -76,7 +76,7 @@ class EntityExtractor:
         Full two-pass extraction pipeline for a single document.
         document_text is the raw text of the seed material (truncated if very long).
         """
-        text = _truncate(document_text, max_chars=12_000)
+        text = _truncate(document_text, max_chars=20_000)
 
         logger.info("Pass 1: ontology generation for '%s'", title)
         ontology = await self._generate_ontology(text, title)

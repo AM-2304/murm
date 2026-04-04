@@ -97,7 +97,7 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 ### Path 1: PyPI Install (Recommended & Fastest)
 
 ```bash
-python3 -m venv murm && source murm/bin/activate   # Windows: murm\Scripts\activate
+python3 -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install murm
 ```
 
@@ -106,7 +106,7 @@ pip install murm
 ```bash
 git clone https://github.com/AM-2304/murm
 cd murm
-python3 -m venv murm && source murm/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
 cp .env.example .env
 ```
@@ -136,7 +136,7 @@ murm estimate -agents 20 -rounds 15
 
 ```bash
 # Terminal 1 - start the backend API
-source murm/bin/activate
+source .venv/bin/activate
 murm serve
 
 # Terminal 2 - start the frontend
@@ -512,7 +512,7 @@ print(report)
 
 **`ModuleNotFoundError: No module named 'murm'`**
 
-You are not inside the virtual environment. Run `source murm/bin/activate` (Mac/Linux) or `murm\Scripts\activate` (Windows) first.
+You are not inside the virtual environment. Run `source .venv/bin/activate` (Mac/Linux) or `.venv\Scripts\activate` (Windows) first.
 
 **`LLM_API_KEY not set` or similar error**
 
@@ -532,14 +532,14 @@ Delete the `data/chroma` directory and restart. This can happen if the database 
 
 **`murm` command not found after install**
 
-You installed the package but are not in the virtual environment. Run `source murm/bin/activate` and try again.
+You installed the package but are not in the virtual environment. Run `source .venv/bin/activate` and try again.
 
 ---
 
 ## Running the tests
 
 ```bash
-source murm/bin/activate
+source .venv/bin/activate
 python -m pytest tests/ -v
 ```
 

@@ -148,6 +148,7 @@ LOG_LEVEL=INFO
 # File: murm/simulation/engine.py, method: execute()
 # What: The modulo (n % 3 == 0) that triggers a context refresh.
 # Effect: Fetches new real-world data to update the simulation's factual context.
+#         The system uses scenario-aware LLM query extraction to ensure relevance.
 #         Default is every 3 rounds. Use 0 or -1 in code to disable.
 #         This enables "Continuous Data Fusion" to stay current with dynamic topics.
 
@@ -206,8 +207,9 @@ LOG_LEVEL=INFO
 # Maximum concurrent agents per round
 # File: murm/simulation/engine.py
 # Class: SimulationConfig
-# Field: max_concurrent_agents: int = 10
+# Field: max_concurrent_agents: int = 1
 # Effect: How many agent LLM calls run in parallel.
+#         Default is 1 to prevent aggressive rate limiting on Groq free/lower tiers.
 #         Higher = faster simulation but more API rate limit risk.
 #         Lower = safer but slower.
 # Change in the API request body: {"max_concurrent_agents": 5}

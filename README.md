@@ -74,11 +74,13 @@ MiroFish is a Chinese-language swarm simulation engine that inspired this projec
 | Generic agent populations | **Institutional Stakeholders**: representative agents for organizations found in text |
 
 > [!IMPORTANT]
-> **MURM** v0.5.1 is the baseline for high-fidelity social simulation. It includes LLM-powered news grounding, cross-agent deliberation, and live knowledge graph evolution. *Always ensure you are on the latest version of MURM as previous versions had malicious versions of **LiteLLM** which have now been specifcally excluded from the package as well as requirements list.*
-| News injection is static/unreliable | **LLM News Grounding**: hyper-relevant keyword extraction for real-time data fusion |
+> **MURM** v0.5.2 is the baseline for high-fidelity social simulation. It includes LLM-powered news grounding, cross-agent deliberation, and live knowledge graph evolution. *Always ensure you are on the latest version of MURM as previous versions had malicious versions of **LiteLLM** which have now been specifcally excluded from the package as well as requirements list.*
+| News injection is static/unreliable | **LLM News Grounding**: scenario-aware keyword extraction for hyper-relevant web data fusion |
 | Agents only post standalone content | **Cross-Agent Deliberation**: direct @replies and threaded logic for deep interaction |
-| Injected events don't update knowledge | **Live Graph Evolution**: God Mode injections structurally evolve the Knowledge Graph |
+| Injected events don't update knowledge | **Live Graph Evolution**: God Mode and news updates structurally evolve the Knowledge Graph |
+| No auto-clipping of large graphs | **D3 Auto-Pan & Zoom**: Interactive graph automatically pans out to fit the whole network as it grows |
 | Agent state loss on malformed LLM outputs | **Robust Persistence**: fail-safe agent serialization for post-simulation interviews |
+| Broken on Python 3.14 alpha | **Compatibility Patch**: Internal fixes for `tiktoken` registry on newest Python versions |
 
 ---
 

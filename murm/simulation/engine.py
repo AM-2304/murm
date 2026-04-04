@@ -61,7 +61,7 @@ class SimulationStatus(str, Enum):
 class SimulationConfig:
     n_rounds:              int  = 10
     seed:                  int  = 42
-    max_concurrent_agents: int  = 5      # paid Groq: 5 concurrent is safe and fast
+    max_concurrent_agents: int  = 3      # Set lower to prevent aggressive rate limiting on Groq free/lower tiers
     counterfactual_events: list[dict] = field(default_factory=list)
     environment_type:      str  = "forum"
     scenario_description:  str  = ""
@@ -129,7 +129,9 @@ class SimulationEngine:
         try:
             # Fetch real world data context to ground the simulation, matching MiroFish real-time data functionality!
             try:
-                real_world_ctx = await fetch_real_world_context(self._config.prediction_question)
+                # Combine prediction question and seed text (scenario description) to ground the news query extractor
+                search_prompt = f"Question: {self._config.prediction_question}\nBackground Context: {self._config.scenario_description[:1500]}"
+                real_world_ctx = await fetch_real_world_context(search_prompt)
                 if real_world_ctx:
                     await self._inject_event(0, {
                         "content": real_world_ctx,
@@ -147,8 +149,9 @@ class SimulationEngine:
                 # This makes MURM a "Digital Twin of Public Opinion" that evolves with external info.
                 if round_num > 1 and round_num % 3 == 0:
                     try:
-                        # Use slightly varied queries or just refresh the same search for updates
-                        refresh_ctx = await fetch_real_world_context(self._config.prediction_question)
+                        # Use slightly varied queries anchored deeply in the scenario seed text
+                        refresh_prompt = f"Question: {self._config.prediction_question}\nBackground Context: {self._config.scenario_description[:1500]}\nFind the latest updates."
+                        refresh_ctx = await fetch_real_world_context(refresh_prompt)
                         if refresh_ctx:
                             await self._inject_event(round_num, {
                                 "content": f"LATEST UPDATE: {refresh_ctx}",
@@ -252,7 +255,7 @@ class SimulationEngine:
                 "agent_id":    a.get("agent_id", ""),
                 "round":       a.get("round", round_num),
                 "action_type": a.get("action_type", "post"),
-                "content":     _safe_slice(a.get("content", ""), 0, 600),
+                "content":     _safe_slice(a.get("content", ""), 0, 1200),
                 "opinion_shift": a.get("opinion_shift"),
             }
             for a in list(itertools.islice(valid, 5)) if a.get("content")

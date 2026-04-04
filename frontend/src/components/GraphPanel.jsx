@@ -98,11 +98,11 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
     });
   }, [graphData]);
 
-  // 2. Real-time extraction: Physically grow the graph as agents talk!
+  // 2. Real-time extraction: Physically grow the graph as agents talk and God Mode injects!
   useEffect(() => {
     if (!liveActions?.length || !dynamicGraph) return;
     const lastAction = liveActions[liveActions.length - 1];
-    if (!lastAction.content || lastAction.action_type === 'external_event') return;
+    if (!lastAction.content) return;
 
     const words = lastAction.content.split(/[^\w]+/);
     const newEntities = words.filter(w => w.length > 4 && w[0] === w[0].toUpperCase() && w.toUpperCase() !== w);
@@ -111,12 +111,12 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
 
     setDynamicGraph(prev => {
       const next = { nodes: [...prev.nodes], edges: [...(prev.edges || prev.links || [])] };
-      const agentId = `agent_${lastAction.agent_id}`;
+      const agentId = lastAction.action_type === 'external_event' ? `event_${lastAction.agent_id}` : `agent_${lastAction.agent_id}`;
       
       let added = false;
       if (!next.nodes.find(n => n.id === agentId)) {
-         // Drop in the agent node
-         next.nodes.push({ id: agentId, name: lastAction.agent_id.split('-')[0], type: "Person" });
+         // Drop in the agent or event node
+         next.nodes.push({ id: agentId, name: lastAction.agent_id ? lastAction.agent_id.split('-')[0] : "Event", type: lastAction.action_type === 'external_event' ? "Event" : "Person" });
          added = true;
       }
 
@@ -126,9 +126,9 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
           next.nodes.push({ id: entId, name: ent, type: "Concept" });
           added = true;
         }
-        // Link agent to their mentioned concept
+        // Link string or agent to their mentioned concept
         if (!next.edges.find(e => (e.source.id || e.source) === agentId && (e.target.id || e.target) === entId)) {
-          next.edges.push({ source: agentId, target: entId, relation: "DISCUSSES" });
+          next.edges.push({ source: agentId, target: entId, relation: lastAction.action_type === 'external_event' ? "INFLUENCES" : "DISCUSSES" });
           added = true;
         }
       }
@@ -239,7 +239,7 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
     const g = svg.append("g");
 
     const zoomBehavior = d3.zoom()
-      .scaleExtent([0.2, 6])
+      .scaleExtent([0.1, 6])
       .on("zoom", (event) => {
         g.attr("transform", event.transform);
         setZoom(+event.transform.k.toFixed(2));
@@ -249,14 +249,19 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
       if (event.target === el || event.target.tagName === "rect") setSelected(null);
     });
 
+    // Auto pan-out to show the whole of it as it grows
+    const targetScale = Math.min(1.2, Math.max(0.1, Math.min(W, H) / (nodes.length * 40 + 200)));
+    const targetTransform = d3.zoomIdentity.translate(W/2, H/2).scale(targetScale).translate(-W/2, -H/2);
+    svg.transition().duration(1000).call(zoomBehavior.transform, targetTransform);
+
     // Edge lines
     const linkG = g.append("g");
     const link = linkG.selectAll("path")
       .data(edges)
       .join("path")
       .attr("fill", "none")
-      .attr("stroke", d => d.relation === "DISCUSSES" ? "#50E3C2" : "rgba(255,255,255,0.25)")
-      .attr("stroke-width", d => d.relation === "DISCUSSES" ? 1.5 : 1)
+      .attr("stroke", d => d.relation === "DISCUSSES" ? "#50E3C2" : "rgba(255,255,255,0.45)")
+      .attr("stroke-width", d => d.relation === "DISCUSSES" ? 2.0 : 1.5)
       .attr("stroke-dasharray", d => d.relation === "DISCUSSES" ? "4 4" : "none");
 
     // Animate the 'DISCUSSES' links to look like data flow
@@ -381,7 +386,7 @@ export function GraphPanel({ graphData, height = 460, liveActions = [] }) {
         d3.select(this).select("circle:nth-child(2)")
           .attr("r", nodeRadius(d))
           .attr("stroke-width", 1.5);
-        link.attr("stroke-opacity", 0.15).attr("stroke-width", 0.5);
+        link.attr("stroke-opacity", 0.45).attr("stroke-width", 1.5);
       });
 
       console.log("D3 rendering complete! Starting simulation...");

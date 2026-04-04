@@ -230,7 +230,7 @@ Write a rigorous justification for this score. Outline the top 3 limitations of 
         # Format trace sample with richer context
         trace_lines = []
         for a in sampled:
-            content = str(a.get("content") or "")[0:150]
+            content = str(a.get("content") or "")[0:800]
             if content:
                 op = a.get("opinion_shift") or ""
                 agent = a.get("agent_id", "?")[0:8]

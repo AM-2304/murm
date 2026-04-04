@@ -50,23 +50,35 @@ async def fetch_real_world_context(query: str, max_words: int = 120) -> str | No
 
     provider = _get_provider()
     try:
+        res = None
         if provider == "gnews":
-            return await _fetch_gnews(query, max_words)
+            res = await _fetch_gnews(query, max_words)
         elif provider == "newsdata":
-            return await _fetch_newsdata(query, max_words)
+            res = await _fetch_newsdata(query, max_words)
         elif provider == "newsapi":
-            return await _fetch_newsapi(query, max_words)
-        else:
-            return await _fetch_wikipedia(query, max_words)
+            res = await _fetch_newsapi(query, max_words)
+        
+        # If provider returned None (e.g. 0 articles found for a complex query), force fallback
+        if not res and provider != "wikipedia":
+            raise ValueError(f"{provider} returned 0 results for query")
+            
+        if res:
+            return res
+            
+        return await _fetch_wikipedia(query, max_words)
+        
     except Exception as e:
         logger.debug("News fetch failed (provider=%s): %s", provider, e)
         # Try Wikipedia as ultimate fallback before going offline
         if provider != "wikipedia":
             try:
-                return await _fetch_wikipedia(query, max_words)
+                wiki_res = await _fetch_wikipedia(query, max_words)
+                if wiki_res: return wiki_res
             except Exception:
                 pass
-        _OFFLINE_MODE = True
+        
+        # Do NOT set offline mode just because Wikipedia didn't find articles. 
+        # A complex user prompt might simply return 0 results round 1.
         return None
 
 

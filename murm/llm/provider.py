@@ -179,8 +179,8 @@ class AgentLLMProvider(LLMProvider):
             api_key=settings.agent_api_key_resolved,
             base_url=settings.agent_base_url_resolved,
             budget=budget,
-            max_retries=3,
-            retry_delay=1.0,
+            max_retries=5,
+            retry_delay=3.0,
         )
 
 

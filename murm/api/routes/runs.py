@@ -386,7 +386,7 @@ async def chat_with_report_agent(run_id: str, request: Request) -> dict:
             all_a = TraceWriter(trace_path).read_all()
             sample = all_a[::max(1, len(all_a) // 20)][:20]
             actions_sample = "\n".join(
-                f"R{a.get('round')} [{a.get('opinion_shift','')}]: {(a.get('content',''))[:100]}"
+                f"R{a.get('round')} [{a.get('opinion_shift','')}]: {(a.get('content',''))[:600]}"
                 for a in sample if a.get("content")
             )
         except Exception:
@@ -453,14 +453,14 @@ async def _run_simulation_safe(
     try:
         await asyncio.wait_for(
             _simulation_body(run_id, config, store, app),
-            timeout=1200.0,
+            timeout=3600.0,
         )
     except asyncio.TimeoutError:
-        logger.error("Run %s timed out after 20 minutes", run_id)
+        logger.error("Run %s timed out after 30 minutes", run_id)
         _active_engines.pop(run_id, None)
         await store.update_run(
             run_id, status="failed", completed_at=time.time(),
-            error="Run timed out after 20 minutes. Use fewer agents/rounds.",
+            error="Run timed out after 30 minutes. Use fewer agents/rounds.",
         )
     except Exception as exc:
         logger.exception("Run %s outer handler: %s", run_id, exc)
